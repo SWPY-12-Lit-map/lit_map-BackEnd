@@ -126,6 +126,7 @@
 ## 🗂 ERD
 
 ## 📚 API 문서
+[<u>[Swagger API 문서](http://localhost:8080/swagger-ui/index.html)</u>] 
 
 ## 🚧 서비스 아키텍처
 ![아키텍쳐 사진](https://github.com/SWPY-12-Lit-map/lit_map-BackEnd/assets/118357403/42b192cf-9c2b-494a-b217-86c195b1a4ec)
