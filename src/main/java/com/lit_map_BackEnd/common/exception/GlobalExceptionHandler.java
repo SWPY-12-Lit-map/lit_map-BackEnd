@@ -2,16 +2,29 @@ package com.lit_map_BackEnd.common.exception;
 
 import com.lit_map_BackEnd.common.exception.code.ErrorCode;
 import com.lit_map_BackEnd.common.exception.response.ErrorResponse;
+import com.lit_map_BackEnd.common.exception.response.ValidationError;
+import com.lit_map_BackEnd.domain.character.dto.CastRequestDto;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.ElementKind;
+import jakarta.validation.Path;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
+import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @RestControllerAdvice
@@ -29,13 +42,46 @@ public class GlobalExceptionHandler {
         log.error("handleMethodArgumentNotValidException", ex);
         BindingResult bindingResult = ex.getBindingResult();
         StringBuilder stringBuilder = new StringBuilder();
-        for (FieldError fieldError : bindingResult.getFieldErrors()) {
+        List<FieldError> fieldErrors = bindingResult.getFieldErrors();
+
+        for (int i = 0; i < fieldErrors.size(); i++) {
+            FieldError fieldError = fieldErrors.get(i);
             stringBuilder.append(fieldError.getField()).append(" : ");
             stringBuilder.append(fieldError.getDefaultMessage());
-            stringBuilder.append(", ");
+
+            if (i < fieldErrors.size() - 1) {
+                stringBuilder.append(", ");
+            }
         }
         final ErrorResponse response = ErrorResponse.of(ErrorCode.NOT_VALID_ERROR, String.valueOf(stringBuilder));
         return new ResponseEntity<>(response, HTTP_STATUS_OK);
+    }
+
+    // 리스트에서 발생
+    @ExceptionHandler(ConstraintViolationException.class)
+    protected ResponseEntity<ErrorResponse> constraintViolationException(ConstraintViolationException ex) {
+        List<ValidationError> validationErrors = new ArrayList<>();
+        Set<ConstraintViolation<?>> constraintViolations = ex.getConstraintViolations();
+
+        for (ConstraintViolation<?> x : constraintViolations) {
+            String targetName = "";
+            int idx = 0;
+            for (Path.Node node : x.getPropertyPath()) {
+                if (node.getKind().equals(ElementKind.PROPERTY)) {
+                    idx = node.getIndex();
+                    targetName = node.getName();
+                }
+            }
+            String message = x.getMessage();
+            ValidationError error = new ValidationError();
+            error.setIndex(idx + 1);
+            error.setField(targetName);
+            error.setDefaultMessage(message);
+            validationErrors.add(error);
+        }
+
+        final ErrorResponse response = ErrorResponse.of(ErrorCode.NOT_VALID_ERROR, validationErrors);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     // 넘어온 request에서 body 값이 존재하지 않은 문제
@@ -63,5 +109,20 @@ public class GlobalExceptionHandler {
         log.debug("business Exception 발생");
         final ErrorResponse response = ErrorResponse.of(ErrorCode.BUSINESS_EXCEPTION_ERROR, ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    private int findIndexFromFieldName(String fieldName, List<CastRequestDto> characterRequestDtoList) {
+        for (int i = 0; i < characterRequestDtoList.size(); i++) {
+            CastRequestDto dto = characterRequestDtoList.get(i);
+            switch (fieldName) {
+                case "workId":
+                    if (dto.getWorkId() == null) {
+                        return i;
+                    }
+                    break;
+                // Add other fields if needed
+            }
+        }
+        return -1; // Not found
     }
 }
