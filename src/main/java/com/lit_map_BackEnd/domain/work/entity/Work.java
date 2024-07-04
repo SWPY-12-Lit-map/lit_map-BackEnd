@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
+@Table(name = "work", uniqueConstraints = {@UniqueConstraint(columnNames = "title")})
 public class Work extends BaseTimeEntity {
 
     @Id
@@ -38,10 +39,15 @@ public class Work extends BaseTimeEntity {
     private Member member;
 
     private String imageUrl;
+
     private String title;
 
     @Lob
     private String content;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "work", cascade = CascadeType.ALL)
+    private List<Version> versions = new ArrayList<>();
 
     private int view;
 }

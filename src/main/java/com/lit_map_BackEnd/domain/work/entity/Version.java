@@ -1,5 +1,6 @@
 package com.lit_map_BackEnd.domain.work.entity;
 
+import com.lit_map_BackEnd.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,7 +10,7 @@ import lombok.*;
 @Getter
 @Entity
 @Table(name = "work_version")
-public class Version {
+public class Version extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
