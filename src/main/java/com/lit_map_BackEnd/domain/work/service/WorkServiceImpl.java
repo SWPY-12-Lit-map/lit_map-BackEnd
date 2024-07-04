@@ -51,6 +51,7 @@ public class WorkServiceImpl implements WorkService{
                 .title(workRequestDto.getTitle())
                 .content(workRequestDto.getContents())
                 .member(null)
+                .publisherName(workRequestDto.getPublisherName())
                 .category(category)
                 .imageUrl(workRequestDto.getImageUrl())
                 .view(0)

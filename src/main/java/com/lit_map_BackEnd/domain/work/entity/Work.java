@@ -38,6 +38,8 @@ public class Work extends BaseTimeEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    private String publisherName;
+
     private String imageUrl;
 
     private String title;
