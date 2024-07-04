@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,12 +19,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/cast")
 @RequiredArgsConstructor
+@Validated
 public class CastController {
 
     private final CastService castService;
 
     @PostMapping("")
-    public ResponseEntity<SuccessResponse> insertCharacter(@RequestBody @Valid List<CastRequestDto> castRequestDto) {
+    public ResponseEntity<SuccessResponse> insertCharacter(@RequestBody List<@Valid CastRequestDto> castRequestDto) {
         int N = castService.insertCharacter(castRequestDto);
 
         SuccessResponse res = SuccessResponse.builder()
