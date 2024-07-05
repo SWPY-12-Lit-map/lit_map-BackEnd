@@ -29,13 +29,12 @@ public class VersionController {
             SuccessResponse res = SuccessResponse.builder()
                     .result(result)
                     .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
-                    .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
+                    .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())
                     .build();
 
             return new ResponseEntity<>(res, HttpStatus.OK);
         } catch (JsonProcessingException e) {
             throw new BusinessExceptionHandler(ErrorCode.JSON_PARSING_ERROR);
         }
-
     }
 }

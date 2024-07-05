@@ -3,6 +3,7 @@ package com.lit_map_BackEnd.domain.work.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
 import com.lit_map_BackEnd.common.exception.code.ErrorCode;
+import com.lit_map_BackEnd.domain.work.dto.VersionResponseDto;
 import com.lit_map_BackEnd.domain.work.entity.Version;
 import com.lit_map_BackEnd.domain.work.entity.Work;
 import com.lit_map_BackEnd.domain.work.repository.VersionRepository;
@@ -11,7 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,15 +31,26 @@ public class VersionServiceImpl implements VersionService{
 
         Work work = workRepository.findById(findWorkId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
+
         Version findVersion = versionRepository.findByVersionNumAndWork(version, work);
 
+        versionRequestDto.remove("workId");
+        versionRequestDto.remove("version");
 
-        try {
-            findVersion.changeRelationship(versionRequestDto);
-        } catch (JsonProcessingException e) {
-            throw new BusinessExceptionHandler(ErrorCode.JSON_PARSING_ERROR);
-        }
+        findVersion.changeRelationship(versionRequestDto);
 
         return 1;
+    }
+
+    @Override
+    public List<VersionResponseDto> findVersionByWork(Work work) {
+        return versionRepository.findByWork(work).stream()
+                .map(version -> VersionResponseDto.builder()
+                        .versionNum(version.getVersionNum())
+                        .versionName(version.getVersionName())
+                        .updateTime(version.getUpdatedDate())
+                        .relationship(version.getRelationship())
+                        .build())
+                .collect(Collectors.toList());
     }
 }
