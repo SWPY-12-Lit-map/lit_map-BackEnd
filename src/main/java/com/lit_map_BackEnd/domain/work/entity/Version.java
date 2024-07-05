@@ -1,8 +1,15 @@
 package com.lit_map_BackEnd.domain.work.entity;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lit_map_BackEnd.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.util.Map;
+
 
 @Builder
 @NoArgsConstructor
@@ -23,8 +30,18 @@ public class Version extends BaseTimeEntity {
 
     private Double versionNum;
     private String versionName;
-    private String relationShip;
+
+    @Column(name = "relationship", columnDefinition = "longtext")
+    private String relationship;
 
     @Enumerated(EnumType.STRING)
     private Confirm confirm;
+
+    public void changeRelationship(Map<String, Object> relationship) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        relationship.remove("workId");
+        relationship.remove("version");
+        this.relationship = objectMapper.writeValueAsString(relationship);
+    }
 }
