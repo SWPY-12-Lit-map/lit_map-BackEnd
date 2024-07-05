@@ -34,6 +34,4 @@ public class WorkController {
 
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
-
-
 }
