@@ -1,18 +1,17 @@
 package com.lit_map_BackEnd.domain.character.service;
 
-import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
-import com.lit_map_BackEnd.common.exception.code.ErrorCode;
 import com.lit_map_BackEnd.domain.character.dto.CastRequestDto;
 import com.lit_map_BackEnd.domain.character.dto.CastResponseDto;
 import com.lit_map_BackEnd.domain.character.entity.Cast;
 import com.lit_map_BackEnd.domain.character.repository.CastRepository;
 import com.lit_map_BackEnd.domain.work.entity.Work;
 import com.lit_map_BackEnd.domain.work.repository.WorkRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,27 +24,38 @@ public class CastServiceImpl implements CastService {
 
     @Override
     @Transactional
-    public int insertCharacter(List<CastRequestDto> castRequestDto) {
-        for (CastRequestDto requestDto : castRequestDto) {
-            Work work = workRepository.findById(requestDto.getWorkId())
-                    .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
+    public Cast insertCharacter(CastRequestDto castRequestDto) {
+        String imageUrl = castRequestDto.getImageUrl();
 
-            Cast cast = Cast.builder()
-                    .name(requestDto.getName())
-                    .work(work)
-                    .imageUrl(requestDto.getImageUrl())
-                    .type(requestDto.getType())
-                    .role(requestDto.getRole())
-                    .gender(requestDto.getGender())
-                    .age(requestDto.getAge())
-                    .mbti(requestDto.getMbti())
-                    .contents(requestDto.getContents())
+        // 임시 사진 설정 하는 곳
+        if (imageUrl.isBlank()) {
+            imageUrl = "임시 사진";
+        }
+
+        Cast cast = null;
+
+        // 이름이 같다면 해당 인물은 더티 체킹으로 데이터 저장
+        // workId와 name을 비교해서 이미 있다면 걔는 정보만 수정
+        cast = castRepository.findByWorkAndName(castRequestDto.getWork(), castRequestDto.getName());
+        if (cast != null) {
+            cast.changeState(castRequestDto, imageUrl);
+        } else {
+            cast = Cast.builder()
+                    .name(castRequestDto.getName())
+                    .imageUrl(imageUrl)
+                    .type(castRequestDto.getType())
+                    .work(castRequestDto.getWork())
+                    .role(castRequestDto.getRole())
+                    .gender(castRequestDto.getGender())
+                    .age(castRequestDto.getAge())
+                    .mbti(castRequestDto.getMbti())
+                    .contents(castRequestDto.getContents())
                     .build();
 
             castRepository.save(cast);
         }
 
-        return 1;
+        return cast;
     }
 
     @Override

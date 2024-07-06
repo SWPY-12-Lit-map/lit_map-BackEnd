@@ -41,6 +41,10 @@ public class Version extends BaseTimeEntity {
         this.relationship = relationship;
     }
 
+    public void updateVersion(String versionName, Map<String, Object> relationship) {
+        this.versionName = versionName;
+        this.relationship = relationship;
+    }
 
 //    public void changeRelationship(Map<String, Object> relationship) throws JsonProcessingException {
 //        ObjectMapper objectMapper = new ObjectMapper();

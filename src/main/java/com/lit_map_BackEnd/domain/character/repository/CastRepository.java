@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface CastRepository extends JpaRepository<Cast, Long> {
     List<Cast> findByWork(Work work);
+
+    Cast findByWorkAndName(Work work, String name);
 }

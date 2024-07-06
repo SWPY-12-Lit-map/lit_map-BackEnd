@@ -1,5 +1,6 @@
 package com.lit_map_BackEnd.domain.character.dto;
 
+import com.lit_map_BackEnd.domain.work.entity.Work;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -12,8 +13,7 @@ public class CastRequestDto {
     @NotBlank(message = "이름을 입력해주세요")
     private String name;
 
-    @NotNull(message = "작품이 선택되지 않았습니다")
-    private Long workId;
+    private Work work;
 
     private String imageUrl;
 
@@ -28,4 +28,8 @@ public class CastRequestDto {
     private int age;
     private String mbti;
     private String contents;
+
+    public void setWork(Work work) {
+        this.work = work;
+    }
 }

@@ -2,6 +2,7 @@ package com.lit_map_BackEnd.domain.work.entity;
 
 import com.lit_map_BackEnd.common.entity.BaseTimeEntity;
 import com.lit_map_BackEnd.domain.category.entity.Category;
+import com.lit_map_BackEnd.domain.character.entity.Cast;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
@@ -51,5 +52,21 @@ public class Work extends BaseTimeEntity {
     @OneToMany(mappedBy = "work", cascade = CascadeType.ALL)
     private List<Version> versions = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "work", cascade = CascadeType.ALL)
+    private List<Cast> casts = new ArrayList<>();
+
     private int view;
+
+    public void changeCategory(Category category) {
+        this.category = category;
+    }
+
+    public void changeImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public void changeContent(String content) {
+        this.content = content;
+    }
 }
