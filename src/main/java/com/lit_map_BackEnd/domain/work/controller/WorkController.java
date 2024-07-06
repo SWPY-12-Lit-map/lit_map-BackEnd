@@ -10,11 +10,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/work")
 @RequiredArgsConstructor
+@Validated
 public class WorkController {
 
     private final WorkService workService;
@@ -34,7 +36,7 @@ public class WorkController {
     }
 
     @PostMapping("")
-    @Operation(summary = "작품 1차 등록", description = "작품의 기본 설정만 한 것을 데이터로 전송")
+    @Operation(summary = "작품 등록", description = "작품의 데이터 저장")
     public ResponseEntity<SuccessResponse> saveWork(@RequestBody @Valid WorkRequestDto workRequestDto) {
         int result = workService.saveWork(workRequestDto);
 

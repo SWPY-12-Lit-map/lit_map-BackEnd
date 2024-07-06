@@ -28,10 +28,10 @@ public class CastController {
     @PostMapping("")
     @Operation(summary = "해당 작품에 캐릭터 등록", description = "작품에 등록될 캐릭터 등록하기")
     public ResponseEntity<SuccessResponse> insertCharacter(@RequestBody List<@Valid CastRequestDto> castRequestDto) {
-        int N = castService.insertCharacter(castRequestDto);
+        //int N = castService.insertCharacter(castRequestDto);
 
         SuccessResponse res = SuccessResponse.builder()
-                .result(N)
+                //.result(N)
                 .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
                 .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())
                 .build();

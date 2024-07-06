@@ -110,19 +110,4 @@ public class GlobalExceptionHandler {
         final ErrorResponse response = ErrorResponse.of(ErrorCode.BUSINESS_EXCEPTION_ERROR, ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
-    private int findIndexFromFieldName(String fieldName, List<CastRequestDto> characterRequestDtoList) {
-        for (int i = 0; i < characterRequestDtoList.size(); i++) {
-            CastRequestDto dto = characterRequestDtoList.get(i);
-            switch (fieldName) {
-                case "workId":
-                    if (dto.getWorkId() == null) {
-                        return i;
-                    }
-                    break;
-                // Add other fields if needed
-            }
-        }
-        return -1; // Not found
-    }
 }

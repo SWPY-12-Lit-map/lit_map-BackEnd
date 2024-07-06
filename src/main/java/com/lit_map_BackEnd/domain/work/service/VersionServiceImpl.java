@@ -1,6 +1,5 @@
 package com.lit_map_BackEnd.domain.work.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
 import com.lit_map_BackEnd.common.exception.code.ErrorCode;
 import com.lit_map_BackEnd.domain.work.dto.VersionResponseDto;
@@ -53,4 +52,14 @@ public class VersionServiceImpl implements VersionService{
                         .build())
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public Version changeVersion(Double versionNum, String versionName, Map<String, Object> relationship, Work work) {
+        Version version = versionRepository.findByVersionNumAndWork(versionNum, work);
+        version.updateVersion(versionName, relationship);
+
+        return version;
+    }
+
+
 }

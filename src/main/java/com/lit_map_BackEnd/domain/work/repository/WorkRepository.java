@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface WorkRepository extends JpaRepository<Work, Long> {
     boolean existsByTitle(String title);
+
+    Work findByTitle(String title);
 }

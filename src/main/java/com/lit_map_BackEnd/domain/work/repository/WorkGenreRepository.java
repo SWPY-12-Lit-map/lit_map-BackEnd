@@ -11,4 +11,6 @@ import java.util.List;
 @Repository
 public interface WorkGenreRepository extends JpaRepository<WorkGenre, Long> {
     List<WorkGenre> findByWork(Work work);
+
+    boolean existsByWorkAndGenre(Work work, Genre genre);
 }

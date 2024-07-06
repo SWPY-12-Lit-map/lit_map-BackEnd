@@ -6,7 +6,9 @@ import com.lit_map_BackEnd.domain.author.entity.Author;
 import com.lit_map_BackEnd.domain.author.service.AuthorService;
 import com.lit_map_BackEnd.domain.category.entity.Category;
 import com.lit_map_BackEnd.domain.category.service.CategoryService;
+import com.lit_map_BackEnd.domain.character.dto.CastRequestDto;
 import com.lit_map_BackEnd.domain.character.dto.CastResponseDto;
+import com.lit_map_BackEnd.domain.character.entity.Cast;
 import com.lit_map_BackEnd.domain.character.service.CastService;
 import com.lit_map_BackEnd.domain.genre.entity.Genre;
 import com.lit_map_BackEnd.domain.genre.service.GenreService;
@@ -15,83 +17,156 @@ import com.lit_map_BackEnd.domain.work.dto.VersionResponseDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkRequestDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
 import com.lit_map_BackEnd.domain.work.entity.*;
+import com.lit_map_BackEnd.domain.work.repository.VersionRepository;
 import com.lit_map_BackEnd.domain.work.repository.WorkAuthorRepository;
 import com.lit_map_BackEnd.domain.work.repository.WorkGenreRepository;
 import com.lit_map_BackEnd.domain.work.repository.WorkRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Validated
 public class WorkServiceImpl implements WorkService{
 
     private final WorkRepository workRepository;
     private final WorkAuthorRepository workAuthorRepository;
     private final WorkGenreRepository workGenreRepository;
+    private final VersionRepository versionRepository;
     private final CategoryService categoryService;
     private final GenreService genreService;
     private final AuthorService authorService;
     private final CastService castService;
     private final VersionService versionService;
 
+
+    /**
+     *  데이터를 삽입하는 것과 업데이트하는것이 동시에 되어야 하기 때문에
+     *  계속된 더티체킹을 하게 된다. 굉장히 비효율적인거 같은데 어떻게 하면 좋을까
+     */
+
     @Override
     @Transactional
-    public int saveWork(WorkRequestDto workRequestDto) {
+    public int saveWork(@Valid WorkRequestDto workRequestDto) {
         // 멤버 확인 ( 현재는 null 로 생성 )
 
+        // 출판사도 확인 ( 현재는 null 로 생성 )
 
+        Work work = null;
+        Version version = null;
+        // 기존에 존재하는 작품인지 아닌지 확인
+        boolean isNew = false;
+
+        // 이미 존재하는 제목이 있다면 추가 불가
         if (workRepository.existsByTitle(workRequestDto.getTitle())) {
-            throw new BusinessExceptionHandler(ErrorCode.DUPLICATE_WORK_NAME);
-        }
-
-        String versionName = "";
-        if (workRequestDto.getVersionName().isEmpty()) {
-            versionName = String.valueOf(workRequestDto.getVersion());
+            // 수정을 하는 것인지 확인하기 위해 기존에 작성하던 사람인지 확인
+            // 중복으로 작품이 작성되는 것은 막아야 하기 떄문에 기존에 작성하던것을 불러와서 더티 체킹으로 저장
+            work = workRepository.findByTitle(workRequestDto.getTitle());
+            if (!work.getMember().getId().equals(workRequestDto.getMemberId())) {
+                throw new BusinessExceptionHandler(ErrorCode.WRITER_WRONG);
+            }
         } else {
-            versionName = workRequestDto.getVersionName();
+            work = Work.builder()
+                    .title(workRequestDto.getTitle())
+                    .content(workRequestDto.getContents())
+                    .member(null)
+                    .publisherName(null)
+                    .category(null)
+                    .imageUrl(workRequestDto.getImageUrl())
+                    .view(0)
+                    .build();
+            isNew = true;
         }
 
-        Category category = categoryService.checkCategory(workRequestDto.getCategory());
+        // 기존의 작품이 존재하지 않는다면 work 객체를 save 하여 외래키 지정이 가능하도록 수정
+        if (isNew) workRepository.save(work);
 
-        Work work = Work.builder()
-                .title(workRequestDto.getTitle())
-                .content(workRequestDto.getContents())
-                .member(null)
-                .publisherName(workRequestDto.getPublisherName())
-                .category(category)
-                .imageUrl(workRequestDto.getImageUrl())
-                .view(0)
-                .build();
-
-        Version version = Version.builder()
-                .work(work)
-                .versionNum(workRequestDto.getVersion())
-                .versionName(versionName)
-                .confirm(Confirm.LOAD)
-                .build();
-        work.getVersions().add(version);
-
-        // 장르 저장
-        String[] genres = workRequestDto.getGenre().split(",");
-        for (String str : genres) {
-            Genre genre = genreService.checkGenre(str);
-            WorkGenre workGenre = WorkGenre.builder().work(work).genre(genre).build();
-            work.getWorkGenres().add(workGenre);
+        // 카테고리 추가
+        if (workRequestDto.getCategory() != null && !workRequestDto.getCategory().isBlank()) {
+            Category category = categoryService.checkCategory(workRequestDto.getCategory());
+            work.changeCategory(category);
         }
 
-        // 작가 저장
-        String[] authors = workRequestDto.getAuthor().split(",");
-        for (String str : authors) {
-            Author author = authorService.checkAuthor(str);
-            WorkAuthor workAuthor = WorkAuthor.builder().work(work).author(author).build();
-            work.getWorkAuthors().add(workAuthor);
+        // 이미지 추가
+        if (workRequestDto.getImageUrl() != null && !workRequestDto.getImageUrl().isBlank()) {
+            work.changeImageUrl(workRequestDto.getImageUrl());
         }
 
-        workRepository.save(work);
+        // 설명 추가
+        if (workRequestDto.getContents() != null && !workRequestDto.getContents().isBlank()) {
+            work.changeContent(workRequestDto.getContents());
+        }
+
+        // 버전 이름을 따로 정해주지 않으면 버전넘버가 이름을 대체
+        String versionName = (workRequestDto.getVersionName() != null && !workRequestDto.getVersionName().isBlank()) ?
+                workRequestDto.getVersionName() : String.valueOf(workRequestDto.getVersion());
+
+
+        // 버전 저장 ( 중복된 버전을 저장할 수 없다 )
+        // 기존에 존재한다면 수정
+        if (versionRepository.existsByVersionNumAndWork(workRequestDto.getVersion(), work)) {
+            // 기존에 존재하면 수정
+            version = versionService.changeVersion(workRequestDto.getVersion(), workRequestDto.getVersionName()
+                    , workRequestDto.getRelationship(), work);
+        } else {
+            // 없다면 추가
+            version = Version.builder()
+                    .work(work)
+                    .versionNum(workRequestDto.getVersion())
+                    .versionName(versionName)
+                    .relationship(workRequestDto.getRelationship())
+                    .confirm(Confirm.LOAD)
+                    .build();
+
+            work.getVersions().add(version);
+        }
+
+        // 장르 저장 ( 중복 저장 되지 않도록 저장 )
+        if (workRequestDto.getGenre() != null && !workRequestDto.getGenre().isBlank()) {
+            String[] genres = workRequestDto.getGenre().split(",");
+            for (String str : genres) {
+                Genre genre = genreService.checkGenre(str);
+                // 이미 중복된 장르가 있다면 다시 저장 X
+                if (!workGenreRepository.existsByWorkAndGenre(work, genre)) {
+                    WorkGenre workGenre = WorkGenre.builder().work(work).genre(genre).build();
+                    work.getWorkGenres().add(workGenre);
+                }
+            }
+        }
+
+        // 작가 저장 ( 중복 저장 되지 않도록 저장 )
+        if (workRequestDto.getAuthor() != null && !workRequestDto.getAuthor().isBlank()) {
+            String[] authors = workRequestDto.getAuthor().split(",");
+            for (String str : authors) {
+                Author author = authorService.checkAuthor(str);
+                // 작가가 이미 저장되어 있다면 다시 저장 X
+                if (!workAuthorRepository.existsByWorkAndAuthor(work, author)) {
+                    WorkAuthor workAuthor = WorkAuthor.builder().work(work).author(author).build();
+                    work.getWorkAuthors().add(workAuthor);
+                }
+            }
+        }
+
+        // 각 캐릭터 저장
+        // 만약 캐릭터를 아무것도 설정하지 않아도 한개의 데이터는 넘어올수있다.
+        // 그 한개의 데이터는 임시 데이터라도 넣어달라고 한다.
+        // 캐릭터 또한 중복 저장되지 않도록 주의해야 한다.
+        // 문제점 : 만약 작품에 중복된 캐릭터가 존재한다면 어떻게 처리할 것인가
+        List<CastRequestDto> casts = workRequestDto.getCasts();
+        for (CastRequestDto cast : casts) {
+            cast.setWork(work);
+            Cast findCast = castService.insertCharacter(cast);
+            work.getCasts().add(findCast);
+        }
+
+        if (!isNew) workRepository.save(work);
+
         return 1;
     }
 

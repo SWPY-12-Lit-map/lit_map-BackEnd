@@ -1,6 +1,7 @@
 package com.lit_map_BackEnd.domain.character.entity;
 
 import com.lit_map_BackEnd.common.entity.BaseTimeEntity;
+import com.lit_map_BackEnd.domain.character.dto.CastRequestDto;
 import com.lit_map_BackEnd.domain.work.entity.Work;
 import jakarta.persistence.*;
 import lombok.*;
@@ -37,5 +38,14 @@ public class Cast extends BaseTimeEntity {
     @Lob
     private String contents;
 
-
+    public void changeState(CastRequestDto castRequestDto, String image) {
+        this.imageUrl = image;
+        this.role = castRequestDto.getRole();
+        this.name = castRequestDto.getName();
+        this.type = castRequestDto.getType();
+        this.gender = castRequestDto.getGender();
+        this.age = castRequestDto.getAge();
+        this.mbti = castRequestDto.getMbti();
+        this.contents = castRequestDto.getContents();
+    }
 }
