@@ -210,10 +210,14 @@ public class WorkServiceImpl implements WorkService{
         }
 
         // 캐릭터
-        List<CastResponseDto> characterByWork = castService.findCharacterByWork(work);
+        //List<CastResponseDto> characterByWork = castService.findCharacterByWork(work);
 
         // 버전 정보 및 내용
-        List<VersionResponseDto> versionByWork = versionService.findVersionByWork(work);
+        //List<VersionResponseDto> versionByWork = versionService.findVersionByWork(work);
+
+        // 기존의 작품의 버전 관련된 내용을 전부 가져오는 과정에서 그냥 0.1버전 하나만 가져오는 것으로 변경
+        // 이는 초기 로딩 속도와 네트워크 효율성을 고려하여 제작
+        VersionResponseDto version = versionService.findVersionByWorkAndNumber(work.getId(), 0.1);
 
         return WorkResponseDto.builder()
                 .category(category.getName())
@@ -223,8 +227,8 @@ public class WorkServiceImpl implements WorkService{
                 .memberName(memberName)
                 .title(work.getTitle())
                 .contents(work.getContent())
-                .casts(characterByWork)
-                .versions(versionByWork)
+                //.casts(characterByWork)
+                .versions(version)
                 .build();
     }
 

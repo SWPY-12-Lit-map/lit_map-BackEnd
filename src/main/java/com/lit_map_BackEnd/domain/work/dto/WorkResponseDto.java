@@ -21,6 +21,6 @@ public class WorkResponseDto {
     private String publisherName;
     private String title;
     private String contents;
-    private List<CastResponseDto> casts;
-    private List<VersionResponseDto> versions;
+    private VersionResponseDto versions;
+    //private List<CastResponseDto> casts;
 }
