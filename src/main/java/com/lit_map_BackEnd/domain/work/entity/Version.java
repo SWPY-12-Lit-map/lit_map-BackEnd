@@ -1,7 +1,5 @@
 package com.lit_map_BackEnd.domain.work.entity;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lit_map_BackEnd.common.converter.JsonMapConverter;
 import com.lit_map_BackEnd.common.entity.BaseTimeEntity;
 import com.lit_map_BackEnd.domain.character.entity.Cast;

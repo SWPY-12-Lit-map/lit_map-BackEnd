@@ -1,7 +1,6 @@
 package com.lit_map_BackEnd.domain.work.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.lit_map_BackEnd.domain.character.dto.CastResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
