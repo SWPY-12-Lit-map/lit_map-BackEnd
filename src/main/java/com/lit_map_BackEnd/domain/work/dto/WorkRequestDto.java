@@ -12,6 +12,7 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 public class WorkRequestDto {
+    private boolean confirmCheck;
     private String category;
 
     private String genre;

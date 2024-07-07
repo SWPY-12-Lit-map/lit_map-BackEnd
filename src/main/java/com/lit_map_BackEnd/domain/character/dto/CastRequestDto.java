@@ -1,5 +1,6 @@
 package com.lit_map_BackEnd.domain.character.dto;
 
+import com.lit_map_BackEnd.domain.work.entity.Version;
 import com.lit_map_BackEnd.domain.work.entity.Work;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -14,6 +15,7 @@ public class CastRequestDto {
     private String name;
 
     private Work work;
+    private Version version;
 
     private String imageUrl;
 
@@ -31,5 +33,9 @@ public class CastRequestDto {
 
     public void setWork(Work work) {
         this.work = work;
+    }
+
+    public void setVersion(Version version) {
+        this.version = version;
     }
 }

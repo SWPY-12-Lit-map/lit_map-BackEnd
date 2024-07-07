@@ -114,6 +114,8 @@ public class WorkServiceImpl implements WorkService{
             // 기존에 존재하면 수정
             version = versionService.changeVersion(workRequestDto.getVersion(), workRequestDto.getVersionName()
                     , workRequestDto.getRelationship(), work);
+
+            version.confirmSetting(checkConfirm(workRequestDto.isConfirmCheck()));
         } else {
             // 없다면 추가
             version = Version.builder()
@@ -121,7 +123,7 @@ public class WorkServiceImpl implements WorkService{
                     .versionNum(workRequestDto.getVersion())
                     .versionName(versionName)
                     .relationship(workRequestDto.getRelationship())
-                    .confirm(Confirm.LOAD)
+                    .confirm(checkConfirm(workRequestDto.isConfirmCheck()))
                     .build();
 
             work.getVersions().add(version);
@@ -161,8 +163,10 @@ public class WorkServiceImpl implements WorkService{
         List<CastRequestDto> casts = workRequestDto.getCasts();
         for (CastRequestDto cast : casts) {
             cast.setWork(work);
+            cast.setVersion(version);
             Cast findCast = castService.insertCharacter(cast);
             work.getCasts().add(findCast);
+            version.getCasts().add(findCast);
         }
 
         if (!isNew) workRepository.save(work);
@@ -222,5 +226,11 @@ public class WorkServiceImpl implements WorkService{
                 .casts(characterByWork)
                 .versions(versionByWork)
                 .build();
+    }
+
+    // 제출(true)과 수정/임시저장(false)을 구분하는 메소드
+    public Confirm checkConfirm(boolean status) {
+        if (!status) return Confirm.LOAD;
+        else return Confirm.CONFIRM;
     }
 }

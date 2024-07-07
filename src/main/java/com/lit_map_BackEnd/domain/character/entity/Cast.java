@@ -2,6 +2,7 @@ package com.lit_map_BackEnd.domain.character.entity;
 
 import com.lit_map_BackEnd.common.entity.BaseTimeEntity;
 import com.lit_map_BackEnd.domain.character.dto.CastRequestDto;
+import com.lit_map_BackEnd.domain.work.entity.Version;
 import com.lit_map_BackEnd.domain.work.entity.Work;
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,6 +23,10 @@ public class Cast extends BaseTimeEntity {
     @ManyToOne
     @JoinColumn(name = "work_id")
     private Work work;
+
+    @ManyToOne
+    @JoinColumn(name = "version_id")
+    private Version version;
 
     private String imageUrl;
 
