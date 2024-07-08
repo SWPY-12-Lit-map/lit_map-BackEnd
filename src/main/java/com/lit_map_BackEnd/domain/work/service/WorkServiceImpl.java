@@ -219,6 +219,7 @@ public class WorkServiceImpl implements WorkService{
         VersionResponseDto version = versionService.findVersionByWorkAndNumber(work.getId(), 0.1);
 
         return WorkResponseDto.builder()
+                .workId(work.getId())
                 .category(category.getName())
                 .genre(workGenresList)
                 .author(workAuthorsList)

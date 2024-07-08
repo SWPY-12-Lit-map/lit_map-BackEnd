@@ -67,4 +67,10 @@ public class WorkController {
 
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "작품 삭제", description = "작품을 삭제하고 관련 내용도 같이 삭제")
+    public ResponseEntity<SuccessResponse> deleteWork(@RequestParam Long id) {
+        return new ResponseEntity<>(null, HttpStatus.OK);
+    }
 }

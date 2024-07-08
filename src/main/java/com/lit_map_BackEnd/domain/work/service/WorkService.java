@@ -9,4 +9,6 @@ public interface WorkService {
     int saveWork(@Valid WorkRequestDto workRequestDto);
 
     WorkResponseDto getWork(Long workId);
+
+    int deleteWork();
 }
