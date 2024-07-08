@@ -10,5 +10,5 @@ public interface WorkService {
 
     WorkResponseDto getWork(Long workId);
 
-    int deleteWork();
+    void deleteWork(Long workId);
 }

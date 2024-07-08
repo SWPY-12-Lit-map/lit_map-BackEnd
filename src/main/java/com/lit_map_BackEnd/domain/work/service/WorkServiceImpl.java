@@ -232,8 +232,17 @@ public class WorkServiceImpl implements WorkService{
                 .build();
     }
 
+    @Override
+    public void deleteWork(Long workId) {
+        workRepository.findById(workId)
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
+
+        workRepository.deleteById(workId);
+    }
+
+
     // 제출(true)과 수정/임시저장(false)을 구분하는 메소드
-    public Confirm checkConfirm(boolean status) {
+    private Confirm checkConfirm(boolean status) {
         if (!status) return Confirm.LOAD;
         else return Confirm.CONFIRM;
     }
