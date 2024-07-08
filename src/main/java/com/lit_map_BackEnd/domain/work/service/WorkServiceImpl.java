@@ -16,10 +16,7 @@ import com.lit_map_BackEnd.domain.work.dto.VersionResponseDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkRequestDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
 import com.lit_map_BackEnd.domain.work.entity.*;
-import com.lit_map_BackEnd.domain.work.repository.VersionRepository;
-import com.lit_map_BackEnd.domain.work.repository.WorkAuthorRepository;
-import com.lit_map_BackEnd.domain.work.repository.WorkGenreRepository;
-import com.lit_map_BackEnd.domain.work.repository.WorkRepository;
+import com.lit_map_BackEnd.domain.work.repository.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -38,6 +35,7 @@ public class WorkServiceImpl implements WorkService{
     private final WorkAuthorRepository workAuthorRepository;
     private final WorkGenreRepository workGenreRepository;
     private final VersionRepository versionRepository;
+    private final WorkCategoryGenreRepository workCategoryGenreRepository;
     private final CategoryService categoryService;
     private final GenreService genreService;
     private final AuthorService authorService;
@@ -75,7 +73,8 @@ public class WorkServiceImpl implements WorkService{
                     .title(workRequestDto.getTitle())
                     .content(workRequestDto.getContents())
                     .member(null)
-                    .publisherName(null)
+                    .publisherName(workRequestDto.getPublisherName())
+                    .publisherDate(workRequestDto.getPublisherDate())
                     .category(null)
                     .imageUrl(workRequestDto.getImageUrl())
                     .view(0)
@@ -87,9 +86,12 @@ public class WorkServiceImpl implements WorkService{
         if (isNew) workRepository.save(work);
 
         // 카테고리 추가
+        Category category = null;
         if (workRequestDto.getCategory() != null && !workRequestDto.getCategory().isBlank()) {
-            Category category = categoryService.checkCategory(workRequestDto.getCategory());
+            category = categoryService.checkCategory(workRequestDto.getCategory());
             work.changeCategory(category);
+
+            // 카테고리가 존재해야 장르를 저장한다.
         }
 
         // 이미지 추가
@@ -137,6 +139,16 @@ public class WorkServiceImpl implements WorkService{
                 if (!workGenreRepository.existsByWorkAndGenre(work, genre)) {
                     WorkGenre workGenre = WorkGenre.builder().work(work).genre(genre).build();
                     work.getWorkGenres().add(workGenre);
+                }
+                // 이미 중복된 카테고리와 장르가 저장되어 있다면 다시 저장할 필요 X
+                if (!workCategoryGenreRepository.existsByWorkAndCategoryAndGenre(work, category, genre)) {
+                    WorkCategoryGenre build = WorkCategoryGenre.builder()
+                            .work(work)
+                            .category(category)
+                            .genre(genre)
+                            .build();
+
+                    work.getWorkCategoryGenres().add(build);
                 }
             }
         }

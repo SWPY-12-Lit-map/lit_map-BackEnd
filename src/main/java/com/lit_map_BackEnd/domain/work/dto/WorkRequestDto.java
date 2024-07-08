@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +27,8 @@ public class WorkRequestDto {
 
     @NotNull(message = "출판사를 입력해주세요")
     private String publisherName;
+
+    private LocalDateTime publisherDate;
 
     @NotNull(message = "제목을 입력해주세요")
     private String title;
