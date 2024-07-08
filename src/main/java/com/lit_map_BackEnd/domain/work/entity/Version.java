@@ -29,7 +29,7 @@ public class Version extends BaseTimeEntity {
     private Work work;
 
     @Builder.Default
-    @OneToMany(mappedBy = "version")
+    @OneToMany(mappedBy = "version", cascade = CascadeType.ALL)
     private List<Cast> casts = new ArrayList<>();
 
     private Double versionNum;

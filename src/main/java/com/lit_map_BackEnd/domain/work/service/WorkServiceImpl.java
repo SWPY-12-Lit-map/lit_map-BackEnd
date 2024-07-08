@@ -233,6 +233,7 @@ public class WorkServiceImpl implements WorkService{
     }
 
     @Override
+    @Transactional
     public void deleteWork(Long workId) {
         workRepository.findById(workId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
