@@ -7,6 +7,7 @@ import com.lit_map_BackEnd.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +34,10 @@ public class Work extends BaseTimeEntity {
 
     @Builder.Default
     @OneToMany(mappedBy = "work", cascade = CascadeType.ALL)
+    private List<WorkCategoryGenre> workCategoryGenres = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "work", cascade = CascadeType.ALL)
     private List<WorkAuthor> workAuthors = new ArrayList<>();
 
     @ManyToOne
@@ -40,6 +45,7 @@ public class Work extends BaseTimeEntity {
     private Member member;
 
     private String publisherName;
+    private LocalDateTime publisherDate;
 
     private String imageUrl;
 
