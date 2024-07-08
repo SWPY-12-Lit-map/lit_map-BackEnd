@@ -1,10 +1,14 @@
 package com.lit_map_BackEnd.domain.character.service;
 
+import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
+import com.lit_map_BackEnd.common.exception.code.ErrorCode;
 import com.lit_map_BackEnd.domain.character.dto.CastRequestDto;
 import com.lit_map_BackEnd.domain.character.dto.CastResponseDto;
 import com.lit_map_BackEnd.domain.character.entity.Cast;
 import com.lit_map_BackEnd.domain.character.repository.CastRepository;
+import com.lit_map_BackEnd.domain.work.entity.Version;
 import com.lit_map_BackEnd.domain.work.entity.Work;
+import com.lit_map_BackEnd.domain.work.repository.VersionRepository;
 import com.lit_map_BackEnd.domain.work.repository.WorkRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +23,7 @@ public class CastServiceImpl implements CastService {
 
     private final CastRepository castRepository;
     private final WorkRepository workRepository;
+    private final VersionRepository versionRepository;
 
     @Override
     @Transactional
@@ -71,5 +76,21 @@ public class CastServiceImpl implements CastService {
                         .contents(cast.getContents())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void deleteCastInVersion(Long workId, Double versionNum, String name) {
+        Work work = workRepository.findById(workId)
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
+
+        Version version = null;
+        if (versionRepository.existsByVersionNumAndWork(versionNum, work)) {
+            version = versionRepository.findByVersionNumAndWork(versionNum, work);
+        } else {
+            throw new BusinessExceptionHandler(ErrorCode.VERSION_NOT_FOUND);
+        }
+
+        castRepository.deleteByWorkAndVersionAndName(work, version, name);
     }
 }

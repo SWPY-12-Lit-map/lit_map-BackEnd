@@ -12,6 +12,7 @@ import java.util.List;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class WorkResponseDto {
+    private Long workId;
     private String category;
     private List<String> genre;
     private List<String> author;

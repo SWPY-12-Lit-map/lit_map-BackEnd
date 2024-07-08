@@ -11,4 +11,6 @@ public interface VersionRepository extends JpaRepository<Version, Long> {
 
     boolean existsByVersionNumAndWork(Double version, Work work);
     List<Version> findByWork(Work work);
+
+    void deleteByWorkAndVersionNum(Work work, Double versionNum);
 }

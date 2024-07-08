@@ -17,4 +17,6 @@ public interface VersionService {
     Version changeVersion(Double versionNum, String versionName, Map<String, Object> relationship, Work work);
 
     VersionResponseDto findVersionByWorkAndNumber(Long workId, Double versionNum);
+
+    void deleteVersion(Long workId, Double versionNum);
 }

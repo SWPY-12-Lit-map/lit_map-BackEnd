@@ -99,5 +99,14 @@ public class VersionServiceImpl implements VersionService{
                 .build();
     }
 
+    @Override
+    @Transactional
+    public void deleteVersion(Long workId, Double versionNum) {
+        Work work = workRepository.findById(workId)
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
+
+        versionRepository.deleteByWorkAndVersionNum(work, versionNum);
+    }
+
 
 }
