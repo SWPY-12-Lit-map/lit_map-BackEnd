@@ -15,4 +15,6 @@ public interface VersionService {
 
     // 기존에 존재하는 상황이면 여기서 수정한다.
     Version changeVersion(Double versionNum, String versionName, Map<String, Object> relationship, Work work);
+
+    VersionResponseDto findVersionByWorkAndNumber(Long workId, Double versionNum);
 }

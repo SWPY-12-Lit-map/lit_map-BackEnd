@@ -7,7 +7,6 @@ import com.lit_map_BackEnd.domain.author.service.AuthorService;
 import com.lit_map_BackEnd.domain.category.entity.Category;
 import com.lit_map_BackEnd.domain.category.service.CategoryService;
 import com.lit_map_BackEnd.domain.character.dto.CastRequestDto;
-import com.lit_map_BackEnd.domain.character.dto.CastResponseDto;
 import com.lit_map_BackEnd.domain.character.entity.Cast;
 import com.lit_map_BackEnd.domain.character.service.CastService;
 import com.lit_map_BackEnd.domain.genre.entity.Genre;
@@ -114,6 +113,8 @@ public class WorkServiceImpl implements WorkService{
             // 기존에 존재하면 수정
             version = versionService.changeVersion(workRequestDto.getVersion(), workRequestDto.getVersionName()
                     , workRequestDto.getRelationship(), work);
+
+            version.confirmSetting(checkConfirm(workRequestDto.isConfirmCheck()));
         } else {
             // 없다면 추가
             version = Version.builder()
@@ -121,7 +122,7 @@ public class WorkServiceImpl implements WorkService{
                     .versionNum(workRequestDto.getVersion())
                     .versionName(versionName)
                     .relationship(workRequestDto.getRelationship())
-                    .confirm(Confirm.LOAD)
+                    .confirm(checkConfirm(workRequestDto.isConfirmCheck()))
                     .build();
 
             work.getVersions().add(version);
@@ -161,8 +162,10 @@ public class WorkServiceImpl implements WorkService{
         List<CastRequestDto> casts = workRequestDto.getCasts();
         for (CastRequestDto cast : casts) {
             cast.setWork(work);
+            cast.setVersion(version);
             Cast findCast = castService.insertCharacter(cast);
             work.getCasts().add(findCast);
+            version.getCasts().add(findCast);
         }
 
         if (!isNew) workRepository.save(work);
@@ -206,10 +209,14 @@ public class WorkServiceImpl implements WorkService{
         }
 
         // 캐릭터
-        List<CastResponseDto> characterByWork = castService.findCharacterByWork(work);
+        //List<CastResponseDto> characterByWork = castService.findCharacterByWork(work);
 
         // 버전 정보 및 내용
-        List<VersionResponseDto> versionByWork = versionService.findVersionByWork(work);
+        //List<VersionResponseDto> versionByWork = versionService.findVersionByWork(work);
+
+        // 기존의 작품의 버전 관련된 내용을 전부 가져오는 과정에서 그냥 0.1버전 하나만 가져오는 것으로 변경
+        // 이는 초기 로딩 속도와 네트워크 효율성을 고려하여 제작
+        VersionResponseDto version = versionService.findVersionByWorkAndNumber(work.getId(), 0.1);
 
         return WorkResponseDto.builder()
                 .category(category.getName())
@@ -219,8 +226,14 @@ public class WorkServiceImpl implements WorkService{
                 .memberName(memberName)
                 .title(work.getTitle())
                 .contents(work.getContent())
-                .casts(characterByWork)
-                .versions(versionByWork)
+                //.casts(characterByWork)
+                .versions(version)
                 .build();
+    }
+
+    // 제출(true)과 수정/임시저장(false)을 구분하는 메소드
+    public Confirm checkConfirm(boolean status) {
+        if (!status) return Confirm.LOAD;
+        else return Confirm.CONFIRM;
     }
 }

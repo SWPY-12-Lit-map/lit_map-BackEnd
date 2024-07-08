@@ -6,11 +6,9 @@ import com.lit_map_BackEnd.domain.character.entity.Cast;
 import com.lit_map_BackEnd.domain.character.repository.CastRepository;
 import com.lit_map_BackEnd.domain.work.entity.Work;
 import com.lit_map_BackEnd.domain.work.repository.WorkRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,8 +33,8 @@ public class CastServiceImpl implements CastService {
         Cast cast = null;
 
         // 이름이 같다면 해당 인물은 더티 체킹으로 데이터 저장
-        // workId와 name을 비교해서 이미 있다면 걔는 정보만 수정
-        cast = castRepository.findByWorkAndName(castRequestDto.getWork(), castRequestDto.getName());
+        // version와 name을 비교해서 이미 있다면 걔는 정보만 수정
+        cast = castRepository.findByVersionAndName(castRequestDto.getVersion(), castRequestDto.getName());
         if (cast != null) {
             cast.changeState(castRequestDto, imageUrl);
         } else {
@@ -45,6 +43,7 @@ public class CastServiceImpl implements CastService {
                     .imageUrl(imageUrl)
                     .type(castRequestDto.getType())
                     .work(castRequestDto.getWork())
+                    .version(castRequestDto.getVersion())
                     .role(castRequestDto.getRole())
                     .gender(castRequestDto.getGender())
                     .age(castRequestDto.getAge())

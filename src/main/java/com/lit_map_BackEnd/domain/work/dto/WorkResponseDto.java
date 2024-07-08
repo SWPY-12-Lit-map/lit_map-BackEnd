@@ -1,7 +1,6 @@
 package com.lit_map_BackEnd.domain.work.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.lit_map_BackEnd.domain.character.dto.CastResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,6 +20,6 @@ public class WorkResponseDto {
     private String publisherName;
     private String title;
     private String contents;
-    private List<CastResponseDto> casts;
-    private List<VersionResponseDto> versions;
+    private VersionResponseDto versions;
+    //private List<CastResponseDto> casts;
 }

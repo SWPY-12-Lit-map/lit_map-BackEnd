@@ -2,8 +2,10 @@ package com.lit_map_BackEnd.domain.work.controller;
 
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
+import com.lit_map_BackEnd.domain.work.dto.VersionResponseDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkRequestDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
+import com.lit_map_BackEnd.domain.work.service.VersionService;
 import com.lit_map_BackEnd.domain.work.service.WorkService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -20,14 +22,31 @@ import org.springframework.web.bind.annotation.*;
 public class WorkController {
 
     private final WorkService workService;
+    private final VersionService versionService;
 
     @GetMapping("/{id}")
-    @Operation(summary = "상세 작품 확인하기", description = "작품의 기본 정보, 캐릭터들, 인물 관계도까지 전달")
+    @Operation(summary = "상세 작품 확인하기", description = "작품의 기본 정보, 모든 버전의 인물 관계도와 캐릭터 전달")
     public ResponseEntity<SuccessResponse> getWork(@PathVariable Long id) {
         WorkResponseDto responseWork = workService.getWork(id);
 
         SuccessResponse res = SuccessResponse.builder()
                 .result(responseWork)
+                .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
+                .build();
+
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/{versionNum}")
+    @Operation(summary = "수정, 추가를 위한 특정 버전 가져오기", description = "수정과 추가를 하기 위해 작품의 특정 버전의 정보를 가져오는 API")
+    public ResponseEntity<SuccessResponse> getWorkVersion(@PathVariable Long id,
+                                                          @PathVariable Double versionNum) {
+        // 해당 작품의 특정 버전 정보 가져오기 ( 전체데이터 or 해당 버전의 내용 )
+        VersionResponseDto responseVersion = versionService.findVersionByWorkAndNumber(id, versionNum) ;
+
+        SuccessResponse res = SuccessResponse.builder()
+                .result(responseVersion)
                 .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
                 .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
                 .build();

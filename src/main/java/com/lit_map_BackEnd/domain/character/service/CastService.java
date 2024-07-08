@@ -5,7 +5,6 @@ import com.lit_map_BackEnd.domain.character.dto.CastRequestDto;
 import com.lit_map_BackEnd.domain.character.dto.CastResponseDto;
 import com.lit_map_BackEnd.domain.character.entity.Cast;
 import com.lit_map_BackEnd.domain.work.entity.Work;
-import jakarta.validation.Valid;
 
 import java.util.List;
 

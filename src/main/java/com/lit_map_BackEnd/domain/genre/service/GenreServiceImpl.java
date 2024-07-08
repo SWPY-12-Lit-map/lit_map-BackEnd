@@ -1,6 +1,5 @@
 package com.lit_map_BackEnd.domain.genre.service;
 
-import com.lit_map_BackEnd.domain.category.entity.Category;
 import com.lit_map_BackEnd.domain.genre.entity.Genre;
 import com.lit_map_BackEnd.domain.genre.repository.GenreRepository;
 import lombok.RequiredArgsConstructor;

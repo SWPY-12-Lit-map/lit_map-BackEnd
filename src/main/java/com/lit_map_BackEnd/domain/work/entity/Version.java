@@ -1,12 +1,13 @@
 package com.lit_map_BackEnd.domain.work.entity;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lit_map_BackEnd.common.converter.JsonMapConverter;
 import com.lit_map_BackEnd.common.entity.BaseTimeEntity;
+import com.lit_map_BackEnd.domain.character.entity.Cast;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 
@@ -27,6 +28,10 @@ public class Version extends BaseTimeEntity {
     @JoinColumn(name = "work_id")
     private Work work;
 
+    @Builder.Default
+    @OneToMany(mappedBy = "version")
+    private List<Cast> casts = new ArrayList<>();
+
     private Double versionNum;
     private String versionName;
 
@@ -46,11 +51,8 @@ public class Version extends BaseTimeEntity {
         this.relationship = relationship;
     }
 
-//    public void changeRelationship(Map<String, Object> relationship) throws JsonProcessingException {
-//        ObjectMapper objectMapper = new ObjectMapper();
-//
-//        relationship.remove("workId");
-//        relationship.remove("version");
-//        this.relationship = objectMapper.writeValueAsString(relationship);
-//    }
+    public void confirmSetting(Confirm confirm) {
+        this.confirm = confirm;
+    }
+
 }
