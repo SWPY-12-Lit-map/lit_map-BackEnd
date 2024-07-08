@@ -12,4 +12,6 @@ public interface CastService {
     Cast insertCharacter(CastRequestDto castRequestDto);
 
     List<CastResponseDto> findCharacterByWork(Work work);
+
+    void deleteCastInVersion(Long workId, Double versionId, String name);
 }
