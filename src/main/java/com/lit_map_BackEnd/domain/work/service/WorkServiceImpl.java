@@ -133,13 +133,13 @@ public class WorkServiceImpl implements WorkService{
         // 장르 저장 ( 중복 저장 되지 않도록 저장 )
         if (workRequestDto.getGenre() != null && !workRequestDto.getGenre().isBlank()) {
             String[] genres = workRequestDto.getGenre().split(",");
+            // 작품에 관련된 장르 전체 삭제
+            workGenreRepository.deleteByWork(work);
             for (String str : genres) {
                 Genre genre = genreService.checkGenre(str);
-                // 이미 중복된 장르가 있다면 다시 저장 X
-                if (!workGenreRepository.existsByWorkAndGenre(work, genre)) {
-                    WorkGenre workGenre = WorkGenre.builder().work(work).genre(genre).build();
-                    work.getWorkGenres().add(workGenre);
-                }
+                // 장르 다시 저장
+                WorkGenre workGenre = WorkGenre.builder().work(work).genre(genre).build();
+                work.getWorkGenres().add(workGenre);
                 // 이미 중복된 카테고리와 장르가 저장되어 있다면 다시 저장할 필요 X
                 if (!workCategoryGenreRepository.existsByWorkAndCategoryAndGenre(work, category, genre)) {
                     WorkCategoryGenre build = WorkCategoryGenre.builder()
@@ -156,13 +156,14 @@ public class WorkServiceImpl implements WorkService{
         // 작가 저장 ( 중복 저장 되지 않도록 저장 )
         if (workRequestDto.getAuthor() != null && !workRequestDto.getAuthor().isBlank()) {
             String[] authors = workRequestDto.getAuthor().split(",");
+            // 해당 작품에 관련된 작가 삭제
+            workAuthorRepository.deleteByWork(work);
             for (String str : authors) {
+                // 해당 작가 저장
                 Author author = authorService.checkAuthor(str);
-                // 작가가 이미 저장되어 있다면 다시 저장 X
-                if (!workAuthorRepository.existsByWorkAndAuthor(work, author)) {
-                    WorkAuthor workAuthor = WorkAuthor.builder().work(work).author(author).build();
-                    work.getWorkAuthors().add(workAuthor);
-                }
+                // 작가 저장
+                WorkAuthor workAuthor = WorkAuthor.builder().work(work).author(author).build();
+                work.getWorkAuthors().add(workAuthor);
             }
         }
 
