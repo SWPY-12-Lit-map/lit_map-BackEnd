@@ -4,6 +4,7 @@ import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
 import com.lit_map_BackEnd.common.exception.code.ErrorCode;
 import com.lit_map_BackEnd.domain.character.dto.CastResponseDto;
 import com.lit_map_BackEnd.domain.character.repository.CastRepository;
+import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
 import com.lit_map_BackEnd.domain.work.dto.VersionResponseDto;
 import com.lit_map_BackEnd.domain.work.entity.Version;
 import com.lit_map_BackEnd.domain.work.entity.Work;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,38 +26,6 @@ public class VersionServiceImpl implements VersionService{
     private final VersionRepository versionRepository;
     private final WorkRepository workRepository;
     private final CastRepository castRepository;
-
-    @Override
-    @Transactional
-    public int insertRelationship(Map<String, Object> versionRequestDto) {
-        long findWorkId = ((Integer) versionRequestDto.get("workId")).longValue();
-        Double version = (Double) versionRequestDto.get("version");
-
-        Work work = workRepository.findById(findWorkId)
-                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
-
-        Version findVersion = versionRepository.findByVersionNumAndWork(version, work);
-
-        versionRequestDto.remove("workId");
-        versionRequestDto.remove("version");
-
-        findVersion.changeRelationship(versionRequestDto);
-
-        return 1;
-    }
-
-    // 한 작품의 여러 버전을 반환
-    @Override
-    public List<VersionResponseDto> findVersionByWork(Work work) {
-        return versionRepository.findByWork(work).stream()
-                .map(version -> VersionResponseDto.builder()
-                        .versionNum(version.getVersionNum())
-                        .versionName(version.getVersionName())
-                        .updateTime(version.getUpdatedDate())
-                        .relationship(version.getRelationship())
-                        .build())
-                .collect(Collectors.toList());
-    }
 
     // 기존의 버전 정보 업데이트하기
     @Override
@@ -106,6 +76,23 @@ public class VersionServiceImpl implements VersionService{
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
 
         versionRepository.deleteByWorkAndVersionNum(work, versionNum);
+    }
+
+    @Override
+    public List<VersionListDto> versionList(Work work) {
+        List<Version> versions = versionRepository.findByWork(work);
+
+        List<VersionListDto> collect = versions.stream().map(version -> VersionListDto.builder()
+                        .versionNum(version.getVersionNum())
+                        .versionName(version.getVersionName())
+                        .build())
+                        .toList();
+
+        for (VersionListDto versionListDto : collect) {
+            System.out.println("name = " + versionListDto.getVersionName());
+            System.out.println("num = " + versionListDto.getVersionNum());
+        }
+        return collect;
     }
 
 

@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -22,5 +23,5 @@ public class WorkResponseDto {
     private String title;
     private String contents;
     private VersionResponseDto versions;
-    //private List<CastResponseDto> casts;
+    private List<VersionListDto> versionList;
 }

@@ -12,6 +12,7 @@ import com.lit_map_BackEnd.domain.character.service.CastService;
 import com.lit_map_BackEnd.domain.genre.entity.Genre;
 import com.lit_map_BackEnd.domain.genre.service.GenreService;
 import com.lit_map_BackEnd.domain.member.entity.Member;
+import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
 import com.lit_map_BackEnd.domain.work.dto.VersionResponseDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkRequestDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
@@ -25,6 +26,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -231,6 +233,9 @@ public class WorkServiceImpl implements WorkService{
         // 이는 초기 로딩 속도와 네트워크 효율성을 고려하여 제작
         VersionResponseDto version = versionService.findVersionByWorkAndNumber(work.getId(), 0.1);
 
+        // 기존에 있는 버전들을 모두 반환
+        List<VersionListDto> maps = versionService.versionList(work);
+
         return WorkResponseDto.builder()
                 .workId(work.getId())
                 .category(category.getName())
@@ -240,8 +245,8 @@ public class WorkServiceImpl implements WorkService{
                 .memberName(memberName)
                 .title(work.getTitle())
                 .contents(work.getContent())
-                //.casts(characterByWork)
                 .versions(version)
+                .versionList(maps)
                 .build();
     }
 
