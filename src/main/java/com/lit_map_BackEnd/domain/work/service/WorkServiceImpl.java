@@ -113,7 +113,7 @@ public class WorkServiceImpl implements WorkService{
         // 기존에 존재한다면 수정
         if (versionRepository.existsByVersionNumAndWork(workRequestDto.getVersion(), work)) {
             // 기존에 존재하면 수정
-            version = versionService.changeVersion(workRequestDto.getVersion(), workRequestDto.getVersionName()
+            version = versionService.changeVersion(workRequestDto.getVersion(), versionName
                     , workRequestDto.getRelationship(), work);
 
             version.confirmSetting(checkConfirm(workRequestDto.isConfirmCheck()));
