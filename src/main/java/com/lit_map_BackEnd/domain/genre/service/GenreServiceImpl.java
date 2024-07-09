@@ -5,6 +5,8 @@ import com.lit_map_BackEnd.domain.genre.repository.GenreRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class GenreServiceImpl implements GenreService{
@@ -23,5 +25,10 @@ public class GenreServiceImpl implements GenreService{
             genre = insertGenre(name);
         }
         return genre;
+    }
+
+    @Override
+    public List<Genre> getGenres() {
+        return genreRepository.findAll();
     }
 }

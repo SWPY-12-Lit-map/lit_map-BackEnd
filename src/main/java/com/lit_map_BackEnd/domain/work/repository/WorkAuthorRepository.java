@@ -11,6 +11,7 @@ import java.util.List;
 @Repository
 public interface WorkAuthorRepository extends JpaRepository<WorkAuthor, Long> {
     List<WorkAuthor> findByWork(Work work);
-
     boolean existsByWorkAndAuthor(Work work, Author author);
+
+    void deleteByWork(Work work);
 }
