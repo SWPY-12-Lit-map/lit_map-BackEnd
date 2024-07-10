@@ -20,9 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -90,20 +88,35 @@ public class VersionServiceImpl implements VersionService{
     public List<VersionListDto> versionList(Work work) {
         // complete 된것만 가져오기
         List<Version> versions = versionRepository.findByWork(work);
+        List<RollBackVersion> rollBackVersions = rollBackVersionRepository.findByWork(work);
 
         List<VersionListDto> list = new ArrayList<>();
+        for (Version version : versions) {
+            VersionListDto build = VersionListDto.builder()
+                    .versionNum(version.getVersionNum())
+                    .versionName(version.getVersionName())
+                    .build();
 
-        List<VersionListDto> collect = versions.stream().map(version -> VersionListDto.builder()
-                        .versionNum(version.getVersionNum())
-                        .versionName(version.getVersionName())
-                        .build())
-                        .toList();
+            list.add(build);
+        }
 
-        for (VersionListDto versionListDto : collect) {
+        for (RollBackVersion rollBackVersion : rollBackVersions) {
+            VersionListDto build = VersionListDto.builder()
+                    .versionNum(rollBackVersion.getVersionNum())
+                    .versionName(rollBackVersion.getVersionName())
+                    .build();
+
+            list.add(build);
+        }
+
+        // versionListDto 에 Comparable을 구현하여 순서 정리
+        Collections.sort(list);
+
+        for (VersionListDto versionListDto : list) {
             System.out.println("name = " + versionListDto.getVersionName());
             System.out.println("num = " + versionListDto.getVersionNum());
         }
-        return collect;
+        return list;
     }
 
     @Override
