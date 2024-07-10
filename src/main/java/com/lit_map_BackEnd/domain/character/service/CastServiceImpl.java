@@ -5,6 +5,7 @@ import com.lit_map_BackEnd.common.exception.code.ErrorCode;
 import com.lit_map_BackEnd.domain.character.dto.CastRequestDto;
 import com.lit_map_BackEnd.domain.character.dto.CastResponseDto;
 import com.lit_map_BackEnd.domain.character.entity.Cast;
+import com.lit_map_BackEnd.domain.character.entity.RollBackCast;
 import com.lit_map_BackEnd.domain.character.repository.CastRepository;
 import com.lit_map_BackEnd.domain.work.entity.Version;
 import com.lit_map_BackEnd.domain.work.entity.Work;
@@ -92,5 +93,20 @@ public class CastServiceImpl implements CastService {
         }
 
         castRepository.deleteByWorkAndVersionAndName(work, version, name);
+    }
+
+    @Override
+    public RollBackCast insertRollBackCast(Cast cast) {
+        return RollBackCast.builder()
+                .work(cast.getWork())
+                .imageUrl(cast.getImageUrl())
+                .name(cast.getName())
+                .role(cast.getRole())
+                .type(cast.getType())
+                .gender(cast.getGender())
+                .age(cast.getAge())
+                .mbti(cast.getMbti())
+                .contents(cast.getContents())
+                .build();
     }
 }

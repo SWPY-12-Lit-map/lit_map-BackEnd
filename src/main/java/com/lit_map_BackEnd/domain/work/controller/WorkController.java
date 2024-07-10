@@ -39,7 +39,7 @@ public class WorkController {
     }
 
     @GetMapping("/{id}/{versionNum}")
-    @Operation(summary = "수정, 추가를 위한 특정 버전 가져오기", description = "수정과 추가를 하기 위해 작품의 특정 버전의 정보를 가져오는 API")
+    @Operation(summary = "특정 버전 가져오기", description = "수정과 추가를 하기 위해 작품의 특정 버전의 정보를 가져오는 API")
     public ResponseEntity<SuccessResponse> getWorkVersion(@PathVariable Long id,
                                                           @PathVariable Double versionNum) {
         // 해당 작품의 특정 버전 정보 가져오기 ( 전체데이터 or 해당 버전의 내용 )
@@ -76,7 +76,7 @@ public class WorkController {
         SuccessResponse res = SuccessResponse.builder()
                 .result("성공")
                 .resultCode(SuccessCode.DELETE_SUCCESS.getStatus())
-                .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
+                .resultMsg(SuccessCode.DELETE_SUCCESS.getMessage())
                 .build();
 
         return new ResponseEntity<>(res, HttpStatus.OK);
