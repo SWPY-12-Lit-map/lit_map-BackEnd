@@ -18,4 +18,6 @@ public interface VersionService {
     void deleteVersion(Long workId, Double versionNum);
 
     List<VersionListDto> versionList(Work work);
+
+    int rollBackDataSave(Long workId, Double versionNum);
 }

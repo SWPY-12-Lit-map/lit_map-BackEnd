@@ -188,6 +188,7 @@ public class WorkServiceImpl implements WorkService{
         return 1;
     }
 
+    // 작품 상세 내용 가져오기 ( 승인이 완료된 내용만 가져오기 )
     @Override
     public WorkResponseDto getWork(Long workId) {
         // 이미지, 작성자, 출판사, 제목, 설명 겸 작품 ID 검사
@@ -222,12 +223,6 @@ public class WorkServiceImpl implements WorkService{
             String name = workAuthor.getAuthor().getName();
             workAuthorsList.add(name);
         }
-
-        // 캐릭터
-        //List<CastResponseDto> characterByWork = castService.findCharacterByWork(work);
-
-        // 버전 정보 및 내용
-        //List<VersionResponseDto> versionByWork = versionService.findVersionByWork(work);
 
         // 기존의 작품의 버전 관련된 내용을 전부 가져오는 과정에서 그냥 0.1버전 하나만 가져오는 것으로 변경
         // 이는 초기 로딩 속도와 네트워크 효율성을 고려하여 제작

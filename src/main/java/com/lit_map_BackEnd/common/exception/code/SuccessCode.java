@@ -8,6 +8,7 @@ public enum SuccessCode {
     DELETE_SUCCESS(200, "200", "데이터 삭제 성공"),
     INSERT_SUCCESS(201, "201", "데이터 삽입 성공"),
     UPDATE_SUCCESS(204, "204", "데이터 수정 성공"),
+    ROLLBACK_SUCCESS(200, "200", "데이터 롤백 저장 성공"),
 
     ;
 
