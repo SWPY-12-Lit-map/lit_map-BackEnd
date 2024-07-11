@@ -20,7 +20,10 @@ public enum ErrorCode {
     CATEGORY_NOT_FOUND(500, "해당 카테고리는 존재하지 않습니다"),
     JSON_PARSING_ERROR(500, "JSON 데이터에 문제가 있습니다"),
     WRITER_WRONG(500, "기존의 작성자가 아닙니다"),
-    NOT_CONFIRM_VERSION(500, "아직 승인이 난 버전이 아닙니다."),
+    NOT_CONFIRM_VERSION(500, "아직 승인이 난 버전이 아닙니다"),
+    FILE_CONVERT_ERROR(500, "파일 변환에 실패하였습니다"),
+    INVALID_FILE_FORMAT(500, "해당 파일 타입은 지원하지 않습니다"),
+    ENCODING_ERROR(500, "지원하지 않는 문자 인코딩입니다"),
 
     // SQL 문제 발생
     INSERT_ERROR(500, "데이터 삽입 문제 발생"),
