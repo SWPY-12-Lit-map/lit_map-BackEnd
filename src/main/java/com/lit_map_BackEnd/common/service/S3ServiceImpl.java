@@ -29,6 +29,9 @@ public class S3ServiceImpl implements S3Service{
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
+    @Value("${cloud.aws.cloudfront.name}")
+    private String cfName;
+
     private static final String EXTENSION_DELIMITER = ".";
     private static final List<String> ALLOWED_FILE_EXTENSIONS = List.of(".jpg", ".png", ".jpeg");
 
@@ -93,7 +96,8 @@ public class S3ServiceImpl implements S3Service{
 
     private String putS3(File uploadFile, String fileName) {
         amazonS3.putObject(new PutObjectRequest(bucket, fileName, uploadFile));
-        return amazonS3.getUrl(bucket, fileName).toString();
+        String path = amazonS3.getUrl(bucket, fileName).getPath();
+        return cfName + path;
     }
 
     private void removeNewFile(File targetFile) {
