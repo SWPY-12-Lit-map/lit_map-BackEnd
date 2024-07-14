@@ -8,6 +8,5 @@ import org.springframework.stereotype.Repository;
 public interface WorkRepository extends JpaRepository<Work, Long> {
     boolean existsByTitle(String title);
     Work findByTitle(String title);
-
     void deleteById(Long workId);
 }

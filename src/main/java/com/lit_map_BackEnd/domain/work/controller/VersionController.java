@@ -36,7 +36,6 @@ public class VersionController {
     public ResponseEntity<SuccessResponse> updateVersion(@PathVariable Long workId,
                                                          @PathVariable Double versionNum) {
         // 롤백 테이블에 데이터 저장
-
         versionService.rollBackDataSave(workId, versionNum);
 
         SuccessResponse res = SuccessResponse.builder()

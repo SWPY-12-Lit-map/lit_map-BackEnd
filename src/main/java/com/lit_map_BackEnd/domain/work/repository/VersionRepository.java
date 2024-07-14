@@ -16,7 +16,10 @@ public interface VersionRepository extends JpaRepository<Version, Long> {
     boolean existsByVersionNumAndWork(Double version, Work work);
 
     @Query("select v from Version v where v.work = :work and v.confirm = 'COMPLETE'")
-    List<Version> findByWork(@Param("work")Work work);
+    List<Version> findByWorkComplete(@Param("work")Work work);
+
+    @Query("select v from Version v where v.work = :work and v.confirm = 'CONFIRM'")
+    List<Version> findByWorkConfirm(@Param("work")Work work);
 
     void deleteByWorkAndVersionNum(Work work, Double versionNum);
 }
