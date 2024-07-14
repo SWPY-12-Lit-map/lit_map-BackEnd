@@ -4,6 +4,7 @@ import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
 import com.lit_map_BackEnd.domain.board.dto.ConfirmListDto;
 import com.lit_map_BackEnd.domain.board.service.BoardService;
+import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,22 @@ public class BoardController {
 
         SuccessResponse res = SuccessResponse.builder()
                 .result(confirmData)
+                .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())
+                .build();
+
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+    @GetMapping("/myWorkList")
+    @Operation(summary = "나의 작품 목록", description = "내가 등록한 작품-버전list로 가져오기")
+    public ResponseEntity<SuccessResponse> getMyWorkList() {
+        // 멤버 정보 가져오기
+        List<WorkResponseDto> myWorkList = boardService.getMyWorkList();
+
+        // 멤버 아이디로 작품 가져오기
+        SuccessResponse res = SuccessResponse.builder()
+                .result(myWorkList)
                 .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
                 .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())
                 .build();
