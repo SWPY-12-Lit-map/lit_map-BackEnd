@@ -10,10 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -33,8 +30,8 @@ public class BoardController {
 
         SuccessResponse res = SuccessResponse.builder()
                 .result(confirmData)
-                .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
-                .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())
+                .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
                 .build();
 
         return new ResponseEntity<>(res, HttpStatus.OK);
@@ -50,8 +47,8 @@ public class BoardController {
         // 멤버 아이디로 작품 가져오기
         SuccessResponse res = SuccessResponse.builder()
                 .result(myWorkList)
-                .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
-                .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())
+                .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
                 .build();
 
         return new ResponseEntity<>(res, HttpStatus.OK);
@@ -67,8 +64,8 @@ public class BoardController {
 
         SuccessResponse res = SuccessResponse.builder()
                 .result(workListByView)
-                .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
-                .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())
+                .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
                 .build();
 
         return new ResponseEntity<>(res, HttpStatus.OK);
@@ -83,15 +80,29 @@ public class BoardController {
 
         SuccessResponse res = SuccessResponse.builder()
                 .result(workListByView)
-                .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
-                .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())
+                .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
                 .build();
 
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
     // 카테고리와 장르를 기준으로 작품 검색
+    @GetMapping("/theme/{categoryId}/{genreId}")
+    @Operation(summary = "update 기준으로 나열하는 작품 목록", description = "update 기준으로 나열")
+    public ResponseEntity<SuccessResponse> getWorkByUpdateDate(@PathVariable Long categoryId,
+                                                               @PathVariable Long genreId) {
 
+        List<WorkResponseDto> list = boardService.getWorkByCategoryAndGenre(categoryId, genreId);
+
+        SuccessResponse res = SuccessResponse.builder()
+                .result(list)
+                .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
+                .build();
+
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
 
     // 각 특징을 통해 작품을 검색해서 나열
     // 1. 제목

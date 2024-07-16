@@ -8,13 +8,11 @@ import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.repository.MemberRepository;
 import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
-import com.lit_map_BackEnd.domain.work.entity.Version;
-import com.lit_map_BackEnd.domain.work.entity.Work;
-import com.lit_map_BackEnd.domain.work.entity.WorkAuthor;
-import com.lit_map_BackEnd.domain.work.entity.WorkGenre;
+import com.lit_map_BackEnd.domain.work.entity.*;
 import com.lit_map_BackEnd.domain.work.repository.VersionRepository;
 import com.lit_map_BackEnd.domain.work.repository.WorkCategoryGenreRepository;
 import com.lit_map_BackEnd.domain.work.repository.WorkRepository;
+import com.lit_map_BackEnd.domain.work.service.WorkCategoryGenreService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -29,7 +27,7 @@ public class BoardServiceImpl implements BoardService{
     private final WorkRepository workRepository;
     private final VersionRepository versionRepository;
     private final MemberRepository memberRepository;
-    private final WorkCategoryGenreRepository workCategoryGenreRepository;
+    private final WorkCategoryGenreService workCategoryGenreService;
 
     @Override
     public List<ConfirmListDto> getConfirmData() {
@@ -139,5 +137,17 @@ public class BoardServiceImpl implements BoardService{
                 .imageUrl(work.getImageUrl())
                 .title(work.getTitle())
                 .build());
+    }
+
+    @Override
+    public List<WorkResponseDto> getWorkByCategoryAndGenre(Long categoryId, Long genreId) {
+        List<WorkCategoryGenre> works = workCategoryGenreService.findWorks(categoryId, genreId);
+
+        return works.stream().map(workCategoryGenre -> WorkResponseDto.builder()
+                .workId(workCategoryGenre.getWork().getId())
+                .title(workCategoryGenre.getWork().getTitle())
+                .build()
+        ).toList();
+
     }
 }

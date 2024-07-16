@@ -13,6 +13,6 @@ public interface BoardService {
     Slice<WorkResponseDto> getWorkListByView(int pageNum);
     Slice<WorkResponseDto> getWorkListByUpdateDate(int pageNum);
 
-    List<Work> getWorkByCategoryAndGenre();
+    List<WorkResponseDto> getWorkByCategoryAndGenre(Long categoryId, Long genreId);
 
 }
