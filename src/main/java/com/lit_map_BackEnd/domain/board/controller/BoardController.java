@@ -3,6 +3,7 @@ package com.lit_map_BackEnd.domain.board.controller;
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
 import com.lit_map_BackEnd.domain.board.dto.ConfirmListDto;
+import com.lit_map_BackEnd.domain.board.dto.VersionInfo;
 import com.lit_map_BackEnd.domain.board.service.BoardService;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,10 +43,8 @@ public class BoardController {
     @GetMapping("/myWorkList")
     @Operation(summary = "나의 작품 목록", description = "내가 등록한 작품-버전 list로 가져오기")
     public ResponseEntity<SuccessResponse> getMyWorkList() {
-        // 멤버 정보 가져오기
-        List<WorkResponseDto> myWorkList = boardService.getMyWorkList();
+        Map<String, List<VersionInfo>> myWorkList = boardService.getMyWorkList();
 
-        // 멤버 아이디로 작품 가져오기
         SuccessResponse res = SuccessResponse.builder()
                 .result(myWorkList)
                 .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
@@ -58,7 +58,7 @@ public class BoardController {
     // view 순으로 작품 나열 ( Redis 에 저장해서 사용 )
     @GetMapping("/view")
     @Operation(summary = "view 순으로 나열된 작품 목록", description = "view 순으로 나열된 작품 목록 나열")
-    public ResponseEntity<SuccessResponse> getWorkByView(@RequestParam int pn) {
+    public ResponseEntity<SuccessResponse> getWorkByView(@RequestParam(name = "pn") int pn) {
 
         Slice<WorkResponseDto> workListByView = boardService.getWorkListByView(pn);
 
@@ -74,7 +74,7 @@ public class BoardController {
     // 업데이트 순으로 나열 ( Redis 에 저장해서 사용 )
     @GetMapping("/updateList")
     @Operation(summary = "update 기준으로 나열하는 작품 목록", description = "update 기준으로 나열")
-    public ResponseEntity<SuccessResponse> getWorkByUpdateDate(@RequestParam int pn) {
+    public ResponseEntity<SuccessResponse> getWorkByUpdateDate(@RequestParam(name = "pn") int pn) {
 
         Slice<WorkResponseDto> workListByView = boardService.getWorkListByUpdateDate(pn);
 
@@ -90,10 +90,10 @@ public class BoardController {
     // 카테고리와 장르를 기준으로 작품 검색
     @GetMapping("/theme/{categoryId}/{genreId}")
     @Operation(summary = "update 기준으로 나열하는 작품 목록", description = "update 기준으로 나열")
-    public ResponseEntity<SuccessResponse> getWorkByUpdateDate(@PathVariable Long categoryId,
-                                                               @PathVariable Long genreId) {
+    public ResponseEntity<SuccessResponse> getWorkByUpdateDate(@PathVariable(name = "categoryId") Long categoryId,
+                                                               @PathVariable(name = "genreId") Long genreId) {
 
-        List<WorkResponseDto> list = boardService.getWorkByCategoryAndGenre(categoryId, genreId);
+        List<Map<String, Object>> list = boardService.getWorkByCategoryAndGenre(categoryId, genreId);
 
         SuccessResponse res = SuccessResponse.builder()
                 .result(list)
