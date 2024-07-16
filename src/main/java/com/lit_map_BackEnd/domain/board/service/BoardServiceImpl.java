@@ -13,13 +13,14 @@ import com.lit_map_BackEnd.domain.work.entity.Work;
 import com.lit_map_BackEnd.domain.work.entity.WorkAuthor;
 import com.lit_map_BackEnd.domain.work.entity.WorkGenre;
 import com.lit_map_BackEnd.domain.work.repository.VersionRepository;
+import com.lit_map_BackEnd.domain.work.repository.WorkCategoryGenreRepository;
 import com.lit_map_BackEnd.domain.work.repository.WorkRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +29,7 @@ public class BoardServiceImpl implements BoardService{
     private final WorkRepository workRepository;
     private final VersionRepository versionRepository;
     private final MemberRepository memberRepository;
+    private final WorkCategoryGenreRepository workCategoryGenreRepository;
 
     @Override
     public List<ConfirmListDto> getConfirmData() {
@@ -107,5 +109,35 @@ public class BoardServiceImpl implements BoardService{
             list.add(workResponseDto);
         }
         return list;
+    }
+
+    @Override
+    public Slice<WorkResponseDto> getWorkListByView(int pageNum) {
+        Slice<Work> all = workRepository.findWorks(PageRequest.of(pageNum, 1));
+
+        return all.map(work -> WorkResponseDto.builder()
+                .workId(work.getId())
+                .imageUrl(work.getImageUrl())
+                .title(work.getTitle())
+                .build());
+    }
+
+    @Override
+    public Slice<WorkResponseDto> getWorkListByUpdateDate(int pageNum) {
+        Pageable pageable = PageRequest.of(pageNum, 1);
+        Page<Long> latestVersions = versionRepository.findLatestUpdateDates(pageable);
+
+        List<Work> list = latestVersions.stream()
+                .map(id -> workRepository.findById(id)
+                        .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND)))
+                .toList();
+
+        Slice<Work> slice = new SliceImpl<>(list, pageable, latestVersions.hasNext());
+
+        return slice.map(work -> WorkResponseDto.builder()
+                .workId(work.getId())
+                .imageUrl(work.getImageUrl())
+                .title(work.getTitle())
+                .build());
     }
 }

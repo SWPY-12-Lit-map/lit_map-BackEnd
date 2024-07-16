@@ -7,10 +7,12 @@ import com.lit_map_BackEnd.domain.board.service.BoardService;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -38,8 +40,9 @@ public class BoardController {
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
+    // 내가 작성한 작품 목록
     @GetMapping("/myWorkList")
-    @Operation(summary = "나의 작품 목록", description = "내가 등록한 작품-버전list로 가져오기")
+    @Operation(summary = "나의 작품 목록", description = "내가 등록한 작품-버전 list로 가져오기")
     public ResponseEntity<SuccessResponse> getMyWorkList() {
         // 멤버 정보 가져오기
         List<WorkResponseDto> myWorkList = boardService.getMyWorkList();
@@ -57,12 +60,13 @@ public class BoardController {
 
     // view 순으로 작품 나열 ( Redis 에 저장해서 사용 )
     @GetMapping("/view")
-    @Operation(summary = "Redis에 저장된 내용 전달", description = "Sorted Set으로 저장된 데이터를 나열")
-    public ResponseEntity<SuccessResponse> getWorkByView() {
+    @Operation(summary = "view 순으로 나열된 작품 목록", description = "view 순으로 나열된 작품 목록 나열")
+    public ResponseEntity<SuccessResponse> getWorkByView(@RequestParam int pn) {
 
+        Slice<WorkResponseDto> workListByView = boardService.getWorkListByView(pn);
 
         SuccessResponse res = SuccessResponse.builder()
-                .result(1)
+                .result(workListByView)
                 .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
                 .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())
                 .build();
@@ -71,6 +75,23 @@ public class BoardController {
     }
 
     // 업데이트 순으로 나열 ( Redis 에 저장해서 사용 )
+    @GetMapping("/updateList")
+    @Operation(summary = "update 기준으로 나열하는 작품 목록", description = "update 기준으로 나열")
+    public ResponseEntity<SuccessResponse> getWorkByUpdateDate(@RequestParam int pn) {
+
+        Slice<WorkResponseDto> workListByView = boardService.getWorkListByUpdateDate(pn);
+
+        SuccessResponse res = SuccessResponse.builder()
+                .result(workListByView)
+                .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())
+                .build();
+
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+    // 카테고리와 장르를 기준으로 작품 검색
+
 
     // 각 특징을 통해 작품을 검색해서 나열
     // 1. 제목

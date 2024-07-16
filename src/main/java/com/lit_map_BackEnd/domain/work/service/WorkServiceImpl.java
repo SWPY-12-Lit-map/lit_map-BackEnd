@@ -201,6 +201,10 @@ public class WorkServiceImpl implements WorkService{
             memberName = "탈퇴한 회원입니다.";
         }
 
+        // view 카운트 올리기
+        // 트랜잭션 처리, 비관적 락 사용
+        workRepository.countUpView(work);
+
         // 카테고리
         Category category = categoryService.checkCategory(work.getCategory().getName());
         if (category == null) {
