@@ -2,8 +2,6 @@ package com.lit_map_BackEnd.domain.work.repository;
 
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.work.entity.Work;
-import jakarta.persistence.OrderBy;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -10,15 +10,17 @@ import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
 import com.lit_map_BackEnd.domain.work.entity.*;
 import com.lit_map_BackEnd.domain.work.repository.VersionRepository;
-import com.lit_map_BackEnd.domain.work.repository.WorkCategoryGenreRepository;
 import com.lit_map_BackEnd.domain.work.repository.WorkRepository;
 import com.lit_map_BackEnd.domain.work.service.WorkCategoryGenreService;
+import com.querydsl.core.Tuple;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,27 +30,37 @@ public class BoardServiceImpl implements BoardService{
     private final VersionRepository versionRepository;
     private final MemberRepository memberRepository;
     private final WorkCategoryGenreService workCategoryGenreService;
+    private final JPAQueryFactory jpaQueryFactory;
 
     @Override
+    @Transactional(readOnly = true)
     public List<ConfirmListDto> getConfirmData() {
-        // 각 작품을 모두 가져오고 그 작품에 해당하는 버전들을 모두 가져온다.
-        List<Work> all = workRepository.findAll();
+        QWork work = QWork.work;
+        QVersion version = QVersion.version;
 
-        List<ConfirmListDto> list = new ArrayList<>();
-        for (Work work : all) {
-            // 해당 작품에 해당하는 버전들 중 confirm 상태인 것을 가져온다
-            List<String> collect = versionRepository.findByWorkConfirm(work).stream()
-                    .map(Version::getVersionName).toList();
+        List<Tuple> results = jpaQueryFactory
+                .select(work.title, version.versionName)
+                .from(work)
+                .join(version).on(version.work.eq(work))
+                .where(version.confirm.eq(Confirm.CONFIRM))
+                .fetch();
 
-            ConfirmListDto build = ConfirmListDto.builder()
-                    .workTitle(work.getTitle())
-                    .versionList(collect)
-                    .build();
+        Map<String, List<String>> workToVersionsMap = new HashMap<>();
+        for (Tuple tuple : results) {
+            String workTitle = tuple.get(work.title);
+            String versionName = tuple.get(version.versionName);
 
-            list.add(build);
+            workToVersionsMap.computeIfAbsent(workTitle, k -> new ArrayList<>())
+                    .add(versionName);
         }
 
-        return list;
+        return workToVersionsMap.entrySet().stream()
+                .filter(entry -> !entry.getValue().isEmpty())
+                .map(entry -> ConfirmListDto.builder()
+                        .workTitle(entry.getKey())
+                        .versionList(entry.getValue())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     @Override
