@@ -29,6 +29,7 @@ public interface VersionRepository extends JpaRepository<Version, Long> {
 
     @Query("select v.work.id " +
             "from Version v " +
+            "where v.confirm = 'COMPLETE'" +
             "group by v.work.id " +
             "order by max(v.updatedDate) desc")
     Page<Long> findLatestUpdateDates(Pageable pageable);
