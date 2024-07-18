@@ -89,7 +89,7 @@ public class BoardController {
 
     // 카테고리와 장르를 기준으로 작품 검색
     @GetMapping("/theme/{categoryId}/{genreId}")
-    @Operation(summary = "update 기준으로 나열하는 작품 목록", description = "update 기준으로 나열")
+    @Operation(summary = "카테고리와 장르별 작품 가져오기", description = "카테고리와 장르를 이름을 기준으로 작품들을 가져오기")
     public ResponseEntity<SuccessResponse> getWorkByUpdateDate(@PathVariable(name = "categoryId") Long categoryId,
                                                                @PathVariable(name = "genreId") Long genreId) {
 
