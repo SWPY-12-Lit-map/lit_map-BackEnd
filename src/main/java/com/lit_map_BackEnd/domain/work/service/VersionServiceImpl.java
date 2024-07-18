@@ -87,7 +87,7 @@ public class VersionServiceImpl implements VersionService{
     @Override
     public List<VersionListDto> versionList(Work work) {
         // complete 된것만 가져오기
-        List<Version> versions = versionRepository.findByWork(work);
+        List<Version> versions = versionRepository.findByWorkComplete(work);
         List<RollBackVersion> rollBackVersions = rollBackVersionRepository.findByWork(work);
 
         List<VersionListDto> list = new ArrayList<>();
@@ -121,7 +121,7 @@ public class VersionServiceImpl implements VersionService{
 
     @Override
     @Transactional
-    public int rollBackDataSave(Long workId, Double versionNum) {
+    public void rollBackDataSave(Long workId, Double versionNum) {
         Work work = workRepository.findById(workId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
         Version version = versionRepository.findByVersionNumAndWork(versionNum, work);
@@ -157,8 +157,5 @@ public class VersionServiceImpl implements VersionService{
         version.confirmSetting(Confirm.LOAD);
 
         rollBackVersionRepository.save(rollBackVersion);
-        return 1;
     }
-
-
 }

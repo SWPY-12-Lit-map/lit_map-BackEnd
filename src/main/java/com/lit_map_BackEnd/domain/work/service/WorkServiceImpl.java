@@ -12,6 +12,7 @@ import com.lit_map_BackEnd.domain.character.service.CastService;
 import com.lit_map_BackEnd.domain.genre.entity.Genre;
 import com.lit_map_BackEnd.domain.genre.service.GenreService;
 import com.lit_map_BackEnd.domain.member.entity.Member;
+import com.lit_map_BackEnd.domain.member.repository.MemberRepository;
 import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
 import com.lit_map_BackEnd.domain.work.dto.VersionResponseDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkRequestDto;
@@ -24,9 +25,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -44,7 +45,6 @@ public class WorkServiceImpl implements WorkService{
     private final CastService castService;
     private final VersionService versionService;
 
-
     /**
      *  데이터를 삽입하는 것과 업데이트하는것이 동시에 되어야 하기 때문에
      *  계속된 더티체킹을 하게 된다. 굉장히 비효율적인거 같은데 어떻게 하면 좋을까
@@ -52,7 +52,7 @@ public class WorkServiceImpl implements WorkService{
 
     @Override
     @Transactional
-    public int saveWork(@Valid WorkRequestDto workRequestDto) {
+    public int saveWork(@Valid WorkRequestDto workRequestDto, int i) {
         // 멤버 확인 ( 현재는 null 로 생성 )
 
         // 출판사도 확인 ( 현재는 null 로 생성 )
@@ -72,7 +72,8 @@ public class WorkServiceImpl implements WorkService{
             }
         } else {
             work = Work.builder()
-                    .title(workRequestDto.getTitle())
+                    //.title(workRequestDto.getTitle())
+                    .title(workRequestDto.getTitle() + " " + i)
                     .content(workRequestDto.getContents())
                     .member(null)
                     .publisherName(workRequestDto.getPublisherName())
@@ -202,6 +203,10 @@ public class WorkServiceImpl implements WorkService{
             memberName = "탈퇴한 회원입니다.";
         }
 
+        // view 카운트 올리기
+        // 트랜잭션 처리, 비관적 락 사용
+        workRepository.countUpView(work);
+
         // 카테고리
         Category category = categoryService.checkCategory(work.getCategory().getName());
         if (category == null) {
@@ -253,7 +258,6 @@ public class WorkServiceImpl implements WorkService{
 
         workRepository.deleteById(workId);
     }
-
 
     // 제출(true)과 수정/임시저장(false)을 구분하는 메소드
     private Confirm checkConfirm(boolean status) {

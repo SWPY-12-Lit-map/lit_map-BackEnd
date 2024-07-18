@@ -19,5 +19,5 @@ public interface VersionService {
 
     List<VersionListDto> versionList(Work work);
 
-    int rollBackDataSave(Long workId, Double versionNum);
+    void rollBackDataSave(Long workId, Double versionNum);
 }
