@@ -18,8 +18,8 @@ public class VersionController {
 
     @DeleteMapping("/{workId}/{versionNum}")
     @Operation(summary = "특정 버전 삭제", description = "특정 버전만 삭제하고 관련 캐릭터들도 같이 삭제")
-    public ResponseEntity<SuccessResponse> deleteVersionInWork(@PathVariable Long workId,
-                                                               @PathVariable Double versionNum) {
+    public ResponseEntity<SuccessResponse> deleteVersionInWork(@PathVariable(name = "workId") Long workId,
+                                                               @PathVariable(name = "versionNum") Double versionNum) {
         versionService.deleteVersion(workId, versionNum);
 
         SuccessResponse res = SuccessResponse.builder()
@@ -33,8 +33,8 @@ public class VersionController {
 
     @PutMapping("/rollback/{workId}/{versionNum}")
     @Operation(summary = "버전 수정으로 인한 롤백데이터 저장", description = "버전을 수정하면서 기존의 데이터를 롤백 테이블에 데이터 기입")
-    public ResponseEntity<SuccessResponse> updateVersion(@PathVariable Long workId,
-                                                         @PathVariable Double versionNum) {
+    public ResponseEntity<SuccessResponse> updateVersion(@PathVariable(name = "workId") Long workId,
+                                                         @PathVariable(name = "versionNum") Double versionNum) {
         // 롤백 테이블에 데이터 저장
         versionService.rollBackDataSave(workId, versionNum);
 
