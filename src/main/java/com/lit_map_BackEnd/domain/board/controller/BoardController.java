@@ -93,8 +93,8 @@ public class BoardController {
     public ResponseEntity<SuccessResponse> getWorkByUpdateDate(@PathVariable(name = "categoryId") Long categoryId,
                                                                @PathVariable(name = "genreId") Long genreId) {
 
-        //List<Map<String, Object>> list = boardService.getWorkByCategoryAndGenre(categoryId, genreId);
-        List<WorkResponseDto> list = boardService.getWorkByCategoryAndGenre(categoryId, genreId);
+        List<Map<String, Object>> list = boardService.getWorkByCategoryAndGenre(categoryId, genreId);
+        //List<WorkResponseDto> list = boardService.getWorkByCategoryAndGenre(categoryId, genreId);
 
         SuccessResponse res = SuccessResponse.builder()
                 .result(list)

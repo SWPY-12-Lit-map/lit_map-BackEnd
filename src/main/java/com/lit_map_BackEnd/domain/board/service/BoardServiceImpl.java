@@ -159,46 +159,46 @@ public class BoardServiceImpl implements BoardService{
 
 
 
-//    @Override
-//    @Transactional(readOnly = true)
-//    public List<Map<String, Object>> getWorkByCategoryAndGenre(Long categoryId, Long genreId) {
-//        Category findCategory = categoryRepository.findById(categoryId)
-//                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.CATEGORY_NOT_FOUND));
-//
-//        Genre findGenre = genreRepository.findById(genreId)
-//                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.GENRE_NOT_FOUND));
-//
-//        QWorkCategoryGenre workCategoryGenre = QWorkCategoryGenre.workCategoryGenre;
-//        QWork work = QWork.work;
-//
-//        JPQLQuery<Long> subQuery = JPAExpressions
-//                .select(workCategoryGenre.work.id)
-//                .from(workCategoryGenre)
-//                .where(workCategoryGenre.category.eq(findCategory)
-//                        .and(workCategoryGenre.genre.eq(findGenre)));
-//
-//        List<Tuple> fetch = jpaQueryFactory.select(work.id, work.title)
-//                .from(work)
-//                .where(work.id.in(subQuery))
-//                .fetch();
-//
-//        return fetch.stream().map(tuple -> {
-//            Map<String, Object> map = new HashMap<>();
-//            map.put("workId", tuple.get(work.id));
-//            map.put("workTitle", tuple.get(work.title));
-//            return map;
-//        }).toList();
-//    }
-
     @Override
-    public List<WorkResponseDto> getWorkByCategoryAndGenre(Long categoryId, Long genreId) {
-        List<WorkCategoryGenre> works = workCategoryGenreService.findWorks(categoryId, genreId);
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getWorkByCategoryAndGenre(Long categoryId, Long genreId) {
+        Category findCategory = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.CATEGORY_NOT_FOUND));
 
-        return works.stream().map(workCategoryGenre -> WorkResponseDto.builder()
-                .workId(workCategoryGenre.getWork().getId())
-                .title(workCategoryGenre.getWork().getTitle())
-                .build()
-        ).toList();
+        Genre findGenre = genreRepository.findById(genreId)
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.GENRE_NOT_FOUND));
 
+        QWorkCategoryGenre workCategoryGenre = QWorkCategoryGenre.workCategoryGenre;
+        QWork work = QWork.work;
+
+        JPQLQuery<Long> subQuery = JPAExpressions
+                .select(workCategoryGenre.work.id)
+                .from(workCategoryGenre)
+                .where(workCategoryGenre.category.eq(findCategory)
+                        .and(workCategoryGenre.genre.eq(findGenre)));
+
+        List<Tuple> fetch = jpaQueryFactory.select(work.id, work.title)
+                .from(work)
+                .where(work.id.in(subQuery))
+                .fetch();
+
+        return fetch.stream().map(tuple -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("workId", tuple.get(work.id));
+            map.put("workTitle", tuple.get(work.title));
+            return map;
+        }).toList();
     }
+
+//    @Override
+//    public List<WorkResponseDto> getWorkByCategoryAndGenre(Long categoryId, Long genreId) {
+//        List<WorkCategoryGenre> works = workCategoryGenreService.findWorks(categoryId, genreId);
+//
+//        return works.stream().map(workCategoryGenre -> WorkResponseDto.builder()
+//                .workId(workCategoryGenre.getWork().getId())
+//                .title(workCategoryGenre.getWork().getTitle())
+//                .build()
+//        ).toList();
+//
+//    }
 }
