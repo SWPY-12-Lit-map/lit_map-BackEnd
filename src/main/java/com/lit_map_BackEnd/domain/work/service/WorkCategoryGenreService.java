@@ -19,7 +19,7 @@ public class WorkCategoryGenreService {
 
     private final WorkCategoryGenreRepository workCategoryGenreRepository;
     private final CategoryRepository categoryRepository;
-    private GenreRepository genreRepository;
+    private final GenreRepository genreRepository;
 
     public List<WorkCategoryGenre> findWorks(Long cId, Long gId) {
         Category category = categoryRepository.findById(cId)

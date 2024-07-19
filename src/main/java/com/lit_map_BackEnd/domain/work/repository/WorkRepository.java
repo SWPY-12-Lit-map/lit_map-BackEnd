@@ -21,6 +21,6 @@ public interface WorkRepository extends JpaRepository<Work, Long> {
     @Query("update Work w set w.view = w.view + 1 where w = :work")
     void countUpView(Work work);
 
-    @Query("select w from Work w order by w.view desc")
+    @Query("select w from Work w join fetch w.category join fetch w.member order by w.view desc")
     Slice<Work> findWorks(Pageable pageable);
 }

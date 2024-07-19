@@ -116,7 +116,7 @@ public class BoardServiceImpl implements BoardService{
     @Override
     @Transactional(readOnly = true)
     public Slice<WorkResponseDto> getWorkListByView(int pageNum) {
-        Slice<Work> all = workRepository.findWorks(PageRequest.of(pageNum, 1));
+        Slice<Work> all = workRepository.findWorks(PageRequest.of(pageNum, 10));
 
         return all.map(work -> WorkResponseDto.builder()
                 .workId(work.getId())
@@ -128,23 +128,36 @@ public class BoardServiceImpl implements BoardService{
     @Override
     @Transactional(readOnly = true)
     public Slice<WorkResponseDto> getWorkListByUpdateDate(int pageNum) {
-        Pageable pageable = PageRequest.of(pageNum, 1);
+        Pageable pageable = PageRequest.of(pageNum, 10);
+
         // 각 작품마다 가장 최신 업데이트 된 순으로 정렬
-        Page<Long> latestVersions = versionRepository.findLatestUpdateDates(pageable);
+        Slice<Object[]> latestUpdateDates = versionRepository.findLatestUpdateDates(pageable);
 
-        List<Work> list = latestVersions.stream()
-                .map(id -> workRepository.findById(id)
-                        .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND)))
-                .toList();
+        List<WorkResponseDto> workResponseDtos = latestUpdateDates.getContent().stream()
+                .map(result -> {
+                    Long workId = (Long) result[0];
+                    String name = "";
 
-        Slice<Work> slice = new SliceImpl<>(list, pageable, latestVersions.hasNext());
+                    Work work = workRepository.findById(workId)
+                            .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
 
-        return slice.map(work -> WorkResponseDto.builder()
-                .workId(work.getId())
-                .imageUrl(work.getImageUrl())
-                .title(work.getTitle())
-                .build());
+                    // 제작자를 찾고 만약 없으면 미상으로 넘기기
+                    if (work.getMember() == null) name = "미상";
+                    else name = work.getMember().getName();
+
+                    return WorkResponseDto.builder()
+                            .workId(work.getId())
+                            .imageUrl(work.getImageUrl())
+                            .title(work.getTitle())
+                            .memberName(name)
+                            .build();
+
+                }).toList();
+
+        return new SliceImpl<>(workResponseDtos, pageable, latestUpdateDates.hasNext());
     }
+
+
 
 //    @Override
 //    @Transactional(readOnly = true)
