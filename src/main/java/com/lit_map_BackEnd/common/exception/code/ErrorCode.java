@@ -20,6 +20,7 @@ public enum ErrorCode {
     CATEGORY_NOT_FOUND(500, "해당 카테고리는 존재하지 않습니다"),
     JSON_PARSING_ERROR(500, "JSON 데이터에 문제가 있습니다"),
     WRITER_WRONG(500, "기존의 작성자가 아닙니다"),
+    KEYWORD_NOT_FOUND(500, "검색 키워드가 존재하지 않습니다."),
 
     // SQL 문제 발생
     INSERT_ERROR(500, "데이터 삽입 문제 발생"),

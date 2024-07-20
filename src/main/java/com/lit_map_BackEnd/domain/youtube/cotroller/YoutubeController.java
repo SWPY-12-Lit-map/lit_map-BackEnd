@@ -17,6 +17,6 @@ public class YoutubeController {
 
     @GetMapping("/search")
     public List<Youtube> search(@RequestParam String query) throws Exception {
-        return youtubeService.searchVideos(query);
+        return youtubeService.getYoutubeInfo(query);
     }
 }

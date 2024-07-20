@@ -1,15 +1,13 @@
 package com.lit_map_BackEnd.domain.youtube.entity;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 //getter setter 로 하면 오류
 
  @Getter
  @Setter
+ @Builder
 public class Youtube {
     private String title;
     private String videoUrl;

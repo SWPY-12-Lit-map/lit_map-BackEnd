@@ -47,7 +47,7 @@ public class WorkServiceImpl implements WorkService{
     private final VersionService versionService;
 
     @Autowired
-    private YoutubeService youtubeService;
+    private final YoutubeService youtubeService;
 
 
     /**
@@ -243,15 +243,33 @@ public class WorkServiceImpl implements WorkService{
 
         // Youtube 정보 조회
         String workTitle = work.getTitle(); // 작품의 제목 가져오기
-        Youtube youtubeInfo = null;
-        if (workTitle != null && !workTitle.isEmpty()) {
-            youtubeInfo = youtubeService.getYoutubeInfo
+        List<Youtube> youtubeInfo = null;
+     try{
+        if (workTitle == null) {
+            //  youtubeInfo = youtubeService.getYoutubeInfo(workTitle); //예외처리가 안됨
+            throw new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND);
+        }
+        youtubeInfo = youtubeService.getYoutubeInfo(workTitle);
+         } catch (Exception e) {
+              throw new BusinessExceptionHandler(ErrorCode.KEYWORD_NOT_FOUND);
+         }
+        List<Youtube> youtubeList = new ArrayList<>();
+        if (youtubeInfo != null) {
 
-                    (workTitle); //예외처리가 안됨
-        } else {
-            throw new IllegalArgumentException("작품 제목이 null이거나 비어 있습니다.");
+            for (Youtube info : youtubeInfo) {
+                Youtube youtube = new Youtube(
+                        info.getTitle(),
+                        info.getVideoUrl(),
+                        info.getThumbnailUrl(),
+                        info.getViewCount(),
+                        info.getUploadDate()
+                );
+                youtubeList.add(youtube);
+            }
+
         }
 
+/*
         // WorkResponseDto 생성
         WorkResponseDto.WorkResponseDtoBuilder builder = WorkResponseDto.builder()
                 .workId(work.getId())
@@ -265,18 +283,10 @@ public class WorkServiceImpl implements WorkService{
                 .versions(version);
 
 // Youtube 정보가 있을 경우에만 추가
-        if (youtubeInfo != null) {
-            builder.youtube(YoutubeDto.builder()
-                    .title(youtubeInfo.getTitle())
-                    .videoUrl(youtubeInfo.getVideoUrl())
-                    .thumbnailUrl(youtubeInfo.getThumbnailUrl())
-                    .viewCount(youtubeInfo.getViewCount())
-                    .uploadDate(youtubeInfo.getUploadDate())
-                    .build());
-        }
-
         return builder.build();
-/*
+
+        */
+
         return WorkResponseDto.builder()
                 .workId(work.getId())
                 .category(category.getName())
@@ -288,7 +298,8 @@ public class WorkServiceImpl implements WorkService{
                 .contents(work.getContent())
                 //.casts(characterByWork)
                 .versions(version)
-                .build();*/
+                .youtubes(youtubeList)
+                .build();
     }
 
     @Override
