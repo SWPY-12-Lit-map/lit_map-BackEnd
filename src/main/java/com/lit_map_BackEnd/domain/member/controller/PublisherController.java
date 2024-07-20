@@ -5,14 +5,18 @@ import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
 import com.lit_map_BackEnd.domain.member.dto.MemberDto;
 import com.lit_map_BackEnd.domain.member.dto.PublisherDto;
 import com.lit_map_BackEnd.domain.member.dto.PublisherMemberRequestDto;
+import com.lit_map_BackEnd.domain.member.dto.PublisherUpdateDto;
+import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.entity.Publisher;
 import com.lit_map_BackEnd.domain.member.service.MemberPublisherService;
 import com.lit_map_BackEnd.domain.member.service.PublisherService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -63,31 +67,25 @@ public class PublisherController {
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
-//    @DeleteMapping("/request-withdrawal-specific")
-//    @Operation(summary = "출판사 탈퇴 요청 (특정 회원)", description = "출판사 탈퇴 요청을 처리하고 특정 회원에게만 탈퇴 메일을 전송합니다.")
-//    public ResponseEntity<SuccessResponse<String>> requestWithdrawalSpecific(@RequestParam Long publisherId, @RequestParam Long memberId) {
-//        publisherService.requestWithdrawalSpecific(publisherId, memberId);
-//        SuccessResponse<String> res = SuccessResponse.<String>builder()
-//                .result("탈퇴 요청이 접수되었습니다. 관리자의 승인이 필요합니다.")
-//                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
-//                .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
-//                .build();
-//        return new ResponseEntity<>(res, HttpStatus.OK);
-//    }
+    @PutMapping("/update")
+    @Operation(summary = "출판사 직원 마이페이지 수정", description = "출판사 직원의 마이페이지 정보를 수정합니다.")
+    public ResponseEntity<SuccessResponse<Member>> updatePublisher(@AuthenticationPrincipal User user, @RequestBody @Validated PublisherUpdateDto publisherUpdateDto) {
+        Member updatedPublisher = memberPublisherService.updatePublisherMember(user.getUsername(), publisherUpdateDto);
+        SuccessResponse<Member> res = SuccessResponse.<Member>builder()
+                .result(updatedPublisher)
+                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
+                .build();
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
 
-//    @PostMapping("/approve-withdrawal")
-//    @Operation(summary = "출판사 탈퇴 승인", description = "관리자가 출판사 탈퇴를 승인합니다.")
-//    public ResponseEntity<SuccessResponse<String>> approveWithdrawal(@RequestParam Long publisherId, @RequestParam(required = false) Long memberId) {
-//        if (memberId != null) {
-//            publisherService.approveWithdrawalSpecific(publisherId, memberId);
-//        } else {
-//            publisherService.approveWithdrawalAll(publisherId);
-//        }
-//        SuccessResponse<String> res = SuccessResponse.<String>builder()
-//                .result("탈퇴 요청이 승인되었습니다.")
-//                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
-//                .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
-//                .build();
-//        return new ResponseEntity<>(res, HttpStatus.OK);
-//    }
 }
+
+/**
+ 일반 인증키
+ (Encoding)
+ %2BmsntrcPO90hTQeYGDTU2JwE3JFHhrN%2BO5og1JMt%2BkzGgctd8VpJB7uaYtwIQg%2FYyZxNwt8iZawKy4a3IZISVQ%3D%3D
+ 일반 인증키
+ (Decoding)
+ +msntrcPO90hTQeYGDTU2JwE3JFHhrN+O5og1JMt+kzGgctd8VpJB7uaYtwIQg/YyZxNwt8iZawKy4a3IZISVQ==
+ */

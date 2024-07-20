@@ -4,6 +4,7 @@ import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
 import com.lit_map_BackEnd.common.exception.code.ErrorCode;
 import com.lit_map_BackEnd.domain.category.repository.CategoryRepository;
 import com.lit_map_BackEnd.domain.member.entity.Member;
+import com.lit_map_BackEnd.domain.member.entity.MemberRoleStatus;
 import com.lit_map_BackEnd.domain.member.entity.Publisher;
 import com.lit_map_BackEnd.domain.member.repository.MemberRepository;
 import com.lit_map_BackEnd.domain.member.repository.PublisherRepository;
@@ -20,8 +21,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PublisherServiceImpl implements PublisherService {
 
-    private final PublisherRepository publisherRepository;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final MemberRepository memberRepository;
     private final EmailService emailService;
 
     @Value("${external.api.publisher.url}")
@@ -29,63 +29,26 @@ public class PublisherServiceImpl implements PublisherService {
 
     @Override
     @Transactional
-    public void requestWithdrawalAll(Long publisherId) {
-        approveWithdrawalAll(publisherId);
+    public void requestPublisherWithdrawal(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
+
+        member.setRoleStatus(MemberRoleStatus.WITHDRAWN_MEMBER);
+        memberRepository.save(member);
     }
 
     @Override
     @Transactional
-    public void requestWithdrawalSpecific(Long publisherId, Long memberId) {
-        approveWithdrawalSpecific(publisherId, memberId);
-    }
+    public void approvePublisherWithdrawal(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
-    @Override
-    @Transactional
-    public void approveWithdrawalAll(Long publisherId) {
-        Optional<Publisher> publisherOptional = publisherRepository.findById(publisherId);
-        if (publisherOptional.isPresent()) {
-            Publisher publisher = publisherOptional.get();
-            publisherRepository.delete(publisher);
+        member.setRoleStatus(MemberRoleStatus.UNKNOWN_MEMBER);
+        memberRepository.save(member);
 
-            for (Member member : publisher.getMemberList()) {
-                String email = member.getLitmapEmail();
-                String subject = "탈퇴 승인 완료";
-                String text = "회원님의 탈퇴 요청이 승인되었습니다.";
-                emailService.sendEmail(email, subject, text);
-            }
-        } else {
-            throw new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND);
-        }
-    }
-
-    @Override
-    @Transactional
-    public void approveWithdrawalSpecific(Long publisherId, Long memberId) {
-        Optional<Publisher> publisherOptional = publisherRepository.findById(publisherId);
-        if (publisherOptional.isPresent()) {
-            Publisher publisher = publisherOptional.get();
-            Member requestedMember = null;
-
-            for (Member member : publisher.getMemberList()) {
-                if (member.getId().equals(memberId)) {
-                    requestedMember = member;
-                    break;
-                }
-            }
-
-            if (requestedMember != null) {
-                String email = requestedMember.getLitmapEmail();
-                String subject = "탈퇴 승인 완료";
-                String text = "회원님의 탈퇴 요청이 승인되었습니다.";
-                emailService.sendEmail(email, subject, text);
-            } else {
-                throw new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND);
-            }
-
-            publisherRepository.delete(publisher);
-        } else {
-            throw new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND);
-        }
+        String subject = "탈퇴가 승인되었습니다.";
+        String content = "회원님의 탈퇴 요청이 승인되었습니다. 그동안 이용해주셔서 감사합니다.";
+        emailService.sendEmail(member.getLitmapEmail(), subject, content);
     }
 }
 

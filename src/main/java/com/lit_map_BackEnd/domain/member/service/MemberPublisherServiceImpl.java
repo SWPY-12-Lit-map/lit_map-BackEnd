@@ -4,12 +4,10 @@ import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
 import com.lit_map_BackEnd.common.exception.code.ErrorCode;
 import com.lit_map_BackEnd.domain.category.entity.Category;
 import com.lit_map_BackEnd.domain.category.repository.CategoryRepository;
-import com.lit_map_BackEnd.domain.member.dto.MailDto;
-import com.lit_map_BackEnd.domain.member.dto.MemberDto;
-import com.lit_map_BackEnd.domain.member.dto.PublisherDto;
+import com.lit_map_BackEnd.domain.member.dto.*;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.entity.Publisher;
-import com.lit_map_BackEnd.domain.member.entity.Role;
+import com.lit_map_BackEnd.domain.member.entity.MemberRoleStatus;
 import com.lit_map_BackEnd.domain.member.repository.MemberRepository;
 import com.lit_map_BackEnd.domain.member.repository.PublisherRepository;
 import jakarta.servlet.http.HttpSession;
@@ -103,7 +101,7 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
                 .myMessage(memberDto.getMyMessage())
                 .userImage(memberDto.getUserImage())
                 .urlLink(memberDto.getUrlLink())
-                .role(memberDto.getRole() != null ? memberDto.getRole() : Role.PENDING_MEMBER) // 기본값 설정
+                .memberRoleStatus(memberDto.getMemberRoleStatus() != null ? memberDto.getMemberRoleStatus() : MemberRoleStatus.PENDING_MEMBER) // 기본값 설정
                 //.role(Role.PENDING_MEMBER) // 기본값 설정
                 .category(category) // Category 설정
                 .build();
@@ -226,13 +224,6 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
                     .publisherPhoneNumber(publisherDto.getPublisherPhoneNumber())
                     .publisherCeo(publisherDto.getPublisherCeo())
                     .build();
-//            List<Category> categories = publisherDto.getCategoryNames().stream()
-//                    .map(categoryName -> Category.builder()
-//                            .name(categoryName)
-//                            .publisher(publisher)
-//                            .build())
-//                    .toList();
-//            publisher.getCategoryList().addAll(categories);
             return publisher;
         }
         throw new BusinessExceptionHandler(ErrorCode.PUBLISHER_NOT_FOUND);
@@ -277,5 +268,61 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         }
     } // 출판사 이메일 찾기 : 사업자번호, 출판사이름, 회원이름 사용 / 모든 결과를 검사하여 필요한 경우 여러 결과 중 하나를 반환
 
+    public Member updateMember(String litmapEmail, MemberUpdateDto memberUpdateDto) {
+        Member member = memberRepository.findByLitmapEmail(litmapEmail)
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
+
+        updateMemberFields(member, memberUpdateDto);
+
+        return memberRepository.save(member);
+    } // 1인 작가 마이페이지 수정
+
+    public Member updatePublisherMember(String litmapEmail, PublisherUpdateDto publisherUpdateDto) {
+        Member member = memberRepository.findByLitmapEmail(litmapEmail)
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
+
+        Publisher publisher = member.getPublisher();
+        if (publisher == null) {
+            throw new BusinessExceptionHandler(ErrorCode.PUBLISHER_NOT_FOUND);
+        }
+
+        updatePublisherFields(publisher, publisherUpdateDto);
+        updateMemberFields(member, publisherUpdateDto);
+
+        return memberRepository.save(member);
+    } // 출판사 직원 마이페이지 수정
+
+    private void updateMemberFields(Member member, MemberUpdateDto memberUpdateDto) {
+        if (memberUpdateDto.getWorkEmail() != null) {
+            member.setWorkEmail(memberUpdateDto.getWorkEmail());
+        }
+        if (memberUpdateDto.getName() != null) {
+            member.setName(memberUpdateDto.getName());
+        }
+        if (memberUpdateDto.getPassword() != null && memberUpdateDto.getConfirmPassword() != null && memberUpdateDto.getPassword().equals(memberUpdateDto.getConfirmPassword())) {
+            member.setPassword(passwordEncoder.encode(memberUpdateDto.getPassword()));
+        }
+        if (memberUpdateDto.getNickname() != null) {
+            member.setNickname(memberUpdateDto.getNickname());
+        }
+        if (memberUpdateDto.getUserImage() != null) {
+            member.setUserImage(memberUpdateDto.getUserImage());
+        }
+        if (memberUpdateDto.getMyMessage() != null) {
+            member.setMyMessage(memberUpdateDto.getMyMessage());
+        }
+    }
+
+    private void updatePublisherFields(Publisher publisher, PublisherUpdateDto publisherUpdateDto) {
+        if (publisherUpdateDto.getPublisherAddress() != null) {
+            publisher.setPublisherAddress(publisherUpdateDto.getPublisherAddress());
+        }
+        if (publisherUpdateDto.getPublisherPhoneNumber() != null) {
+            publisher.setPublisherPhoneNumber(publisherUpdateDto.getPublisherPhoneNumber());
+        }
+        if (publisherUpdateDto.getPublisherCeo() != null) {
+            publisher.setPublisherCeo(publisherUpdateDto.getPublisherCeo());
+        }
+    }
 
 }

@@ -21,10 +21,15 @@ public class Publisher {
     private Long id;
 
     private Long publisherNumber; // 사업자 번호
-
     private String publisherName; // 출판사 이름
+
+    @Setter
     private String publisherAddress; // 출판사 주소
+
+    @Setter
     private String publisherPhoneNumber; // 출판사 연락처
+
+    @Setter
     private String publisherCeo; // 대표자 이름
 
     @Setter
@@ -34,10 +39,6 @@ public class Publisher {
     @ToString.Exclude
     @Builder.Default
     private List<Member> memberList = new ArrayList<>();
-
-//    @OneToMany(mappedBy = "publisher", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @Builder.Default
-//    private List<Category> categoryList = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "category_id")

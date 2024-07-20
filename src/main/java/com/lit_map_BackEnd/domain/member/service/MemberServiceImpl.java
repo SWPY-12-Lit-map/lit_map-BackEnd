@@ -4,8 +4,10 @@ import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
 import com.lit_map_BackEnd.common.exception.code.ErrorCode;
 import com.lit_map_BackEnd.domain.member.dto.MailDto;
 import com.lit_map_BackEnd.domain.member.entity.Member;
+import com.lit_map_BackEnd.domain.member.entity.MemberRoleStatus;
 import com.lit_map_BackEnd.domain.member.repository.MemberRepository;
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,40 +23,27 @@ public class MemberServiceImpl implements MemberService{
     private final EmailService emailService;
 
     @Override
-    public void requestWithdrawal(Long memberId) {
-        Optional<Member> memberOptional = memberRepository.findById(memberId);
-        if (memberOptional.isPresent()) {
-            Member member = memberOptional.get();
-            // 탈퇴 요청 플래그 설정
-            member.setWithdrawalRequested(true);
-            memberRepository.save(member);
+    @Transactional
+    public void requestMemberWithdrawal(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
-            // 관리자에게 알림 이메일 전송
-            String subject = "탈퇴 요청 알림";
-            String text = "회원 " + member.getLitmapEmail() + "님이 탈퇴 요청을 했습니다.";
-            // 관리자 이메일로 변경 필요
-            emailService.sendEmail("sooho7767@naver.com", subject, text);
-        } else {
-            throw new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND);
-        }
+        member.setRoleStatus(MemberRoleStatus.WITHDRAWN_MEMBER);
+        memberRepository.save(member);
     }
 
     @Override
-    public void approveWithdrawal(Long memberId) {
-        // 탈퇴 승인 로직
-        Optional<Member> memberOptional = memberRepository.findById(memberId);
-        if (memberOptional.isPresent()) {
-            Member member = memberOptional.get();
-            memberRepository.delete(member);
+    @Transactional
+    public void approveMemberWithdrawal(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
-            // 탈퇴 승인 이메일 전송
-            String email = member.getLitmapEmail();
-            String subject = "탈퇴 승인 완료";
-            String text = "회원님의 탈퇴 요청이 승인되었습니다.";
-            emailService.sendEmail(email, subject, text);
-        } else {
-            throw new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND);
-        }
+        member.setRoleStatus(MemberRoleStatus.UNKNOWN_MEMBER);
+        memberRepository.save(member);
+
+        String subject = "탈퇴가 승인되었습니다.";
+        String content = "회원님의 탈퇴 요청이 승인되었습니다. 그동안 이용해주셔서 감사합니다.";
+        emailService.sendEmail(member.getLitmapEmail(), subject, content);
     }
 
 }

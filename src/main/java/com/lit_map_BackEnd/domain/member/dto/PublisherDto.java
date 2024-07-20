@@ -47,5 +47,4 @@ public class PublisherDto {
     private String myMessage;
 
     private String userImage;
-    //private String workEmail;
 }

@@ -3,6 +3,7 @@ package com.lit_map_BackEnd.domain.member.controller;
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
 import com.lit_map_BackEnd.domain.member.dto.MemberDto;
+import com.lit_map_BackEnd.domain.member.dto.MemberUpdateDto;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.service.MemberPublisherService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +11,8 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -73,27 +76,16 @@ public class MemberController {
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
-//    @DeleteMapping("/request-withdrawal")
-//    @Operation(summary = "탈퇴 요청", description = "회원 탈퇴 요청을 처리합니다.")
-//    public ResponseEntity<SuccessResponse<String>> requestWithdrawal(@RequestParam Long memberId) {
-//        memberPublisherService.requestWithdrawal(memberId, null);
-//        SuccessResponse<String> res = SuccessResponse.<String>builder()
-//                .result("탈퇴 요청이 접수되었습니다. 관리자의 승인이 필요합니다.")
-//                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
-//                .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
-//                .build();
-//        return new ResponseEntity<>(res, HttpStatus.OK);
-//    }
-//
-//    @PostMapping("/approve-withdrawal")
-//    @Operation(summary = "탈퇴 승인", description = "관리자가 회원 탈퇴를 승인합니다.")
-//    public ResponseEntity<SuccessResponse<String>> approveWithdrawal(@RequestParam Long memberId) {
-//        memberPublisherService.approveWithdrawal(null, memberId);
-//        SuccessResponse<String> res = SuccessResponse.<String>builder()
-//                .result("탈퇴 요청이 승인되었습니다.")
-//                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
-//                .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
-//                .build();
-//        return new ResponseEntity<>(res, HttpStatus.OK);
-//    }
+    @PutMapping("/update")
+    @Operation(summary = "1인작가 마이페이지 수정", description = "1인작가의 마이페이지 정보를 수정합니다.")
+    public ResponseEntity<SuccessResponse<Member>> updateMember(@AuthenticationPrincipal User user, @RequestBody @Validated MemberUpdateDto memberUpdateDto) {
+        Member updatedMember = memberPublisherService.updateMember(user.getUsername(), memberUpdateDto);
+        SuccessResponse<Member> res = SuccessResponse.<Member>builder()
+                .result(updatedMember)
+                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
+                .build();
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
 }

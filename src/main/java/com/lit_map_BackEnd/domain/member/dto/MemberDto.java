@@ -1,11 +1,9 @@
 package com.lit_map_BackEnd.domain.member.dto;
 
-import com.lit_map_BackEnd.domain.member.entity.Role;
+import com.lit_map_BackEnd.domain.member.entity.MemberRoleStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
-
-import java.util.List;
 
 @Data
 @Builder
@@ -41,6 +39,6 @@ public class MemberDto {
 
     private Long categoryId;
 
-    @Schema(defaultValue = "PENDING_MEMBER")
-    private Role role = Role.PENDING_MEMBER; // 기본값을 승인 대기 중인 회원으로 설정
+    private MemberRoleStatus memberRoleStatus;
+
 }

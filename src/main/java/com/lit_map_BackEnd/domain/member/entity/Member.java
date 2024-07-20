@@ -5,8 +5,12 @@ import com.lit_map_BackEnd.domain.work.entity.Work;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Builder
@@ -35,23 +39,17 @@ public class Member {
 
     @Column(length = 8, nullable = false)
     private String nickname;
-
     private String myMessage;
-
     private String userImage; // 사용자 이미지 등록, 옵션임 - 등록해도 되고 안 해도 됨
-
     private String urlLink; // 판매 링크 사이트
 
-    @Setter
-    private boolean withdrawalRequested; // 탈퇴 요청 여부
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singleton(new SimpleGrantedAuthority(memberRoleStatus.name()));
+    }
 
-    @Schema(defaultValue = "PENDING_MEMBER")
-    private Role role;
+    @Enumerated(EnumType.STRING)
+    private MemberRoleStatus memberRoleStatus;
 
-    // 회원 한 명당 카테고리 여러 개 선택
-//    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @Builder.Default
-//    private List<Category> categoryList = new ArrayList<>();
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;

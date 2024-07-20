@@ -1,8 +1,6 @@
 package com.lit_map_BackEnd.domain.member.service;
 
-import com.lit_map_BackEnd.domain.member.dto.MailDto;
-import com.lit_map_BackEnd.domain.member.dto.MemberDto;
-import com.lit_map_BackEnd.domain.member.dto.PublisherDto;
+import com.lit_map_BackEnd.domain.member.dto.*;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.entity.Publisher;
 
@@ -22,5 +20,8 @@ public interface MemberPublisherService {
     String findMemberEmail(String workEmail, String name); // 1인작가 이메일 찾기
     String findPublisherEmail(Long publisherNumber, String publisherName, String name); // 출판사 이메일 찾기
     // 출판사에서 ceo가 아닌 그냥 이름
+
+    Member updateMember(String litmapEmail, MemberUpdateDto memberUpdateDto); // 1인작가 정보 수정
+    Member updatePublisherMember(String litmapEmail, PublisherUpdateDto publisherUpdateDto); // 출판사 직원 정보 수정
 
 }
