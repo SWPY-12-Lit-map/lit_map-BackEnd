@@ -5,6 +5,8 @@ import com.lit_map_BackEnd.domain.category.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService{
@@ -24,4 +26,11 @@ public class CategoryServiceImpl implements CategoryService{
         }
         return category;
     }
+
+    @Override
+    public List<Category> getCategories() {
+        return categoryRepository.findAll();
+    }
+
+
 }

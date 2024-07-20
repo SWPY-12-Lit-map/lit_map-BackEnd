@@ -18,6 +18,7 @@ public enum ErrorCode {
     WORK_NOT_FOUND(500, "해당 작품은 존재하지 않습니다"),
     VERSION_NOT_FOUND(500, "해당 버전은 존재하지 않습니다"),
     CATEGORY_NOT_FOUND(500, "해당 카테고리는 존재하지 않습니다"),
+    GENRE_NOT_FOUND(500, "해당 장르는 존재하지 않습니다"),
     JSON_PARSING_ERROR(500, "JSON 데이터에 문제가 있습니다"),
     WRITER_WRONG(500, "기존의 작성자가 아닙니다"),
     NOT_CONFIRM_VERSION(500, "아직 승인이 난 버전이 아닙니다"),
@@ -35,7 +36,6 @@ public enum ErrorCode {
     DUPLICATE_PUBLISHER(400, "이미 존재하는 출판사입니다."),
     PUBLISHER_NOT_FOUND(404,"출판사를 찾을 수 없습니다."),
     EMAIL_SEND_FAILED(500,"이메일로 임시비밀번호 발송에 실패했습니다."),  // 수정된 부분
-
 
     // SQL 문제 발생
     INSERT_ERROR(500, "데이터 삽입 문제 발생"),
