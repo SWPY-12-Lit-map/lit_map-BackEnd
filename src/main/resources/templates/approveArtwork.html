@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Approve Artwork</title>
+</head>
+<body>
+<h1>Approve Artwork</h1>
+<table>
+    <tr>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Actions</th>
+    </tr>
+    <tr th:each="artwork : ${artworks}">
+        <td th:text="${artwork.title}"></td>
+        <td th:text="${artwork.description}"></td>
+        <td>
+            <form th:action="@{/admin/approveArtwork}" method="post">
+                <input type="hidden" name="artworkId" th:value="${artwork.id}">
+                <button type="submit">Approve</button>
+            </form>
+            <form th:action="@{/admin/rejectArtwork}" method="post">
+                <input type="hidden" name="artworkId" th:value="${artwork.id}">
+                <button type="submit">Reject</button>
+            </form>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

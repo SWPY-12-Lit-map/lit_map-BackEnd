@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Submit Artwork</title>
+</head>
+<body>
+<h1>Submit Artwork</h1>
+<form th:action="@{/user/submitArtwork}" method="post">
+    <div>
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title">
+    </div>
+    <div>
+        <label for="description">Description:</label>
+        <textarea id="description" name="description"></textarea>
+    </div>
+    <div>
+        <button type="submit">Submit</button>
+    </div>
+</form>
+</body>
+</html>

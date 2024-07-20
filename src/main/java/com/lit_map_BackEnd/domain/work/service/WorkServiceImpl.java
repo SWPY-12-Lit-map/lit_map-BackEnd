@@ -17,8 +17,12 @@ import com.lit_map_BackEnd.domain.work.dto.WorkRequestDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
 import com.lit_map_BackEnd.domain.work.entity.*;
 import com.lit_map_BackEnd.domain.work.repository.*;
+import com.lit_map_BackEnd.domain.youtube.entity.Youtube;
+//import com.lit_map_BackEnd.domain.youtube.service.YoutubeService;
+import com.lit_map_BackEnd.domain.youtube.service.YoutubeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -41,6 +45,9 @@ public class WorkServiceImpl implements WorkService{
     private final AuthorService authorService;
     private final CastService castService;
     private final VersionService versionService;
+
+    @Autowired
+    private YoutubeService youtubeService;
 
 
     /**
@@ -185,6 +192,10 @@ public class WorkServiceImpl implements WorkService{
         return 1;
     }
 
+
+
+
+
     @Override
     public WorkResponseDto getWork(Long workId) {
         // 이미지, 작성자, 출판사, 제목, 설명 겸 작품 ID 검사
@@ -230,6 +241,42 @@ public class WorkServiceImpl implements WorkService{
         // 이는 초기 로딩 속도와 네트워크 효율성을 고려하여 제작
         VersionResponseDto version = versionService.findVersionByWorkAndNumber(work.getId(), 0.1);
 
+        // Youtube 정보 조회
+        String workTitle = work.getTitle(); // 작품의 제목 가져오기
+        Youtube youtubeInfo = null;
+        if (workTitle != null && !workTitle.isEmpty()) {
+            youtubeInfo = youtubeService.getYoutubeInfo
+
+                    (workTitle); //예외처리가 안됨
+        } else {
+            throw new IllegalArgumentException("작품 제목이 null이거나 비어 있습니다.");
+        }
+
+        // WorkResponseDto 생성
+        WorkResponseDto.WorkResponseDtoBuilder builder = WorkResponseDto.builder()
+                .workId(work.getId())
+                .category(category.getName())
+                .genre(workGenresList)
+                .author(workAuthorsList)
+                .imageUrl(work.getImageUrl())
+                .memberName(memberName)
+                .title(work.getTitle())
+                .contents(work.getContent())
+                .versions(version);
+
+// Youtube 정보가 있을 경우에만 추가
+        if (youtubeInfo != null) {
+            builder.youtube(YoutubeDto.builder()
+                    .title(youtubeInfo.getTitle())
+                    .videoUrl(youtubeInfo.getVideoUrl())
+                    .thumbnailUrl(youtubeInfo.getThumbnailUrl())
+                    .viewCount(youtubeInfo.getViewCount())
+                    .uploadDate(youtubeInfo.getUploadDate())
+                    .build());
+        }
+
+        return builder.build();
+/*
         return WorkResponseDto.builder()
                 .workId(work.getId())
                 .category(category.getName())
@@ -241,7 +288,7 @@ public class WorkServiceImpl implements WorkService{
                 .contents(work.getContent())
                 //.casts(characterByWork)
                 .versions(version)
-                .build();
+                .build();*/
     }
 
     @Override
