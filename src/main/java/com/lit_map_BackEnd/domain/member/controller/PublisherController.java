@@ -79,13 +79,28 @@ public class PublisherController {
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
-}
+    @PostMapping("/{memberId}/request-withdrawal")
+    @Operation(summary = "출판사 탈퇴 요청", description = "출판사 회원의 탈퇴를 요청합니다.")
+    public ResponseEntity<SuccessResponse<String>> requestPublisherWithdrawal(@PathVariable Long memberId) {
+        publisherService.requestPublisherWithdrawal(memberId);
+        SuccessResponse<String> res = SuccessResponse.<String>builder()
+                .result("출판사 탈퇴 요청이 완료되었습니다.")
+                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
+                .build();
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
 
-/**
- 일반 인증키
- (Encoding)
- %2BmsntrcPO90hTQeYGDTU2JwE3JFHhrN%2BO5og1JMt%2BkzGgctd8VpJB7uaYtwIQg%2FYyZxNwt8iZawKy4a3IZISVQ%3D%3D
- 일반 인증키
- (Decoding)
- +msntrcPO90hTQeYGDTU2JwE3JFHhrN+O5og1JMt+kzGgctd8VpJB7uaYtwIQg/YyZxNwt8iZawKy4a3IZISVQ==
- */
+    @PostMapping("/{memberId}/approve-withdrawal")
+    @Operation(summary = "출판사 탈퇴 승인", description = "출판사 회원의 탈퇴를 승인합니다.")
+    public ResponseEntity<SuccessResponse<String>> approvePublisherWithdrawal(@PathVariable Long memberId) {
+        publisherService.approvePublisherWithdrawal(memberId);
+        SuccessResponse<String> res = SuccessResponse.<String>builder()
+                .result("출판사 탈퇴가 승인되었습니다.")
+                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
+                .build();
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+}

@@ -6,6 +6,7 @@ import com.lit_map_BackEnd.domain.member.dto.MemberDto;
 import com.lit_map_BackEnd.domain.member.dto.MemberUpdateDto;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.service.MemberPublisherService;
+import com.lit_map_BackEnd.domain.member.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
 
     private final MemberPublisherService memberPublisherService;
+    private final MemberService memberService;
     private final HttpSession session;
 
     @PostMapping("/register")
@@ -82,6 +84,30 @@ public class MemberController {
         Member updatedMember = memberPublisherService.updateMember(user.getUsername(), memberUpdateDto);
         SuccessResponse<Member> res = SuccessResponse.<Member>builder()
                 .result(updatedMember)
+                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
+                .build();
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+    @PostMapping("/{memberId}/request-withdrawal")
+    @Operation(summary = "회원 탈퇴 요청", description = "회원의 탈퇴를 요청합니다.")
+    public ResponseEntity<SuccessResponse<String>> requestMemberWithdrawal(@PathVariable Long memberId) {
+        memberService.requestMemberWithdrawal(memberId);
+        SuccessResponse<String> res = SuccessResponse.<String>builder()
+                .result("회원 탈퇴 요청이 완료되었습니다.")
+                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
+                .build();
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+    @PostMapping("/{memberId}/approve-withdrawal")
+    @Operation(summary = "회원 탈퇴 승인", description = "회원의 탈퇴를 승인합니다.")
+    public ResponseEntity<SuccessResponse<String>> approveMemberWithdrawal(@PathVariable Long memberId) {
+        memberService.approveMemberWithdrawal(memberId);
+        SuccessResponse<String> res = SuccessResponse.<String>builder()
+                .result("회원 탈퇴가 승인되었습니다.")
                 .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
                 .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
                 .build();

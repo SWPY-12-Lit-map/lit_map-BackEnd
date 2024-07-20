@@ -63,12 +63,17 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         if (containsProhibitedWords(memberDto.getNickname())) {
             throw new BusinessExceptionHandler(ErrorCode.PROHIBITED_NICKNAME);
         } // 닉네임 유효성 검사 -> 금지어 사용시 가입 불가
+
+        if (memberRepository.findByNickname(memberDto.getNickname()).isPresent()) {
+            throw new BusinessExceptionHandler(ErrorCode.PROHIBITED_NICKNAME);
+        } // 닉네임 중복 확인
+
     }
 
     private boolean isValidPassword(String password) {
         String regex = "^(?=.*[a-z])(?=.*\\d)[a-z\\d]{8,20}$";
         return Pattern.compile(regex).matcher(password).matches();
-    } // 비밀번호 유효성 메서드 -> 영어+특수기호+숫자 섞어서 사용
+    } // 비밀번호 유효성 메서드 -> 영어+숫자 섞어서 사용
 
     private boolean containsProhibitedWords(String nickname) {
         String[] prohibitedWords = {"admin", "관리자", "system"};
@@ -98,6 +103,10 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
                 .memberRoleStatus(memberDto.getMemberRoleStatus() != null ? memberDto.getMemberRoleStatus() : MemberRoleStatus.PENDING_MEMBER) // 기본값 설정
                 //.role(Role.PENDING_MEMBER) // 기본값 설정
                 .build();
+
+        if (member.getWithdrawalRequested() == null) {
+            member.setWithdrawalRequested(false);  // 기본값 설정
+        }
 
         return memberRepository.save(member);
     } // 1인작가 회원가입
@@ -214,11 +223,6 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         }
         throw new BusinessExceptionHandler(ErrorCode.PUBLISHER_NOT_FOUND);
     }// 공공 API로 출판사 정보 가져오기 + 사업자확인도 필요
-    /**
-     * 출판사정보 api, 사업자번호 api 2개를 받아와야 하는데.. 출판사정보는 파일로 받아서 바로 DB에 저장해도 되지않을까???
-     * -> 출판사파일에는 출판사이름, 대표자, 주소(시구군명) 만 있음
-     * -> 추가로 출판사연락처, 출판사 나머지 주소는 별도 입력 필요
-     */
 
     @Override
     public String findMemberEmail(String workEmail, String name) {

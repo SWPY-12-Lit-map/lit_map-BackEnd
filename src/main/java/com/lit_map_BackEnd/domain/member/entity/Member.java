@@ -50,6 +50,10 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberRoleStatus memberRoleStatus;
 
+    @Column(nullable = false)
+    private Boolean withdrawalRequested = false; // 탈퇴 요청 여부, 기본값 false
+
+
     // 회원 여러 명 : 출판사 한 개
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_member_publisher_id")
