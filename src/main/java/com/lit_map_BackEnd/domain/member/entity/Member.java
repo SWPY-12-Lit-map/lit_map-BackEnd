@@ -64,6 +64,17 @@ public class Member {
     @Builder.Default
     private List<Work> works = new ArrayList<>();
 
+    // 역할 상태를 설정하는 메서드
+    public void setRoleStatus(MemberRoleStatus roleStatus) {
+        this.memberRoleStatus = roleStatus;
+    }
+
+    // 역할 상태를 반환하는 메서드
+    public MemberRoleStatus getRoleStatus() {
+        return memberRoleStatus;
+    }
+
+
     // 어드민 auth
     // create_data
     // update_data
