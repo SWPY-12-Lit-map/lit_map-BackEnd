@@ -33,7 +33,7 @@ public class PublisherServiceImpl implements PublisherService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
-        member.setRoleStatus(MemberRoleStatus.WITHDRAWN_MEMBER);
+        member.setMemberRoleStatus(MemberRoleStatus.WITHDRAWN_MEMBER);
         memberRepository.save(member);
     }
 
@@ -43,11 +43,15 @@ public class PublisherServiceImpl implements PublisherService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
-        member.setRoleStatus(MemberRoleStatus.UNKNOWN_MEMBER);
+        member.setMemberRoleStatus(MemberRoleStatus.UNKNOWN_MEMBER);
         memberRepository.save(member);
 
-        String subject = "탈퇴가 승인되었습니다.";
-        String content = "회원님의 탈퇴 요청이 승인되었습니다. 그동안 이용해주셔서 감사합니다.";
+        String subject = "회원 탈퇴가 승인되었습니다.";
+        String content = "<h1>회원님의 탈퇴 요청이 승인되었습니다.</h1>"
+                + "<p>그동안 이용해주셔서 감사합니다.</p>"
+                + "<p>더 나은 서비스를 제공하기 위해 노력하겠습니다.</p>"
+                + "<p>감사합니다.</p>";
+
         emailService.sendEmail(member.getLitmapEmail(), subject, content);
     }
 }

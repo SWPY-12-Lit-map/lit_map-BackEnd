@@ -33,7 +33,6 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final HttpSession session;
-    private final CategoryRepository categoryRepository;
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Value("${external.api.publisher.url}")
