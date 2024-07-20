@@ -37,8 +37,6 @@ public class MemberDto {
     @NotBlank(message = "판매사이트를 입력해주세요.")
     private String urlLink;
 
-    private Long categoryId;
-
     private MemberRoleStatus memberRoleStatus;
 
 }

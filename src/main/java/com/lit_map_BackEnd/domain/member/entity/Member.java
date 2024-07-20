@@ -50,10 +50,6 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberRoleStatus memberRoleStatus;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    private Category category;
-
     // 회원 여러 명 : 출판사 한 개
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "publisher_id")

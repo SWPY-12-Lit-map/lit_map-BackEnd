@@ -86,12 +86,6 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
     public Member saveMember(MemberDto memberDto) {
         validateMemberDto(memberDto);
 
-        Optional<Category> optionalCategory = categoryRepository.findById(memberDto.getCategoryId());
-        if (!optionalCategory.isPresent()) {
-            throw new BusinessExceptionHandler(ErrorCode.CATEGORY_NOT_FOUND);
-        }
-        Category category = optionalCategory.get();
-
         Member member = Member.builder()
                 .litmapEmail(memberDto.getLitmapEmail())
                 .workEmail(memberDto.getWorkEmail())
@@ -103,7 +97,6 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
                 .urlLink(memberDto.getUrlLink())
                 .memberRoleStatus(memberDto.getMemberRoleStatus() != null ? memberDto.getMemberRoleStatus() : MemberRoleStatus.PENDING_MEMBER) // 기본값 설정
                 //.role(Role.PENDING_MEMBER) // 기본값 설정
-                .category(category) // Category 설정
                 .build();
 
         return memberRepository.save(member);
@@ -120,19 +113,12 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
             throw new BusinessExceptionHandler(ErrorCode.DUPLICATE_EMAIL);
         }
 
-        Optional<Category> optionalCategory = categoryRepository.findById(publisherDto.getCategoryId());
-        if (!optionalCategory.isPresent()) {
-            throw new BusinessExceptionHandler(ErrorCode.CATEGORY_NOT_FOUND);
-        }
-        Category category = optionalCategory.get();
-
         Publisher publisher = Publisher.builder()
                 .publisherNumber(publisherDto.getPublisherNumber())
                 .publisherName(publisherDto.getPublisherName())
                 .publisherAddress(publisherDto.getPublisherAddress())
                 .publisherPhoneNumber(publisherDto.getPublisherPhoneNumber())
                 .publisherCeo(publisherDto.getPublisherCeo())
-                .category(category) // Category 설정
                 .build();
 
         Member member = Member.builder()
