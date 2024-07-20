@@ -82,6 +82,6 @@ public class Work extends BaseTimeEntity {
     }
 
     @ManyToOne
-    @JoinColumn(name = "publisher_id")
+    @JoinColumn(name = "fk_work_publisher_id")
     private Publisher publisher;
 }
