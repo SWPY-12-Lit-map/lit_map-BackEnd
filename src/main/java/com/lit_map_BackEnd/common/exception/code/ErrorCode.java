@@ -20,22 +20,6 @@ public enum ErrorCode {
     CATEGORY_NOT_FOUND(500, "해당 카테고리는 존재하지 않습니다"),
     JSON_PARSING_ERROR(500, "JSON 데이터에 문제가 있습니다"),
     WRITER_WRONG(500, "기존의 작성자가 아닙니다"),
-    NOT_CONFIRM_VERSION(500, "아직 승인이 난 버전이 아닙니다"),
-    FILE_CONVERT_ERROR(500, "파일 변환에 실패하였습니다"),
-    INVALID_FILE_FORMAT(500, "해당 파일 타입은 지원하지 않습니다"),
-    ENCODING_ERROR(500, "지원하지 않는 문자 인코딩입니다"),
-
-    DUPLICATE_EMAIL(500,"이미 존재하는 이메일입니다."),
-    DUPLICATE_WORK_EMAIL(500,"이미 존재하는 업무용 이메일입니다."),
-    DUPLICATE_EMAILS(500,"litmap 이메일과 업무용 이메일이 동일할 수 없습니다."),
-    PASSWORDS_DO_NOT_MATCH(500,"비밀번호가 일치하지 않습니다."),
-    INVALID_PASSWORD_FORMAT(500,"비밀번호 형식이 올바르지 않습니다."),
-    PROHIBITED_NICKNAME(500,"허용되지 않는 닉네임입니다."),
-    INVALID_USER_INFO(500,"사용자 정보가 일치하지 않습니다."),
-    DUPLICATE_PUBLISHER(400, "이미 존재하는 출판사입니다."),
-    PUBLISHER_NOT_FOUND(404,"출판사를 찾을 수 없습니다."),
-    EMAIL_SEND_FAILED(500,"이메일로 임시비밀번호 발송에 실패했습니다."),  // 수정된 부분
-
 
     // SQL 문제 발생
     INSERT_ERROR(500, "데이터 삽입 문제 발생"),
