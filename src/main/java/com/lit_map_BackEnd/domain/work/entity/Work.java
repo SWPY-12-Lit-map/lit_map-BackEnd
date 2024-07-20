@@ -45,6 +45,8 @@ public class Work extends BaseTimeEntity {
     private Member member;
 
     private String publisherName;
+
+    // 승인 완료시 업데이트
     private LocalDateTime publisherDate;
 
     private String imageUrl;

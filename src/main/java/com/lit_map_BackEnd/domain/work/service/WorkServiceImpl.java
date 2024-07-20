@@ -52,7 +52,7 @@ public class WorkServiceImpl implements WorkService{
 
     @Override
     @Transactional
-    public int saveWork(@Valid WorkRequestDto workRequestDto, int i) {
+    public int saveWork(@Valid WorkRequestDto workRequestDto) {
         // 멤버 확인 ( 현재는 null 로 생성 )
 
         // 출판사도 확인 ( 현재는 null 로 생성 )
@@ -73,7 +73,7 @@ public class WorkServiceImpl implements WorkService{
         } else {
             work = Work.builder()
                     //.title(workRequestDto.getTitle())
-                    .title(workRequestDto.getTitle() + " " + i)
+                    .title(workRequestDto.getTitle())
                     .content(workRequestDto.getContents())
                     .member(null)
                     .publisherName(workRequestDto.getPublisherName())
