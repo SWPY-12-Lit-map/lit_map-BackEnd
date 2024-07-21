@@ -190,6 +190,8 @@ public class WorkServiceImpl implements WorkService{
     }
 
     // 작품 상세 내용 가져오기 ( 승인이 완료된 내용만 가져오기 )
+
+    @Transactional
     @Override
     public WorkResponseDto getWork(Long workId) {
         // 이미지, 작성자, 출판사, 제목, 설명 겸 작품 ID 검사
@@ -205,7 +207,7 @@ public class WorkServiceImpl implements WorkService{
 
         // view 카운트 올리기
         // 트랜잭션 처리, 비관적 락 사용
-        workRepository.countUpView(work);
+        workRepository.countUpView(workId);
 
         // 카테고리
         Category category = categoryService.checkCategory(work.getCategory().getName());

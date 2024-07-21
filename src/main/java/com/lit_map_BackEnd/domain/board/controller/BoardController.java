@@ -94,7 +94,6 @@ public class BoardController {
                                                                @PathVariable(name = "genreId") Long genreId) {
 
         List<Map<String, Object>> list = boardService.getWorkByCategoryAndGenre(categoryId, genreId);
-        //List<WorkResponseDto> list = boardService.getWorkByCategoryAndGenre(categoryId, genreId);
 
         SuccessResponse res = SuccessResponse.builder()
                 .result(list)

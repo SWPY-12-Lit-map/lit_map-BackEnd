@@ -14,7 +14,6 @@ import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
 import com.lit_map_BackEnd.domain.work.entity.*;
 import com.lit_map_BackEnd.domain.work.repository.VersionRepository;
 import com.lit_map_BackEnd.domain.work.repository.WorkRepository;
-import com.lit_map_BackEnd.domain.work.service.WorkCategoryGenreService;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -38,7 +37,6 @@ public class BoardServiceImpl implements BoardService{
     private final GenreRepository genreRepository;
     private final MemberRepository memberRepository;
     private final JPAQueryFactory jpaQueryFactory;
-    private final WorkCategoryGenreService workCategoryGenreService;
 
     @Override
     @Transactional(readOnly = true)
@@ -158,7 +156,6 @@ public class BoardServiceImpl implements BoardService{
     }
 
 
-
     @Override
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getWorkByCategoryAndGenre(Long categoryId, Long genreId) {
@@ -189,16 +186,4 @@ public class BoardServiceImpl implements BoardService{
             return map;
         }).toList();
     }
-
-//    @Override
-//    public List<WorkResponseDto> getWorkByCategoryAndGenre(Long categoryId, Long genreId) {
-//        List<WorkCategoryGenre> works = workCategoryGenreService.findWorks(categoryId, genreId);
-//
-//        return works.stream().map(workCategoryGenre -> WorkResponseDto.builder()
-//                .workId(workCategoryGenre.getWork().getId())
-//                .title(workCategoryGenre.getWork().getTitle())
-//                .build()
-//        ).toList();
-//
-//    }
 }

@@ -16,6 +16,5 @@ public interface BoardService {
     Slice<WorkResponseDto> getWorkListByUpdateDate(int pageNum);
 
     List<Map<String, Object>> getWorkByCategoryAndGenre(Long categoryId, Long genreId);
-    //List<WorkResponseDto> getWorkByCategoryAndGenre(Long categoryId, Long genreId);
 
 }
