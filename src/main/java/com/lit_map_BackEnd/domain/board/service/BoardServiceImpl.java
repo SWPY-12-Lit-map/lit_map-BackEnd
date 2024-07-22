@@ -168,15 +168,13 @@ public class BoardServiceImpl implements BoardService{
         QWorkCategoryGenre workCategoryGenre = QWorkCategoryGenre.workCategoryGenre;
         QWork work = QWork.work;
 
-        JPQLQuery<Long> subQuery = JPAExpressions
-                .select(workCategoryGenre.work.id)
-                .from(workCategoryGenre)
-                .where(workCategoryGenre.category.eq(findCategory)
-                        .and(workCategoryGenre.genre.eq(findGenre)));
-
-        List<Tuple> fetch = jpaQueryFactory.select(work.id, work.title)
+        List<Tuple> fetch = jpaQueryFactory
+                .select(work.id, work.title)
                 .from(work)
-                .where(work.id.in(subQuery))
+                .join(workCategoryGenre)
+                .on(work.id.eq(workCategoryGenre.work.id))
+                .where(workCategoryGenre.category.eq(findCategory)
+                        .and(workCategoryGenre.genre.eq(findGenre)))
                 .fetch();
 
         return fetch.stream().map(tuple -> {
