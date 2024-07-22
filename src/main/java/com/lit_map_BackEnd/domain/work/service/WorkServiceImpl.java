@@ -13,6 +13,7 @@ import com.lit_map_BackEnd.domain.genre.entity.Genre;
 import com.lit_map_BackEnd.domain.genre.service.GenreService;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.repository.MemberRepository;
+import com.lit_map_BackEnd.domain.member.repository.PublisherRepository;
 import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
 import com.lit_map_BackEnd.domain.work.dto.VersionResponseDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkRequestDto;
@@ -44,6 +45,8 @@ public class WorkServiceImpl implements WorkService{
     private final AuthorService authorService;
     private final CastService castService;
     private final VersionService versionService;
+    private final MemberRepository memberRepository;
+    private final PublisherRepository publisherRepository;
 
     /**
      *  데이터를 삽입하는 것과 업데이트하는것이 동시에 되어야 하기 때문에
@@ -54,8 +57,11 @@ public class WorkServiceImpl implements WorkService{
     @Transactional
     public int saveWork(@Valid WorkRequestDto workRequestDto) {
         // 멤버 확인 ( 현재는 null 로 생성 )
+        Member member = memberRepository.findById(workRequestDto.getMemberId())
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
-        // 출판사도 확인 ( 현재는 null 로 생성 )
+        // 작성된 출판사가 이 사람의 출판사가 맞는지 확인
+        // 만약 1인 작가라면 출판사가 없다
 
         Work work = null;
         Version version = null;
