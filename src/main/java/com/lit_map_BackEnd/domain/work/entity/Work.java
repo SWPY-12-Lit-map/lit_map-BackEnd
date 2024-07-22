@@ -48,7 +48,7 @@ public class Work extends BaseTimeEntity {
     private Member member;
 
     @ManyToOne
-    @JoinColumn(name = "fk_work_publisher_id")
+    @JoinColumn(name = "publisher_id")
     private Publisher publisher;
 
     private LocalDateTime publisherDate;

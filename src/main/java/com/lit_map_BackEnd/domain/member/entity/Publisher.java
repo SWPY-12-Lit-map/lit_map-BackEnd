@@ -1,6 +1,5 @@
 package com.lit_map_BackEnd.domain.member.entity;
 
-import com.lit_map_BackEnd.domain.category.entity.Category;
 import com.lit_map_BackEnd.domain.work.entity.Work;
 import jakarta.persistence.*;
 import lombok.*;
