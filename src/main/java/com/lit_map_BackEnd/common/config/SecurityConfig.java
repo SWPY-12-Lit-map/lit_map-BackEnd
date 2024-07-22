@@ -36,29 +36,24 @@ public class SecurityConfig {
                         // 모든 요청에 대해 접근을 허용
                         .anyRequest().permitAll()
                 )
-
-                .sessionManagement(sessionManagement -> sessionManagement
-                        .maximumSessions(1)
-                        .maxSessionsPreventsLogin(false)
-                        .sessionRegistry(sessionRegistry())
-                )
-
-                .formLogin(formLogin -> formLogin
-                        .loginPage("/login")
-                        .permitAll()
-                        .defaultSuccessUrl("/main")
-                )
-
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/main")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
-                )
-
+//                .sessionManagement(sessionManagement -> sessionManagement
+//                        .maximumSessions(1)
+//                        .maxSessionsPreventsLogin(false)
+//                        .sessionRegistry(sessionRegistry())
+//                )
+//                .formLogin(formLogin -> formLogin
+//                        .loginPage("/login")
+//                        .permitAll()
+//                        .defaultSuccessUrl("/main")
+//                )
+//                .logout(logout -> logout
+//                        .logoutUrl("/logout")
+//                        .logoutSuccessUrl("/main")
+//                        .invalidateHttpSession(true)
+//                        .deleteCookies("JSESSIONID")
+//                )
                 // CORS 설정을 활성화합니다.
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()));
-
         return http.build();
     }
 
@@ -67,32 +62,41 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public HttpSessionEventPublisher httpSessionEventPublisher() {
-        return new HttpSessionEventPublisher();
-    }
-
-    @Bean
-    public SessionAuthenticationStrategy sessionAuthenticationStrategy() {
-        return new ConcurrentSessionControlAuthenticationStrategy(sessionRegistry());
-    }
-
-    @Bean
-    public SessionRegistryImpl sessionRegistry() {
-        return new SessionRegistryImpl();
-    }
+//    @Bean
+//    public HttpSessionEventPublisher httpSessionEventPublisher() {
+//        return new HttpSessionEventPublisher();
+//    }
+//
+//    @Bean
+//    public SessionAuthenticationStrategy sessionAuthenticationStrategy() {
+//        return new ConcurrentSessionControlAuthenticationStrategy(sessionRegistry());
+//    }
+//
+//    @Bean
+//    public SessionRegistryImpl sessionRegistry() {
+//        return new SessionRegistryImpl();
+//    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration configuration = new CorsConfiguration();
+//        configuration.addAllowedOriginPattern("*");
+//        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+//        configuration.setAllowedHeaders(List.of("*"));
+//        configuration.setAllowCredentials(true);
+//        configuration.setMaxAge(3600L);
+
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOriginPattern("*");
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowedOrigins(List.of("https://api.litmap.store", "http://localhost:8080"));
+        configuration.addAllowedHeader("*");
+        configuration.addAllowedMethod("*");
         configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
+
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
+
 }

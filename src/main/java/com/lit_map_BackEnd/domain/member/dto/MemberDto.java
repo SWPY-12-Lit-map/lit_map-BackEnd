@@ -39,4 +39,6 @@ public class MemberDto {
 
     private MemberRoleStatus memberRoleStatus;
 
+    private Boolean withdrawalRequested = false;  // 기본값 설정
+
 }

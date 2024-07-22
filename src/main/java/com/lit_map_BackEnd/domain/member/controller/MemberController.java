@@ -12,8 +12,6 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,6 +43,8 @@ public class MemberController {
     public ResponseEntity<SuccessResponse<Member>> login(@RequestParam String litmapEmail, @RequestParam String password) {
         Member loggedMember = memberPublisherService.login(litmapEmail, password);
 
+        session.setAttribute("loggedInUser", loggedMember); // 세션에 로그인된 사용자 정보 저장
+
         SuccessResponse<Member> res = SuccessResponse.<Member>builder()
                 .result(loggedMember)
                 .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
@@ -57,7 +57,7 @@ public class MemberController {
     @GetMapping("/logout")
     @Operation(summary = "로그아웃", description = "사용자를 로그아웃하고 세션을 무효화합니다.")
     public ResponseEntity<SuccessResponse<String>> logout() {
-        memberPublisherService.logout();
+        session.invalidate();
         SuccessResponse<String> res = SuccessResponse.<String>builder()
                 .result("로그아웃 되었습니다.")
                 .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
@@ -80,8 +80,16 @@ public class MemberController {
 
     @PutMapping("/update")
     @Operation(summary = "1인작가 마이페이지 수정", description = "1인작가의 마이페이지 정보를 수정합니다.")
-    public ResponseEntity<SuccessResponse<Member>> updateMember(@AuthenticationPrincipal User user, @RequestBody @Validated MemberUpdateDto memberUpdateDto) {
-        Member updatedMember = memberPublisherService.updateMember(user.getUsername(), memberUpdateDto);
+    public ResponseEntity<SuccessResponse<Member>> updateMember(@RequestBody @Validated MemberUpdateDto memberUpdateDto) {
+        Member loggedInUser = (Member) session.getAttribute("loggedInUser");
+
+        if (loggedInUser == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        Member updatedMember = memberPublisherService.updateMember(loggedInUser.getLitmapEmail(), memberUpdateDto);
+        session.setAttribute("loggedInUser", updatedMember); // 세션에 업데이트된 사용자 정보 저장
+
         SuccessResponse<Member> res = SuccessResponse.<Member>builder()
                 .result(updatedMember)
                 .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())

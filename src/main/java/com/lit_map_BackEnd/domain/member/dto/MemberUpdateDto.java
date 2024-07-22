@@ -11,4 +11,6 @@ public class MemberUpdateDto {
     private String nickname;
     private String userImage;
     private String myMessage;
+
+    private Boolean withdrawalRequested = false;  // 기본값 설정
 }

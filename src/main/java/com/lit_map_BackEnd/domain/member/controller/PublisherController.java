@@ -70,6 +70,10 @@ public class PublisherController {
     @PutMapping("/update")
     @Operation(summary = "출판사 직원 마이페이지 수정", description = "출판사 직원의 마이페이지 정보를 수정합니다.")
     public ResponseEntity<SuccessResponse<Member>> updatePublisher(@AuthenticationPrincipal User user, @RequestBody @Validated PublisherUpdateDto publisherUpdateDto) {
+        if (user == null) {
+            throw new IllegalArgumentException("User must be authenticated");
+        }
+
         Member updatedPublisher = memberPublisherService.updatePublisherMember(user.getUsername(), publisherUpdateDto);
         SuccessResponse<Member> res = SuccessResponse.<Member>builder()
                 .result(updatedPublisher)
