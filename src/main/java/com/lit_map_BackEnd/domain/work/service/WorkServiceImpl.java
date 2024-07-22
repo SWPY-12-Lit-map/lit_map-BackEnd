@@ -12,9 +12,7 @@ import com.lit_map_BackEnd.domain.character.service.CastService;
 import com.lit_map_BackEnd.domain.genre.entity.Genre;
 import com.lit_map_BackEnd.domain.genre.service.GenreService;
 import com.lit_map_BackEnd.domain.member.entity.Member;
-import com.lit_map_BackEnd.domain.member.entity.Publisher;
 import com.lit_map_BackEnd.domain.member.repository.MemberRepository;
-import com.lit_map_BackEnd.domain.member.repository.PublisherRepository;
 import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
 import com.lit_map_BackEnd.domain.work.dto.VersionResponseDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkRequestDto;
@@ -27,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +44,6 @@ public class WorkServiceImpl implements WorkService{
     private final CastService castService;
     private final VersionService versionService;
     private final MemberRepository memberRepository;
-    private final PublisherRepository publisherRepository;
 
     /**
      *  데이터를 삽입하는 것과 업데이트하는것이 동시에 되어야 하기 때문에
@@ -202,15 +198,42 @@ public class WorkServiceImpl implements WorkService{
         Work work = workRepository.findById(workId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
 
+        WorkResponseDto workData = getWorkData(workId, 0.1);
+
+        // 나머지 버전 리스트를 가져오기
+        List<VersionListDto> maps = versionService.versionList(work);
+
+        workData.setVersionList(maps);
+
+        return workData;
+    }
+
+    @Override
+    @Transactional
+    public void deleteWork(Long workId) {
+        workRepository.findById(workId)
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
+
+        workRepository.deleteById(workId);
+    }
+
+    // 제출(true)과 수정/임시저장(false)을 구분하는 메소드
+    private Confirm checkConfirm(boolean status) {
+        if (!status) return Confirm.LOAD;
+        else return Confirm.CONFIRM;
+    }
+
+    // 상세 작품과 수정 시 가져오는 WorkResponse 때문에 메소드화로 변경
+    public WorkResponseDto getWorkData(Long workId, Double versionNum) {
+        Work work = workRepository.findById(workId)
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
+
         // 작성자의 이름이 없을 수 있다 ( 탈퇴하였을 경우 )
         String memberName = "";
         Member member = work.getMember();
         if (member == null) {
             memberName = "탈퇴한 회원입니다.";
         }
-
-        // view 카운트 올리기
-        workRepository.countUpView(workId);
 
         // 카테고리
         Category category = categoryService.checkCategory(work.getCategory().getName());
@@ -236,10 +259,7 @@ public class WorkServiceImpl implements WorkService{
 
         // 기존의 작품의 버전 관련된 내용을 전부 가져오는 과정에서 그냥 0.1버전 하나만 가져오는 것으로 변경
         // 이는 초기 로딩 속도와 네트워크 효율성을 고려하여 제작
-        VersionResponseDto version = versionService.findVersionByWorkAndNumber(work.getId(), 0.1);
-
-        // 기존에 있는 버전들을 모두 반환
-        List<VersionListDto> maps = versionService.versionList(work);
+        VersionResponseDto version = versionService.findVersionByWorkAndNumber(work.getId(), versionNum);
 
         return WorkResponseDto.builder()
                 .workId(work.getId())
@@ -251,22 +271,6 @@ public class WorkServiceImpl implements WorkService{
                 .title(work.getTitle())
                 .contents(work.getContent())
                 .versions(version)
-                .versionList(maps)
                 .build();
-    }
-
-    @Override
-    @Transactional
-    public void deleteWork(Long workId) {
-        workRepository.findById(workId)
-                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
-
-        workRepository.deleteById(workId);
-    }
-
-    // 제출(true)과 수정/임시저장(false)을 구분하는 메소드
-    private Confirm checkConfirm(boolean status) {
-        if (!status) return Confirm.LOAD;
-        else return Confirm.CONFIRM;
     }
 }

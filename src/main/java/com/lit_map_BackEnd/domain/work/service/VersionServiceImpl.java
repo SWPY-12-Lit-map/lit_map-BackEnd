@@ -9,10 +9,8 @@ import com.lit_map_BackEnd.domain.character.repository.CastRepository;
 import com.lit_map_BackEnd.domain.character.service.CastService;
 import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
 import com.lit_map_BackEnd.domain.work.dto.VersionResponseDto;
-import com.lit_map_BackEnd.domain.work.entity.Confirm;
-import com.lit_map_BackEnd.domain.work.entity.RollBackVersion;
-import com.lit_map_BackEnd.domain.work.entity.Version;
-import com.lit_map_BackEnd.domain.work.entity.Work;
+import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
+import com.lit_map_BackEnd.domain.work.entity.*;
 import com.lit_map_BackEnd.domain.work.repository.RollBackVersionRepository;
 import com.lit_map_BackEnd.domain.work.repository.VersionRepository;
 import com.lit_map_BackEnd.domain.work.repository.WorkRepository;
@@ -157,8 +155,5 @@ public class VersionServiceImpl implements VersionService{
         version.confirmSetting(Confirm.LOAD);
 
         rollBackVersionRepository.save(rollBackVersion);
-
-        // return 값으로 롤백 데이터 전달 -> 수정하기 위한 값을 변경
-
     }
 }

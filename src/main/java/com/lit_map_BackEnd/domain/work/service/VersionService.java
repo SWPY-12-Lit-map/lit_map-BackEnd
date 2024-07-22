@@ -3,6 +3,7 @@ package com.lit_map_BackEnd.domain.work.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
 import com.lit_map_BackEnd.domain.work.dto.VersionResponseDto;
+import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
 import com.lit_map_BackEnd.domain.work.entity.Version;
 import com.lit_map_BackEnd.domain.work.entity.Work;
 
@@ -20,4 +21,5 @@ public interface VersionService {
     List<VersionListDto> versionList(Work work);
 
     void rollBackDataSave(Long workId, Double versionNum);
+
 }
