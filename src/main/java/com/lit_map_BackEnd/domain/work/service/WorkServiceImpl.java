@@ -75,7 +75,7 @@ public class WorkServiceImpl implements WorkService{
             work = Work.builder()
                     .title(workRequestDto.getTitle())
                     .content(workRequestDto.getContents())
-                    .member(null)
+                    .member(member)
                     .publisher(member.getPublisher())
                     .publisherDate(workRequestDto.getPublisherDate())
                     .category(null)
