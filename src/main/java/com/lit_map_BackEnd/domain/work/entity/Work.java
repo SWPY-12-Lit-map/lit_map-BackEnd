@@ -4,6 +4,7 @@ import com.lit_map_BackEnd.common.entity.BaseTimeEntity;
 import com.lit_map_BackEnd.domain.category.entity.Category;
 import com.lit_map_BackEnd.domain.character.entity.Cast;
 import com.lit_map_BackEnd.domain.member.entity.Member;
+import com.lit_map_BackEnd.domain.member.entity.Publisher;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -45,6 +46,8 @@ public class Work extends BaseTimeEntity {
     private Member member;
 
     private String publisherName;
+
+    // 승인 완료시 업데이트
     private LocalDateTime publisherDate;
 
     private String imageUrl;
@@ -79,4 +82,8 @@ public class Work extends BaseTimeEntity {
     public void changeContent(String content) {
         this.content = content;
     }
+
+    @ManyToOne
+    @JoinColumn(name = "fk_work_publisher_id")
+    private Publisher publisher;
 }

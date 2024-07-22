@@ -1,6 +1,7 @@
 package com.lit_map_BackEnd.domain.work.entity;
 
 import com.lit_map_BackEnd.common.converter.JsonMapConverter;
+import com.lit_map_BackEnd.common.entity.BaseTimeEntity;
 import com.lit_map_BackEnd.domain.character.entity.Cast;
 import com.lit_map_BackEnd.domain.character.entity.RollBackCast;
 import jakarta.persistence.*;
@@ -16,7 +17,7 @@ import java.util.Map;
 @Getter
 @Entity
 @Table(name = "rollback_versions")
-public class RollBackVersion {
+public class RollBackVersion extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

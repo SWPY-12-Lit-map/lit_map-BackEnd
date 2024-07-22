@@ -57,12 +57,8 @@ public class WorkController {
     @PostMapping("")
     @Operation(summary = "작품 등록", description = "작품의 데이터 저장")
     public ResponseEntity<SuccessResponse> saveWork(@RequestBody @Valid WorkRequestDto workRequestDto) {
-        //int result = workService.saveWork(workRequestDto);
+        int result = workService.saveWork(workRequestDto);
 
-        int result = 0;
-        for (int i = 0; i < 10000; i++) {
-            result = workService.saveWork(workRequestDto, i);
-        }
         SuccessResponse res = SuccessResponse.builder()
                 .result(result)
                 .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
