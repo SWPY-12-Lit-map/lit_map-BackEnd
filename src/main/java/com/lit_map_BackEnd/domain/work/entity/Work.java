@@ -41,13 +41,16 @@ public class Work extends BaseTimeEntity {
     @OneToMany(mappedBy = "work", cascade = CascadeType.ALL)
     private List<WorkAuthor> workAuthors = new ArrayList<>();
 
+    private String mainAuthor;
+
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
 
-    private String publisherName;
+    @ManyToOne
+    @JoinColumn(name = "fk_work_publisher_id")
+    private Publisher publisher;
 
-    // 승인 완료시 업데이트
     private LocalDateTime publisherDate;
 
     private String imageUrl;
@@ -83,7 +86,9 @@ public class Work extends BaseTimeEntity {
         this.content = content;
     }
 
-    @ManyToOne
-    @JoinColumn(name = "fk_work_publisher_id")
-    private Publisher publisher;
+    public void mainAuthorSetting(String mainAuthor) {
+        this.mainAuthor = mainAuthor;
+    }
+
+
 }

@@ -20,7 +20,7 @@ public class WorkRequestDto {
 
     private String genre;
 
-    private String author;
+    private List<String> author;
 
     private String imageUrl;
 

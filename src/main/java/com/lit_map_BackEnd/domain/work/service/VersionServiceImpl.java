@@ -157,5 +157,8 @@ public class VersionServiceImpl implements VersionService{
         version.confirmSetting(Confirm.LOAD);
 
         rollBackVersionRepository.save(rollBackVersion);
+
+        // return 값으로 롤백 데이터 전달 -> 수정하기 위한 값을 변경
+
     }
 }

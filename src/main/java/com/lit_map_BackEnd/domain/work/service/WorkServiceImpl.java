@@ -12,6 +12,7 @@ import com.lit_map_BackEnd.domain.character.service.CastService;
 import com.lit_map_BackEnd.domain.genre.entity.Genre;
 import com.lit_map_BackEnd.domain.genre.service.GenreService;
 import com.lit_map_BackEnd.domain.member.entity.Member;
+import com.lit_map_BackEnd.domain.member.entity.Publisher;
 import com.lit_map_BackEnd.domain.member.repository.MemberRepository;
 import com.lit_map_BackEnd.domain.member.repository.PublisherRepository;
 import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
@@ -56,17 +57,15 @@ public class WorkServiceImpl implements WorkService{
     @Override
     @Transactional
     public int saveWork(@Valid WorkRequestDto workRequestDto) {
-        // 멤버 확인 ( 현재는 null 로 생성 )
-        Member member = memberRepository.findById(workRequestDto.getMemberId())
-                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
-
-        // 작성된 출판사가 이 사람의 출판사가 맞는지 확인
-        // 만약 1인 작가라면 출판사가 없다
+        // 기존에 존재하는 작품인지 아닌지 확인
+        boolean isNew = false;
 
         Work work = null;
         Version version = null;
-        // 기존에 존재하는 작품인지 아닌지 확인
-        boolean isNew = false;
+
+        // 멤버 확인 ( 현재는 null 로 생성 )
+        Member member = memberRepository.findById(workRequestDto.getMemberId())
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
         // 이미 존재하는 제목이 있다면 추가 불가
         if (workRepository.existsByTitle(workRequestDto.getTitle())) {
@@ -78,14 +77,12 @@ public class WorkServiceImpl implements WorkService{
             }
         } else {
             work = Work.builder()
-                    //.title(workRequestDto.getTitle())
                     .title(workRequestDto.getTitle())
                     .content(workRequestDto.getContents())
                     .member(null)
-                    .publisherName(workRequestDto.getPublisherName())
+                    .publisher(member.getPublisher())
                     .publisherDate(workRequestDto.getPublisherDate())
                     .category(null)
-                    .imageUrl(workRequestDto.getImageUrl())
                     .view(0)
                     .build();
             isNew = true;
@@ -106,7 +103,7 @@ public class WorkServiceImpl implements WorkService{
         // 이미지 추가
         if (workRequestDto.getImageUrl() != null && !workRequestDto.getImageUrl().isBlank()) {
             work.changeImageUrl(workRequestDto.getImageUrl());
-        }
+        } else work.changeImageUrl("대체 이미지");
 
         // 설명 추가
         if (workRequestDto.getContents() != null && !workRequestDto.getContents().isBlank()) {
@@ -163,15 +160,16 @@ public class WorkServiceImpl implements WorkService{
         }
 
         // 작가 저장 ( 중복 저장 되지 않도록 저장 )
-        if (workRequestDto.getAuthor() != null && !workRequestDto.getAuthor().isBlank()) {
-            String[] authors = workRequestDto.getAuthor().split(",");
+        List<String> author = workRequestDto.getAuthor();
+        if (author != null && !author.isEmpty()) {
             // 해당 작품에 관련된 작가 삭제
             workAuthorRepository.deleteByWork(work);
-            for (String str : authors) {
-                // 해당 작가 저장
-                Author author = authorService.checkAuthor(str);
+            int size = author.size();
+            for (int i = 0; i < size; i++) {
+                work.mainAuthorSetting(author.get(0));
                 // 작가 저장
-                WorkAuthor workAuthor = WorkAuthor.builder().work(work).author(author).build();
+                Author authorName = authorService.checkAuthor(author.get(i));
+                WorkAuthor workAuthor = WorkAuthor.builder().work(work).author(authorName).build();
                 work.getWorkAuthors().add(workAuthor);
             }
         }
@@ -212,7 +210,6 @@ public class WorkServiceImpl implements WorkService{
         }
 
         // view 카운트 올리기
-        // 트랜잭션 처리, 비관적 락 사용
         workRepository.countUpView(workId);
 
         // 카테고리
