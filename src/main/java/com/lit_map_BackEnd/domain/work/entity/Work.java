@@ -89,6 +89,4 @@ public class Work extends BaseTimeEntity {
     public void mainAuthorSetting(String mainAuthor) {
         this.mainAuthor = mainAuthor;
     }
-
-
 }

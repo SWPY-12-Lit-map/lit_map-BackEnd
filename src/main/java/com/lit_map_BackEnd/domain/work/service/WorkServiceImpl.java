@@ -99,7 +99,7 @@ public class WorkServiceImpl implements WorkService{
         // 이미지 추가
         if (workRequestDto.getImageUrl() != null && !workRequestDto.getImageUrl().isBlank()) {
             work.changeImageUrl(workRequestDto.getImageUrl());
-        } else work.changeImageUrl("대체 이미지");
+        } else work.changeImageUrl("대체 이미지 URL");
 
         // 설명 추가
         if (workRequestDto.getContents() != null && !workRequestDto.getContents().isBlank()) {
@@ -179,6 +179,7 @@ public class WorkServiceImpl implements WorkService{
         for (CastRequestDto cast : casts) {
             cast.setWork(work);
             cast.setVersion(version);
+            // 캐릭터의 사진이 없을때 저장하는 대체 이미지
             Cast findCast = castService.insertCharacter(cast);
             work.getCasts().add(findCast);
             version.getCasts().add(findCast);
@@ -190,20 +191,23 @@ public class WorkServiceImpl implements WorkService{
     }
 
     // 작품 상세 내용 가져오기 ( 승인이 완료된 내용만 가져오기 )
-
     @Transactional
     @Override
     public WorkResponseDto getWork(Long workId) {
-        // 이미지, 작성자, 출판사, 제목, 설명 겸 작품 ID 검사
         Work work = workRepository.findById(workId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
 
         WorkResponseDto workData = getWorkData(workId, 0.1);
 
-        // 나머지 버전 리스트를 가져오기
         List<VersionListDto> maps = versionService.versionList(work);
 
         workData.setVersionList(maps);
+
+        // view count 올리기
+        workRepository.countUpView(workId);
+
+        // 명시적으로 호출을 해서 변경 사항이 있다는 것을 확인
+        workRepository.save(work);
 
         return workData;
     }
@@ -225,6 +229,7 @@ public class WorkServiceImpl implements WorkService{
 
     // 상세 작품과 수정 시 가져오는 WorkResponse 때문에 메소드화로 변경
     public WorkResponseDto getWorkData(Long workId, Double versionNum) {
+        // 이미지, 작성자, 출판사, 제목, 설명 겸 작품 ID 검사
         Work work = workRepository.findById(workId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
 
