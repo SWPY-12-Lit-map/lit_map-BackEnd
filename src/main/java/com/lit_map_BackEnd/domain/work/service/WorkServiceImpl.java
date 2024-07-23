@@ -20,7 +20,6 @@ import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
 import com.lit_map_BackEnd.domain.work.entity.*;
 import com.lit_map_BackEnd.domain.work.repository.*;
 import com.lit_map_BackEnd.domain.youtube.entity.Youtube;
-//import com.lit_map_BackEnd.domain.youtube.service.YoutubeService;
 import com.lit_map_BackEnd.domain.youtube.service.YoutubeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +48,7 @@ public class WorkServiceImpl implements WorkService{
     private final VersionService versionService;
     private final MemberRepository memberRepository;
 
+
     @Autowired
     private final YoutubeService youtubeService;
 
@@ -67,7 +67,6 @@ public class WorkServiceImpl implements WorkService{
         Work work = null;
         Version version = null;
 
-        // 멤버 확인 ( 현재는 null 로 생성 )
         Member member = memberRepository.findById(workRequestDto.getMemberId())
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
@@ -108,6 +107,7 @@ public class WorkServiceImpl implements WorkService{
         if (workRequestDto.getImageUrl() != null && !workRequestDto.getImageUrl().isBlank()) {
             work.changeImageUrl(workRequestDto.getImageUrl());
         } else work.changeImageUrl("대체 이미지 URL");
+
 
         // 설명 추가
         if (workRequestDto.getContents() != null && !workRequestDto.getContents().isBlank()) {
@@ -283,8 +283,8 @@ public class WorkServiceImpl implements WorkService{
         } catch (Exception e) {
             throw new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND);
         }
-
         List<Youtube> youtubeList = new ArrayList<>();
+
         if (youtubeInfo != null) {
 
             for (Youtube info : youtubeInfo) {

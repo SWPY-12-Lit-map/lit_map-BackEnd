@@ -19,5 +19,4 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Modifying // 찾아서 수정하기
     @Query("UPDATE Member m SET m.password = :password WHERE m.id = :id")
     void updatePassword(@Param("id") Long id, @Param("password") String password);
-
 }

@@ -253,6 +253,4 @@ public class BoardServiceImpl implements BoardService{
                 .title(work.getTitle())
                 .build();
     }
-
-
 }

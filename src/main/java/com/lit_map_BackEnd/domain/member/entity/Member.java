@@ -1,8 +1,6 @@
 package com.lit_map_BackEnd.domain.member.entity;
 
-import com.lit_map_BackEnd.domain.category.entity.Category;
 import com.lit_map_BackEnd.domain.work.entity.Work;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,10 +15,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Data
 @Getter
+@Setter
 public class Member {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
@@ -78,4 +75,5 @@ public class Member {
     // 어드민 auth
     // create_data
     // update_data
+
 }

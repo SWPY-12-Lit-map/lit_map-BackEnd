@@ -20,4 +20,5 @@ public interface WorkAuthorRepository extends JpaRepository<WorkAuthor, Long> {
             "join Author a on wa.author.id = a.id " +
             "where a.name like :question")
     List<Work> findByAuthorName(String question);
+
 }

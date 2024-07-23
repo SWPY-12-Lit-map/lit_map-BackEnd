@@ -9,7 +9,6 @@ import com.lit_map_BackEnd.domain.character.repository.CastRepository;
 import com.lit_map_BackEnd.domain.character.service.CastService;
 import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
 import com.lit_map_BackEnd.domain.work.dto.VersionResponseDto;
-import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
 import com.lit_map_BackEnd.domain.work.entity.*;
 import com.lit_map_BackEnd.domain.work.repository.RollBackVersionRepository;
 import com.lit_map_BackEnd.domain.work.repository.VersionRepository;
@@ -17,6 +16,16 @@ import com.lit_map_BackEnd.domain.work.repository.WorkRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.lit_map_BackEnd.domain.mail.dto.MailDto;
+import com.lit_map_BackEnd.domain.mail.service.MailService;
+import com.lit_map_BackEnd.domain.member.entity.Member;
+import com.lit_map_BackEnd.domain.member.repository.MemberRepository;
+import com.lit_map_BackEnd.domain.work.entity.Confirm;
+import com.lit_map_BackEnd.domain.work.entity.Version;
+import com.lit_map_BackEnd.domain.work.entity.Work;
+import org.springframework.mail.MailException;
+import org.springframework.security.core.Authentication;
+
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,6 +39,10 @@ public class VersionServiceImpl implements VersionService{
     private final CastRepository castRepository;
     private final RollBackVersionRepository rollBackVersionRepository;
     private final CastService castService;
+
+    private final MemberRepository memberRepository;
+    private final MailService mailService;
+
 
     // 기존의 버전 정보 업데이트하기
     @Override
@@ -155,5 +168,57 @@ public class VersionServiceImpl implements VersionService{
         version.confirmSetting(Confirm.LOAD);
 
         rollBackVersionRepository.save(rollBackVersion);
+    }
+
+    //추가
+    @Override
+    public void confirmVersion(Long versionId, Authentication authentication) {
+        Version version = versionRepository.findById(versionId)
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.VERSION_NOT_FOUND));
+
+        // 인증 객체에서 현재 사용자의 권한을 가져와 ADMIN 역할인지 확인
+        version.confirmSetting(Confirm.COMPLETE);
+
+        // 승인 완료 메일 발송
+        sendApprovalEmail(versionId); //삭제 , 등록 , 수정
+
+        versionRepository.save(version);
+    }
+
+    // admin 체크
+    private boolean isAdmin(Authentication authentication) {
+        return authentication.getAuthorities().stream()
+                .anyMatch(role -> role.getAuthority().equals("ADMIN"));
+    }
+
+    // 이메일 발송
+    public void sendApprovalEmail(Long versionId) {
+        // VersionId로 Version 엔티티를 조회하여 workId를 가져옴
+        Version version = versionRepository.findById(versionId)
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.VERSION_NOT_FOUND));
+
+        Work work = workRepository.findById(version.getWork().getId())
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
+
+        Member member = memberRepository.findById(work.getMember().getId())
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
+
+        String mailAddress = member.getLitmapEmail();
+        //등록 승인
+        String subject = "[litmap] 작품 승인 완료 알림";
+        String text = "작품이 성공적으로 승인되었습니다.";
+
+        //삭제
+
+        //수정 승인
+
+        MailDto mailDTO = new MailDto(mailAddress, subject, text);
+
+        try {
+            mailService.sendMail(mailDTO);
+        } catch (MailException e) {
+            // 메일 발송 실패 시 처리 로직
+            e.printStackTrace(); // 예외 처리를 좀 더 구체적으로 해야 함
+        }
     }
 }

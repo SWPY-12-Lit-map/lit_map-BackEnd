@@ -70,6 +70,7 @@ public class Work extends BaseTimeEntity {
 
     @Builder.Default
     @OneToMany(mappedBy = "work", cascade = CascadeType.ALL)
+
     private List<Cast> casts = new ArrayList<>();
 
     private int view;
