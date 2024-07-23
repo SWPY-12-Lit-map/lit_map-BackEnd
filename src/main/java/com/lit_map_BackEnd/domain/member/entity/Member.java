@@ -1,8 +1,7 @@
 package com.lit_map_BackEnd.domain.member.entity;
 
-import com.lit_map_BackEnd.domain.category.entity.Category;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.lit_map_BackEnd.domain.work.entity.Work;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -49,19 +48,24 @@ public class Member {
 
     @Enumerated(EnumType.STRING)
     private MemberRoleStatus memberRoleStatus;
+//    @Enumerated(EnumType.STRING)
+//    @Builder.Default
+//    private MemberRoleStatus memberRoleStatus = MemberRoleStatus.PENDING_MEMBER;
 
-    @Column(nullable = false)
+
+    @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
     private Boolean withdrawalRequested = false; // 탈퇴 요청 여부, 기본값 false
-
 
     // 회원 여러 명 : 출판사 한 개
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "publisher_id")
+    @JsonBackReference
     private Publisher publisher;
 
     // 회원 한 명 : 작품 여러 개
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @JsonBackReference
     private List<Work> works = new ArrayList<>();
 
     // 역할 상태를 설정하는 메서드
@@ -73,7 +77,6 @@ public class Member {
     public MemberRoleStatus getRoleStatus() {
         return memberRoleStatus;
     }
-
 
     // 어드민 auth
     // create_data

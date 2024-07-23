@@ -69,6 +69,11 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
 
     }
 
+    @Override
+    public boolean checkLitmapEmailExists(String litmapEmail) {
+        return memberRepository.existsByLitmapEmail(litmapEmail);
+    }
+
     private boolean isValidPassword(String password) {
         String regex = "^(?=.*[a-z])(?=.*\\d)[a-z\\d]{8,20}$";
         return Pattern.compile(regex).matcher(password).matches();
@@ -127,6 +132,7 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
                 .publisherAddress(publisherDto.getPublisherAddress())
                 .publisherPhoneNumber(publisherDto.getPublisherPhoneNumber())
                 .publisherCeo(publisherDto.getPublisherCeo())
+                .withdrawalRequested(false)  // 기본값 설정
                 .build();
 
         Member member = Member.builder()
@@ -137,9 +143,9 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
                 .myMessage(publisherDto.getMyMessage())
                 .userImage(publisherDto.getUserImage())
                 .publisher(publisher)
+                .withdrawalRequested(false)  // 기본값 설정
                 //.role(Role.PUBLISHER_MEMBER) // 출판사 회원 역할 설정
                 .build();
-
         publisher.getMemberList().add(member);
 
         return publisherRepository.save(publisher);
@@ -299,6 +305,11 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         }
         if (memberUpdateDto.getMyMessage() != null) {
             member.setMyMessage(memberUpdateDto.getMyMessage());
+        }
+        if (memberUpdateDto.getWithdrawalRequested() != null) {
+            member.setWithdrawalRequested(memberUpdateDto.getWithdrawalRequested());
+        } else {
+            member.setWithdrawalRequested(false);  // 기본값 설정
         }
     }
 

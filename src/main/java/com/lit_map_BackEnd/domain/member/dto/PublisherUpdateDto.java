@@ -16,4 +16,6 @@ public class PublisherUpdateDto extends MemberUpdateDto{
     private String userImage; // 공통 필드
     private String myMessage; // 공통 필드
 
+    private Boolean withdrawalRequested = false;  // 기본값 설정
+
 }
