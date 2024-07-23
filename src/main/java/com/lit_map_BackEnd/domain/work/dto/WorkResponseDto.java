@@ -22,5 +22,6 @@ public class WorkResponseDto {
     private String title;
     private String contents;
     private VersionResponseDto versions;
+    // 한가지 작품 반환시 사용
     private List<VersionListDto> versionList;
 }

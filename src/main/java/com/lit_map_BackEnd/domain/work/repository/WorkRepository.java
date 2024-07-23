@@ -27,4 +27,30 @@ public interface WorkRepository extends JpaRepository<Work, Long> {
 
     @Query("select w from Work w join fetch w.category join fetch w.member order by w.view desc")
     Slice<Work> findWorks(Pageable pageable);
+
+    @Query("select w from Work w where w.title like %:question%")
+    List<Work> findWorksByTitle(String question);
+
+    @Query("select w from Work w where w.content like %:question%")
+    List<Work> findWorksByContents(String question);
+
+    @Query("select w from Work w " +
+            "where w.content like %:question% or w.title like %:question%")
+    List<Work> findWorksByTitleAndContents(String question);
+
+    @Query("select w " +
+            "from Work w " +
+            "join Publisher p on w.publisher.id = p.id " +
+            "where p.publisherName like :question")
+    List<Work> findWorksByPublisherName(String question);
+
+    @Query("select w " +
+            "from Work w " +
+            "join Member m on w.member.id = m.id " +
+            "where m.nickname like :question")
+    List<Work> findWorksByMemberNickName(String question);
+
+
+
+
 }

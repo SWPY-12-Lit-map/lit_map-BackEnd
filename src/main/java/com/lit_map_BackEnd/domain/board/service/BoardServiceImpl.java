@@ -2,10 +2,13 @@ package com.lit_map_BackEnd.domain.board.service;
 
 import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
 import com.lit_map_BackEnd.common.exception.code.ErrorCode;
+import com.lit_map_BackEnd.domain.board.dto.CategoryResultDto;
 import com.lit_map_BackEnd.domain.board.dto.ConfirmListDto;
+import com.lit_map_BackEnd.domain.board.dto.SearchDto;
 import com.lit_map_BackEnd.domain.board.dto.VersionInfo;
 import com.lit_map_BackEnd.domain.category.entity.Category;
 import com.lit_map_BackEnd.domain.category.repository.CategoryRepository;
+import com.lit_map_BackEnd.domain.category.service.CategoryService;
 import com.lit_map_BackEnd.domain.genre.entity.Genre;
 import com.lit_map_BackEnd.domain.genre.repository.GenreRepository;
 import com.lit_map_BackEnd.domain.member.entity.Member;
@@ -13,6 +16,7 @@ import com.lit_map_BackEnd.domain.member.repository.MemberRepository;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
 import com.lit_map_BackEnd.domain.work.entity.*;
 import com.lit_map_BackEnd.domain.work.repository.VersionRepository;
+import com.lit_map_BackEnd.domain.work.repository.WorkAuthorRepository;
 import com.lit_map_BackEnd.domain.work.repository.WorkRepository;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.JPAExpressions;
@@ -31,12 +35,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class BoardServiceImpl implements BoardService{
 
+    private final JPAQueryFactory jpaQueryFactory;
     private final WorkRepository workRepository;
     private final VersionRepository versionRepository;
     private final CategoryRepository categoryRepository;
     private final GenreRepository genreRepository;
     private final MemberRepository memberRepository;
-    private final JPAQueryFactory jpaQueryFactory;
+    private final CategoryService categoryService;
+    private final WorkAuthorRepository workAuthorRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -184,4 +190,69 @@ public class BoardServiceImpl implements BoardService{
             return map;
         }).toList();
     }
+
+    @Override
+    public Map<String, CategoryResultDto> findWorksBySearch(SearchDto searchDto) {
+        Map<String, CategoryResultDto> result = new HashMap<>();
+
+        List<Category> categories = categoryService.getCategories();
+        for (Category category : categories) {
+            result.put(category.getName(), new CategoryResultDto(0, new ArrayList<>()));
+        }
+
+        List<Work> worksByQuestion = new ArrayList<>();
+        String question = searchDto.getQuestion();
+        switch (searchDto.getSearchType()) {
+            case TITLE:
+                // 제목으로 검색하는 로직
+                worksByQuestion = workRepository.findWorksByTitle(question);
+                break;
+            case CONTENTS:
+                // 내용으로 검색하는 로직
+                worksByQuestion = workRepository.findWorksByContents(question);
+                break;
+            case AUTHOR:
+                // 저자로 검색하는 로직
+                worksByQuestion = workAuthorRepository.findByAuthorName(question);
+                break;
+            case PUBLISHER:
+                // 출판사로 검색하는 로직
+                worksByQuestion = workRepository.findWorksByPublisherName(question);
+                break;
+            case MEMBER:
+                // 회원으로 검색하는 로직
+                worksByQuestion = workRepository.findWorksByTitleAndContents(question);
+                break;
+            case TITLE_AND_CONTENTS:
+                // 제목과 내용 모두 검색하는 로직
+                worksByQuestion = workRepository.findWorksByTitleAndContents(question);
+                break;
+        }
+
+        // 각 검색 이후 return 값 설정
+        return processWorks(worksByQuestion, result);
+    }
+
+    private Map<String, CategoryResultDto> processWorks(List<Work> worksByQuestion, Map<String, CategoryResultDto> map) {
+        for (Work work : worksByQuestion) {
+            String name = work.getCategory().getName();
+            CategoryResultDto categoryResult = map.getOrDefault(name, new CategoryResultDto(0, new ArrayList<>()));
+
+            categoryResult.countUp();
+            categoryResult.getWorks().add(convertToWorkResponseDto(work));
+
+            map.put(name, categoryResult);
+        }
+        return map;
+    }
+
+    private WorkResponseDto convertToWorkResponseDto(Work work) {
+        return WorkResponseDto.builder()
+                .workId(work.getId())
+                .imageUrl(work.getImageUrl())
+                .title(work.getTitle())
+                .build();
+    }
+
+
 }
