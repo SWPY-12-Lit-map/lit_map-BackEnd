@@ -4,6 +4,7 @@ import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
 import com.lit_map_BackEnd.domain.member.dto.MemberDto;
 import com.lit_map_BackEnd.domain.member.dto.MemberUpdateDto;
+import com.lit_map_BackEnd.domain.member.entity.CustomUserDetails;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.service.MemberPublisherService;
 import com.lit_map_BackEnd.domain.member.service.MemberService;
@@ -38,6 +39,16 @@ public class MemberController {
                 .build();
 
         return new ResponseEntity<>(res, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/check-email")
+    public ResponseEntity<?> checkEmail(@RequestParam String litmapEmail) {
+        boolean exists = memberPublisherService.checkLitmapEmailExists(litmapEmail);
+        if (exists) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 존재하는 이메일입니다.");
+        } else {
+            return ResponseEntity.ok("사용 가능한 이메일입니다.");
+        }
     }
 
     @PostMapping("/login")
@@ -80,8 +91,9 @@ public class MemberController {
 
     @PutMapping("/update")
     @Operation(summary = "1인작가 마이페이지 수정", description = "1인작가의 마이페이지 정보를 수정합니다.")
-    public ResponseEntity<SuccessResponse<Member>> updateMember(@AuthenticationPrincipal User user, @RequestBody @Validated MemberUpdateDto memberUpdateDto) {
-        Member updatedMember = memberPublisherService.updateMember(user.getUsername(), memberUpdateDto);
+    public ResponseEntity<SuccessResponse<Member>> updateMember(
+            @AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody @Validated MemberUpdateDto memberUpdateDto) {
+        Member updatedMember = memberPublisherService.updateMember(userDetails.getMember().getLitmapEmail(), memberUpdateDto);
         SuccessResponse<Member> res = SuccessResponse.<Member>builder()
                 .result(updatedMember)
                 .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
