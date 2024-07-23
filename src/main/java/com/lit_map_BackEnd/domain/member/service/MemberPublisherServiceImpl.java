@@ -100,15 +100,19 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
                 .userImage(memberDto.getUserImage())
                 .urlLink(memberDto.getUrlLink())
                 .memberRoleStatus(memberDto.getMemberRoleStatus() != null ? memberDto.getMemberRoleStatus() : MemberRoleStatus.PENDING_MEMBER) // 기본값 설정
+                .withdrawalRequested(false) // 기본 값 설정
                 //.role(Role.PENDING_MEMBER) // 기본값 설정
                 .build();
 
-        if (member.getWithdrawalRequested() == null) {
-            member.setWithdrawalRequested(false);  // 기본값 설정
-        }
-
+//        if (member.getWithdrawalRequested() == null) {
+//            member.setWithdrawalRequested(false);  // 기본값 설정
+//        }
         return memberRepository.save(member);
     } // 1인작가 회원가입
+
+    public boolean checkLitmapEmailExists(String litmapEmail) {
+        return memberRepository.findByLitmapEmail(litmapEmail).isPresent();
+    }
 
     @Override
     @Transactional
@@ -137,6 +141,7 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
                 .myMessage(publisherDto.getMyMessage())
                 .userImage(publisherDto.getUserImage())
                 .publisher(publisher)
+                .withdrawalRequested(false) // 기본 값 설정
                 //.role(Role.PUBLISHER_MEMBER) // 출판사 회원 역할 설정
                 .build();
 
@@ -177,10 +182,10 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
 
         // 이메일 전송을 위한 내용 설정
         String subject = "litmap 임시 비밀번호 발송";
-        String content = "안녕하세요,\n\n임시 비밀번호는 다음과 같습니다: " + tempPw + "\n로그인 후 비밀번호를 변경해 주세요.\n\n감사합니다.";
+        String content = "안녕하세요,\n\n임시 비밀번호는 다음과 같습니다 : " + tempPw + "\n로그인 후 비밀번호를 변경해 주세요.\n\n감사합니다.";
 
         // 이메일 전송
-        emailService.sendEmail(request.getEmail(), subject, content);
+        emailService.sendEmail(member.getLitmapEmail(), subject, content);  // 수신자를 litmapEmail로 설정
 
         // 회원의 비밀번호를 임시 비밀번호로 설정
         member.setPassword(passwordEncoder.encode(tempPw));
@@ -221,7 +226,7 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
             return publisher;
         }
         throw new BusinessExceptionHandler(ErrorCode.PUBLISHER_NOT_FOUND);
-    }// 공공 API로 출판사 정보 가져오기 + 사업자확인도 필요
+    }// 사업자 api로 변경하기
 
     @Override
     public String findMemberEmail(String workEmail, String name) {
@@ -262,7 +267,6 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
         updateMemberFields(member, memberUpdateDto);
-
         return memberRepository.save(member);
     } // 1인 작가 마이페이지 수정
 
@@ -299,6 +303,9 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         }
         if (memberUpdateDto.getMyMessage() != null) {
             member.setMyMessage(memberUpdateDto.getMyMessage());
+        }
+        if (memberUpdateDto.getUrlLink() != null) {
+            member.setUrlLink(memberUpdateDto.getUrlLink());
         }
     }
 
