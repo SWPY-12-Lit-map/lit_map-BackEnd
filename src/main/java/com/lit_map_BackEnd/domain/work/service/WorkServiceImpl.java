@@ -47,14 +47,11 @@ public class WorkServiceImpl implements WorkService{
     private final AuthorService authorService;
     private final CastService castService;
     private final VersionService versionService;
-<<<<<<< HEAD
     private final MemberRepository memberRepository;
-=======
 
     @Autowired
     private final YoutubeService youtubeService;
 
->>>>>>> origin/feat-34
 
     /**
      *  데이터를 삽입하는 것과 업데이트하는것이 동시에 되어야 하기 때문에
@@ -280,15 +277,13 @@ public class WorkServiceImpl implements WorkService{
         // Youtube 정보 조회
         String workTitle = work.getTitle(); // 작품의 제목 가져오기
         List<Youtube> youtubeInfo = null;
-     try{
-        if (workTitle == null) {
-            //  youtubeInfo = youtubeService.getYoutubeInfo(workTitle); //예외처리가 안됨
+
+        try {
+            youtubeInfo = youtubeService.getYoutubeInfo(workTitle);
+        } catch (Exception e) {
             throw new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND);
         }
-        youtubeInfo = youtubeService.getYoutubeInfo(workTitle);
-         } catch (Exception e) {
-              throw new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND);
-         }
+
         List<Youtube> youtubeList = new ArrayList<>();
         if (youtubeInfo != null) {
 

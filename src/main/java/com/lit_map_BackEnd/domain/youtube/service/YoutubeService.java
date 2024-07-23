@@ -24,7 +24,7 @@ public class YoutubeService {
 
     public List<Youtube> getYoutubeInfo(String query) throws Exception {
         if (query == null || query.isEmpty()) {
-            throw new BusinessExceptionHandler(ErrorCode.KEYWORD_NOT_FOUND);
+            throw new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND);
         }
         
         //url 포맷 설정 , 기본 값 10개 (Results = 10)
