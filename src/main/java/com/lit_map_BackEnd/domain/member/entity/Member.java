@@ -47,9 +47,8 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberRoleStatus memberRoleStatus;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
     private Boolean withdrawalRequested = false; // 탈퇴 요청 여부, 기본값 false
-
 
     // 회원 여러 명 : 출판사 한 개
     @ManyToOne(fetch = FetchType.LAZY)

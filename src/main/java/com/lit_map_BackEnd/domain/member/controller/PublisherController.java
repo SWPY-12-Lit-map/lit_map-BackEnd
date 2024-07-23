@@ -41,6 +41,16 @@ public class PublisherController {
         return new ResponseEntity<>(res, HttpStatus.CREATED);
     }
 
+    @GetMapping("/check-email")
+    public ResponseEntity<?> checkEmail(@RequestParam String litmapEmail) {
+        boolean exists = memberPublisherService.checkLitmapEmailExists(litmapEmail);
+        if (exists) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 존재하는 이메일입니다.");
+        } else {
+            return ResponseEntity.ok("사용 가능한 이메일입니다.");
+        }
+    }
+
     @GetMapping("/fetch")
     @Operation(summary = "공공API를 사용하여 출판사 정보 가져오기", description = "공공API를 사용하여 출판사 정보를 가져옵니다.")
     public ResponseEntity<SuccessResponse<Publisher>> fetchPublisherFromApi(@RequestParam Long publisherNumber) {
