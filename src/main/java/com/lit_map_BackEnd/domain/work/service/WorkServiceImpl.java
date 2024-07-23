@@ -19,8 +19,12 @@ import com.lit_map_BackEnd.domain.work.dto.WorkRequestDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
 import com.lit_map_BackEnd.domain.work.entity.*;
 import com.lit_map_BackEnd.domain.work.repository.*;
+import com.lit_map_BackEnd.domain.youtube.entity.Youtube;
+//import com.lit_map_BackEnd.domain.youtube.service.YoutubeService;
+import com.lit_map_BackEnd.domain.youtube.service.YoutubeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -43,7 +47,14 @@ public class WorkServiceImpl implements WorkService{
     private final AuthorService authorService;
     private final CastService castService;
     private final VersionService versionService;
+<<<<<<< HEAD
     private final MemberRepository memberRepository;
+=======
+
+    @Autowired
+    private final YoutubeService youtubeService;
+
+>>>>>>> origin/feat-34
 
     /**
      *  데이터를 삽입하는 것과 업데이트하는것이 동시에 되어야 하기 때문에
@@ -266,6 +277,34 @@ public class WorkServiceImpl implements WorkService{
         // 이는 초기 로딩 속도와 네트워크 효율성을 고려하여 제작
         VersionResponseDto version = versionService.findVersionByWorkAndNumber(work.getId(), versionNum);
 
+        // Youtube 정보 조회
+        String workTitle = work.getTitle(); // 작품의 제목 가져오기
+        List<Youtube> youtubeInfo = null;
+     try{
+        if (workTitle == null) {
+            //  youtubeInfo = youtubeService.getYoutubeInfo(workTitle); //예외처리가 안됨
+            throw new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND);
+        }
+        youtubeInfo = youtubeService.getYoutubeInfo(workTitle);
+         } catch (Exception e) {
+              throw new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND);
+         }
+        List<Youtube> youtubeList = new ArrayList<>();
+        if (youtubeInfo != null) {
+
+            for (Youtube info : youtubeInfo) {
+                Youtube youtube = new Youtube(
+                        info.getTitle(),
+                        info.getVideoUrl(),
+                        info.getThumbnailUrl(),
+                        info.getViewCount(),
+                        info.getUploadDate()
+                );
+                youtubeList.add(youtube);
+            }
+
+        }
+
         return WorkResponseDto.builder()
                 .workId(work.getId())
                 .category(category.getName())
@@ -276,6 +315,7 @@ public class WorkServiceImpl implements WorkService{
                 .title(work.getTitle())
                 .contents(work.getContent())
                 .versions(version)
+                .youtubes(youtubeList)
                 .build();
     }
 }
