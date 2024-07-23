@@ -38,6 +38,16 @@ public class MemberController {
         return new ResponseEntity<>(res, HttpStatus.CREATED);
     }
 
+    @GetMapping("/check-email")
+    public ResponseEntity<?> checkEmail(@RequestParam String litmapEmail) {
+        boolean exists = memberPublisherService.checkLitmapEmailExists(litmapEmail);
+        if (exists) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 존재하는 이메일입니다.");
+        } else {
+            return ResponseEntity.ok("사용 가능한 이메일입니다.");
+        }
+    }
+
     @PostMapping("/login")
     @Operation(summary = "로그인", description = "1인작가 및 출판사 회원이 로그인합니다.")
     public ResponseEntity<SuccessResponse<Member>> login(@RequestParam String litmapEmail, @RequestParam String password) {

@@ -69,6 +69,11 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
 
     }
 
+    @Override
+    public boolean checkLitmapEmailExists(String litmapEmail) {
+        return memberRepository.existsByLitmapEmail(litmapEmail);
+    }
+
     private boolean isValidPassword(String password) {
         String regex = "^(?=.*[a-z])(?=.*\\d)[a-z\\d]{8,20}$";
         return Pattern.compile(regex).matcher(password).matches();

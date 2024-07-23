@@ -50,6 +50,10 @@ public class Member {
 
     @Enumerated(EnumType.STRING)
     private MemberRoleStatus memberRoleStatus;
+//    @Enumerated(EnumType.STRING)
+//    @Builder.Default
+//    private MemberRoleStatus memberRoleStatus = MemberRoleStatus.PENDING_MEMBER;
+
 
     @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
     private Boolean withdrawalRequested = false; // 탈퇴 요청 여부, 기본값 false

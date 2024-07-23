@@ -16,6 +16,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByWorkEmail(String workEmail);
     Optional<Member> findByNickname(String nickname);
 
+    boolean existsByLitmapEmail(String litmapEmail);
+
     @Modifying // 찾아서 수정하기
     @Query("UPDATE Member m SET m.password = :password WHERE m.id = :id")
     void updatePassword(@Param("id") Long id, @Param("password") String password);
