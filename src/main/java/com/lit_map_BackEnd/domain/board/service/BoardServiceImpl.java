@@ -221,7 +221,7 @@ public class BoardServiceImpl implements BoardService{
                 break;
             case MEMBER:
                 // 회원으로 검색하는 로직
-                worksByQuestion = workRepository.findWorksByTitleAndContents(question);
+                worksByQuestion = workRepository.findWorksByMemberNickName(question);
                 break;
             case TITLE_AND_CONTENTS:
                 // 제목과 내용 모두 검색하는 로직
