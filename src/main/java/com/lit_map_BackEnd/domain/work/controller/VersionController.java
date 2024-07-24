@@ -35,7 +35,7 @@ public class VersionController {
     }
 
     @PutMapping("/rollback/{workId}/{versionNum}")
-    @Operation(summary = "버전 수정으로 인한 롤백데이터 저장", description = "버전을 수정하면서 기존의 데이터를 롤백 테이블에 데이터 기입")
+    @Operation(summary = "수정하기 버튼", description = "버전을 수정하면서 기존의 데이터를 롤백 테이블에 데이터 기입")
     public ResponseEntity<SuccessResponse> updateVersion(@PathVariable(name = "workId") Long workId,
                                                          @PathVariable(name = "versionNum") Double versionNum) {
         // 롤백 테이블에 데이터 저장
