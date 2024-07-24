@@ -272,6 +272,7 @@ public class WorkServiceImpl implements WorkService{
                 .genre(workGenresList)
                 .author(workAuthorsList)
                 .imageUrl(work.getImageUrl())
+                .publisherDate(work.getPublisherDate())
                 .memberName(memberName)
                 .title(work.getTitle())
                 .contents(work.getContent())

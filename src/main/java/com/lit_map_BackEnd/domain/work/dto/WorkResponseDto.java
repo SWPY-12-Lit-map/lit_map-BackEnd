@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -16,6 +17,7 @@ public class WorkResponseDto {
     private String category;
     private List<String> genre;
     private List<String> author;
+    private LocalDateTime publisherDate;
     private String imageUrl;
     private String memberName;
     private String publisherName;
