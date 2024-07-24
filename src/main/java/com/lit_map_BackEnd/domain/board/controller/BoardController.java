@@ -107,7 +107,7 @@ public class BoardController {
     }
 
     // 각 특징을 통해 작품을 검색해서 나열
-    @GetMapping("/search")
+    @PostMapping("/search")
     @Operation(summary = "검색", description = "각 타입과 내용으로 검색하기")
     public ResponseEntity<SuccessResponse> getWorksByQuestion(@RequestBody SearchDto searchDto) {
         Map<String, CategoryResultDto> worksBySearch = boardService.findWorksBySearch(searchDto);
