@@ -24,7 +24,7 @@ public class EmailServiceImpl implements EmailService {
     public void sendEmail(String to, String subject, String text) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("sooho7767@naver.com");  // 발신자 이메일 고정
+        //    message.setFrom("sooho7767@naver.com");  // 발신자 이메일 고정
             message.setTo(to);  // 수신자 이메일
             message.setSubject(subject);
             message.setText(text);
