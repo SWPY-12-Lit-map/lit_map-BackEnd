@@ -4,8 +4,11 @@ import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
 import com.lit_map_BackEnd.domain.member.dto.MemberDto;
 import com.lit_map_BackEnd.domain.member.dto.MemberUpdateDto;
+import com.lit_map_BackEnd.domain.member.dto.PublisherDto;
+import com.lit_map_BackEnd.domain.member.dto.PublisherUpdateDto;
 import com.lit_map_BackEnd.domain.member.entity.CustomUserDetails;
 import com.lit_map_BackEnd.domain.member.entity.Member;
+import com.lit_map_BackEnd.domain.member.entity.Publisher;
 import com.lit_map_BackEnd.domain.member.service.MemberPublisherService;
 import com.lit_map_BackEnd.domain.member.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +30,7 @@ public class MemberController {
     private final HttpSession session;
 
     @PostMapping("/register")
-    @Operation(summary = "1인작가 회원가입", description = "새로운 1인작가 회원을 등록합니다.")
+    @Operation(summary = "회원가입", description = "새로운 회원을 등록합니다.")
     public ResponseEntity<SuccessResponse<Member>> registerMember(@RequestBody @Validated MemberDto memberDto) {
         Member savedMember = memberPublisherService.saveMember(memberDto);
 
@@ -52,9 +54,11 @@ public class MemberController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "로그인", description = "1인작가 및 출판사 회원이 로그인합니다.")
+    @Operation(summary = "로그인", description = "회원이 로그인합니다.")
     public ResponseEntity<SuccessResponse<Member>> login(@RequestParam String litmapEmail, @RequestParam String password) {
         Member loggedMember = memberPublisherService.login(litmapEmail, password);
+
+        session.setAttribute("loggedInUser", loggedMember); // 세션에 로그인된 사용자 정보 저장
 
         SuccessResponse<Member> res = SuccessResponse.<Member>builder()
                 .result(loggedMember)
@@ -90,7 +94,7 @@ public class MemberController {
     }
 
     @PutMapping("/update")
-    @Operation(summary = "1인작가 마이페이지 수정", description = "1인작가의 마이페이지 정보를 수정합니다.")
+    @Operation(summary = "마이페이지 수정", description = "회원의 마이페이지 정보를 수정합니다.")
     public ResponseEntity<SuccessResponse<Member>> updateMember(
             @AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody @Validated MemberUpdateDto memberUpdateDto) {
         Member updatedMember = memberPublisherService.updateMember(userDetails.getMember().getLitmapEmail(), memberUpdateDto);
@@ -105,7 +109,7 @@ public class MemberController {
     @PostMapping("/{memberId}/request-withdrawal")
     @Operation(summary = "회원 탈퇴 요청", description = "회원의 탈퇴를 요청합니다.")
     public ResponseEntity<SuccessResponse<String>> requestMemberWithdrawal(@PathVariable Long memberId) {
-        memberService.requestMemberWithdrawal(memberId);
+        memberService.requestWithdrawal(memberId);
         SuccessResponse<String> res = SuccessResponse.<String>builder()
                 .result("회원 탈퇴 요청이 완료되었습니다.")
                 .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
@@ -117,7 +121,7 @@ public class MemberController {
     @PostMapping("/{memberId}/approve-withdrawal")
     @Operation(summary = "회원 탈퇴 승인", description = "회원의 탈퇴를 승인합니다.")
     public ResponseEntity<SuccessResponse<String>> approveMemberWithdrawal(@PathVariable Long memberId) {
-        memberService.approveMemberWithdrawal(memberId);
+        memberService.approveWithdrawal(memberId);
         SuccessResponse<String> res = SuccessResponse.<String>builder()
                 .result("회원 탈퇴가 승인되었습니다.")
                 .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
@@ -125,5 +129,4 @@ public class MemberController {
                 .build();
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
-
 }
