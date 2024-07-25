@@ -46,33 +46,39 @@ public class BoardServiceImpl implements BoardService{
 
     @Override
     @Transactional(readOnly = true)
-    public List<ConfirmListDto> getConfirmData() {
+    public List<WorkResponseDto> getConfirmData() {
         QWork work = QWork.work;
         QVersion version = QVersion.version;
 
         List<Tuple> results = jpaQueryFactory
-                .select(work.title, version.versionName)
+                .select(work.id, work.title,
+                        version.versionName, version.updatedDate)
                 .from(work)
                 .join(version).on(version.work.eq(work))
                 .where(version.confirm.eq(Confirm.CONFIRM))
                 .fetch();
 
-        Map<String, List<String>> workToVersionsMap = new HashMap<>();
+        Map<Long, WorkResponseDto> workToVersionsMap = new HashMap<>();
         for (Tuple tuple : results) {
+            Long workId = tuple.get(work.id);
             String workTitle = tuple.get(work.title);
             String versionName = tuple.get(version.versionName);
+            LocalDateTime updatedDate = tuple.get(version.updatedDate);
 
-            workToVersionsMap.computeIfAbsent(workTitle, k -> new ArrayList<>())
-                    .add(versionName);
+            WorkResponseDto workResponseDto = workToVersionsMap.computeIfAbsent(workId, id -> WorkResponseDto.builder()
+                    .workId(workId)
+                    .title(workTitle)
+                    .versionList(new ArrayList<>())
+                    .build());
+
+            VersionListDto build = VersionListDto.builder()
+                    .versionName(versionName)
+                    .lastUpdateDate(updatedDate)
+                    .build();
+            workResponseDto.getVersionList().add(build);
         }
 
-        return workToVersionsMap.entrySet().stream()
-                .filter(entry -> !entry.getValue().isEmpty())
-                .map(entry -> ConfirmListDto.builder()
-                        .workTitle(entry.getKey())
-                        .versionList(entry.getValue())
-                        .build())
-                .collect(Collectors.toList());
+        return new ArrayList<>(workToVersionsMap.values());
     }
 
     @Override
@@ -289,8 +295,6 @@ public class BoardServiceImpl implements BoardService{
                         .and(version.confirm.eq(Confirm.COMPLETE)))
                 .fetchCount();
 
-        System.out.println("fullCount = " + fullCount);
-        System.out.println("completeCount = " + completeCount);
         map.put("작성한 글", completeCount);
         map.put("작성중인 글", fullCount - completeCount);
 

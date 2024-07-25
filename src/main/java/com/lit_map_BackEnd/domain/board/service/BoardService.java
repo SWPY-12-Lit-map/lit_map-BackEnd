@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface BoardService {
-    List<ConfirmListDto> getConfirmData();
+    List<WorkResponseDto> getConfirmData();
     MyWorkListResponseDto getMyWorkList();
     Slice<WorkResponseDto> getWorkListByView(int pageNum);
     Slice<WorkResponseDto> getWorkListByUpdateDate(int pageNum);

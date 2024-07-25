@@ -27,7 +27,7 @@ public class BoardController {
     @Operation(summary = "승인 대기 목록", description = "승인 대기 중 작품들 작품-버전List로 데이터 가져오기")
     public ResponseEntity<SuccessResponse> getConfirmVersion() {
 
-        List<ConfirmListDto> confirmData = boardService.getConfirmData();
+        List<WorkResponseDto> confirmData = boardService.getConfirmData();
 
         SuccessResponse res = SuccessResponse.builder()
                 .result(confirmData)
