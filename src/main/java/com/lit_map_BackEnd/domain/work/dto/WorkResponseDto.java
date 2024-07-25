@@ -1,6 +1,7 @@
 package com.lit_map_BackEnd.domain.work.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.lit_map_BackEnd.domain.youtube.entity.Youtube;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,5 +23,7 @@ public class WorkResponseDto {
     private String title;
     private String contents;
     private VersionResponseDto versions;
+    // 한가지 작품 반환시 사용
     private List<VersionListDto> versionList;
+    private List<Youtube> youtubes;
 }

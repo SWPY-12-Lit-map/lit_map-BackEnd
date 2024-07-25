@@ -2,10 +2,12 @@ package com.lit_map_BackEnd.domain.member.controller;
 
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
-import com.lit_map_BackEnd.domain.member.dto.*;
+import com.lit_map_BackEnd.domain.member.dto.MemberDto;
+import com.lit_map_BackEnd.domain.member.dto.PublisherDto;
+import com.lit_map_BackEnd.domain.member.dto.PublisherMemberRequestDto;
+import com.lit_map_BackEnd.domain.member.dto.PublisherUpdateDto;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.entity.Publisher;
-import com.lit_map_BackEnd.domain.member.service.BusinessVerificationService;
 import com.lit_map_BackEnd.domain.member.service.MemberPublisherService;
 import com.lit_map_BackEnd.domain.member.service.PublisherService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,7 +27,6 @@ public class PublisherController {
 
     private final PublisherService publisherService;
     private final MemberPublisherService memberPublisherService;
-    private final BusinessVerificationService businessVerificationService;
     private final HttpSession session;
 
     @PostMapping("/register")
@@ -40,13 +41,22 @@ public class PublisherController {
         return new ResponseEntity<>(res, HttpStatus.CREATED);
     }
 
-    @PostMapping("/verify")
-    @CrossOrigin(origins = "*", methods = RequestMethod.POST)
-    @Operation(summary = "사업자 정보 진위 확인", description = "공공API를 사용하여 사업자 정보를 확인합니다.")
-    public ResponseEntity<SuccessResponse<BusinessVerificationResponse>> verifyBusiness(@RequestBody BusinessVerificationRequest request) {
-        BusinessVerificationResponse response = businessVerificationService.verifyBusiness(request);
-        SuccessResponse<BusinessVerificationResponse> res = SuccessResponse.<BusinessVerificationResponse>builder()
-                .result(response)
+    @GetMapping("/check-email")
+    public ResponseEntity<?> checkEmail(@RequestParam String litmapEmail) {
+        boolean exists = memberPublisherService.checkLitmapEmailExists(litmapEmail);
+        if (exists) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 존재하는 이메일입니다.");
+        } else {
+            return ResponseEntity.ok("사용 가능한 이메일입니다.");
+        }
+    }
+
+    @GetMapping("/fetch")
+    @Operation(summary = "공공API를 사용하여 출판사 정보 가져오기", description = "공공API를 사용하여 출판사 정보를 가져옵니다.")
+    public ResponseEntity<SuccessResponse<Publisher>> fetchPublisherFromApi(@RequestParam Long publisherNumber) {
+        Publisher fetchedPublisher = memberPublisherService.fetchPublisherFromApi(publisherNumber);
+        SuccessResponse<Publisher> res = SuccessResponse.<Publisher>builder()
+                .result(fetchedPublisher)
                 .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
                 .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
                 .build();
@@ -70,10 +80,6 @@ public class PublisherController {
     @PutMapping("/update")
     @Operation(summary = "출판사 직원 마이페이지 수정", description = "출판사 직원의 마이페이지 정보를 수정합니다.")
     public ResponseEntity<SuccessResponse<Member>> updatePublisher(@AuthenticationPrincipal User user, @RequestBody @Validated PublisherUpdateDto publisherUpdateDto) {
-        if (user == null) {
-            throw new IllegalArgumentException("User must be authenticated");
-        }
-
         Member updatedPublisher = memberPublisherService.updatePublisherMember(user.getUsername(), publisherUpdateDto);
         SuccessResponse<Member> res = SuccessResponse.<Member>builder()
                 .result(updatedPublisher)

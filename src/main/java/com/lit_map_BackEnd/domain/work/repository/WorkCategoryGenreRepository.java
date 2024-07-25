@@ -12,4 +12,5 @@ public interface WorkCategoryGenreRepository extends JpaRepository<WorkCategoryG
     boolean existsByWorkAndCategoryAndGenre(Work work, Category category, Genre genre);
 
     List<WorkCategoryGenre> findWorkCategoryGenreByCategoryAndGenre(Category category, Genre genre);
+
 }

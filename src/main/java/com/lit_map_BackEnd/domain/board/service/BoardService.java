@@ -1,6 +1,8 @@
 package com.lit_map_BackEnd.domain.board.service;
 
+import com.lit_map_BackEnd.domain.board.dto.CategoryResultDto;
 import com.lit_map_BackEnd.domain.board.dto.ConfirmListDto;
+import com.lit_map_BackEnd.domain.board.dto.SearchDto;
 import com.lit_map_BackEnd.domain.board.dto.VersionInfo;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
 import com.lit_map_BackEnd.domain.work.entity.Work;
@@ -17,4 +19,5 @@ public interface BoardService {
 
     List<Map<String, Object>> getWorkByCategoryAndGenre(Long categoryId, Long genreId);
 
+    Map<String, CategoryResultDto> findWorksBySearch(SearchDto searchDto);
 }

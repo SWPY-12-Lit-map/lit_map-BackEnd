@@ -2,7 +2,9 @@ package com.lit_map_BackEnd.domain.board.controller;
 
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
+import com.lit_map_BackEnd.domain.board.dto.CategoryResultDto;
 import com.lit_map_BackEnd.domain.board.dto.ConfirmListDto;
+import com.lit_map_BackEnd.domain.board.dto.SearchDto;
 import com.lit_map_BackEnd.domain.board.dto.VersionInfo;
 import com.lit_map_BackEnd.domain.board.service.BoardService;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
@@ -105,15 +107,18 @@ public class BoardController {
     }
 
     // 각 특징을 통해 작품을 검색해서 나열
-    // 1. 제목
+    @GetMapping("/search")
+    @Operation(summary = "검색", description = "각 타입과 내용으로 검색하기")
+    public ResponseEntity<SuccessResponse> getWorksByQuestion(@RequestBody SearchDto searchDto) {
+        Map<String, CategoryResultDto> worksBySearch = boardService.findWorksBySearch(searchDto);
 
-    // 2. 내용
+        SuccessResponse res = SuccessResponse.builder()
+                .result(worksBySearch)
+                .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
+                .build();
 
-    // 3. 제목 + 내용
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
 
-    // 4. 작가
-
-    // 5. 출판사
-
-    // 6. 제작자
 }

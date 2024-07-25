@@ -19,8 +19,11 @@ import com.lit_map_BackEnd.domain.work.dto.WorkRequestDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
 import com.lit_map_BackEnd.domain.work.entity.*;
 import com.lit_map_BackEnd.domain.work.repository.*;
+import com.lit_map_BackEnd.domain.youtube.entity.Youtube;
+import com.lit_map_BackEnd.domain.youtube.service.YoutubeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -45,6 +48,11 @@ public class WorkServiceImpl implements WorkService{
     private final VersionService versionService;
     private final MemberRepository memberRepository;
 
+
+    @Autowired
+    private final YoutubeService youtubeService;
+
+
     /**
      *  데이터를 삽입하는 것과 업데이트하는것이 동시에 되어야 하기 때문에
      *  계속된 더티체킹을 하게 된다. 굉장히 비효율적인거 같은데 어떻게 하면 좋을까
@@ -59,7 +67,6 @@ public class WorkServiceImpl implements WorkService{
         Work work = null;
         Version version = null;
 
-        // 멤버 확인 ( 현재는 null 로 생성 )
         Member member = memberRepository.findById(workRequestDto.getMemberId())
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
@@ -100,6 +107,7 @@ public class WorkServiceImpl implements WorkService{
         if (workRequestDto.getImageUrl() != null && !workRequestDto.getImageUrl().isBlank()) {
             work.changeImageUrl(workRequestDto.getImageUrl());
         } else work.changeImageUrl("대체 이미지 URL");
+
 
         // 설명 추가
         if (workRequestDto.getContents() != null && !workRequestDto.getContents().isBlank()) {
@@ -266,6 +274,32 @@ public class WorkServiceImpl implements WorkService{
         // 이는 초기 로딩 속도와 네트워크 효율성을 고려하여 제작
         VersionResponseDto version = versionService.findVersionByWorkAndNumber(work.getId(), versionNum);
 
+        // Youtube 정보 조회
+        String workTitle = work.getTitle(); // 작품의 제목 가져오기
+        List<Youtube> youtubeInfo = null;
+
+        try {
+            youtubeInfo = youtubeService.getYoutubeInfo(workTitle);
+        } catch (Exception e) {
+            throw new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND);
+        }
+        List<Youtube> youtubeList = new ArrayList<>();
+
+        if (youtubeInfo != null) {
+
+            for (Youtube info : youtubeInfo) {
+                Youtube youtube = new Youtube(
+                        info.getTitle(),
+                        info.getVideoUrl(),
+                        info.getThumbnailUrl(),
+                        info.getViewCount(),
+                        info.getUploadDate()
+                );
+                youtubeList.add(youtube);
+            }
+
+        }
+
         return WorkResponseDto.builder()
                 .workId(work.getId())
                 .category(category.getName())
@@ -276,6 +310,7 @@ public class WorkServiceImpl implements WorkService{
                 .title(work.getTitle())
                 .contents(work.getContent())
                 .versions(version)
+                .youtubes(youtubeList)
                 .build();
     }
 }
