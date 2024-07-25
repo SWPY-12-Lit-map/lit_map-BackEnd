@@ -107,7 +107,21 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
 //        if (member.getWithdrawalRequested() == null) {
 //            member.setWithdrawalRequested(false);  // 기본값 설정
 //        }
-        return memberRepository.save(member);
+      //  return memberRepository.save(member);
+            Member savedMember = memberRepository.save(member);
+
+        // (1인작가) 회원 가입 승인 이메일 전송
+        String subject = "[litmap] 회원 가입 승인";
+        String content = "<div style=\"margin:30px;\"><img src=\"data:image/png;base64,iVBORw0qMPdgAAAAASUVORK5CYII=\\\"/>"
+                + "<br><h2>회원 가입 완료</h2><h4>"
+                + memberDto.getName()
+                + "님 회원 가입 승인되었습니다.</h4></div>";
+
+        emailService.sendEmail(memberDto.getLitmapEmail(), subject, content);
+
+        return savedMember;
+
+
     } // 1인작가 회원가입
 
     public boolean checkLitmapEmailExists(String litmapEmail) {
@@ -147,7 +161,22 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
 
         publisher.getMemberList().add(member);
 
-        return publisherRepository.save(publisher);
+        //return publisherRepository.save(publisher);
+
+        Publisher savedPublisher = publisherRepository.save(publisher);
+
+        // (출판사) 회원 가입 승인 이메일 전송
+        String subject = "[litmap] 회원 가입 승인";
+        String content = "<div style=\"margin:30px;\"><img src=\"data:image/png;base64,iVBORw0qMPdgAAAAASUVORK5CYII=\\\"/>"
+                + "<br><h2>회원 가입 완료</h2><h4>"
+                + publisherDto.getPublisherName()
+                + "님 회원 가입 승인되었습니다.</h4></div>";
+
+        emailService.sendEmail(publisherDto.getLitmapEmail(), subject, content);
+
+        return savedPublisher;
+
+
     } // 출판사 회원가입
 
     @Override
@@ -181,8 +210,11 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         String tempPw = generateTempPassword();
 
         // 이메일 전송을 위한 내용 설정
-        String subject = "litmap 임시 비밀번호 발송";
-        String content = "안녕하세요,\n\n임시 비밀번호는 다음과 같습니다 : " + tempPw + "\n로그인 후 비밀번호를 변경해 주세요.\n\n감사합니다.";
+        String subject = "[litmap] 임시 비밀번호 발송";
+        String content = "<div style=\"margin:30px;\"><img src=\"data:image/png;base64,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\\\"/>"
+                        + "<br><br><h2>비밀번호 확인</h2><h4>고객님의 임시 비밀번호를 아래에서 확인하세요.</h4><br><br><br><h4>"
+                        + tempPw
+                        + "</h4><br><button style=\\\"background-color: #1890FF; color: white; font-size: 16px; border: none; border-radius: 5px; padding: 10px 20px;\\\">복사하기</button></div>";
 
         // 이메일 전송
         emailService.sendEmail(member.getLitmapEmail(), subject, content);  // 수신자를 litmapEmail로 설정

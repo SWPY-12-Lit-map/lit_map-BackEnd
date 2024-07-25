@@ -7,6 +7,7 @@ import com.lit_map_BackEnd.domain.character.entity.Cast;
 import com.lit_map_BackEnd.domain.character.entity.RollBackCast;
 import com.lit_map_BackEnd.domain.character.repository.CastRepository;
 import com.lit_map_BackEnd.domain.character.service.CastService;
+import com.lit_map_BackEnd.domain.member.service.EmailService;
 import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
 import com.lit_map_BackEnd.domain.work.dto.VersionResponseDto;
 import com.lit_map_BackEnd.domain.work.entity.*;
@@ -41,8 +42,8 @@ public class VersionServiceImpl implements VersionService{
     private final CastService castService;
 
     private final MemberRepository memberRepository;
-    private final MailService mailService;
-
+  //  private final MailService mailService;
+    private final EmailService emailService;
 
     // 기존의 버전 정보 업데이트하기
     @Override
@@ -203,22 +204,18 @@ public class VersionServiceImpl implements VersionService{
         Member member = memberRepository.findById(work.getMember().getId())
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
-        String mailAddress = member.getLitmapEmail();
-        //등록 승인
-        String subject = "[litmap] 작품 승인 완료 알림";
-        String text = "작품이 성공적으로 승인되었습니다.";
 
+        // 작품 등록 승인
+        String subject = "[litmap] 작품 승인 완료";
+        String content = "<div style=\"margin:30px;\"><img src=\"data:image/png;base64,iVBORw0qMPdgAAAAASUVORK5CYII=\\\"/>"
+                + "<br><h2>작품 승인 완료</h2><h4>작품 ("
+                + work.getTitle()
+                + "이 등록 승인 완료되었습니다.</h4><br></div>"; //수정 승인...?
+
+        emailService.sendEmail(member.getLitmapEmail(), subject, content);
         //삭제
 
         //수정 승인
 
-        MailDto mailDTO = new MailDto(mailAddress, subject, text);
-
-        try {
-            mailService.sendMail(mailDTO);
-        } catch (MailException e) {
-            // 메일 발송 실패 시 처리 로직
-            e.printStackTrace(); // 예외 처리를 좀 더 구체적으로 해야 함
-        }
     }
 }
