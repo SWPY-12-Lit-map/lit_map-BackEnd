@@ -26,4 +26,5 @@ public class WorkResponseDto {
     private VersionResponseDto versions;
     // 한가지 작품 반환시 사용
     private List<VersionListDto> versionList;
+    private String mainAuthor;
 }

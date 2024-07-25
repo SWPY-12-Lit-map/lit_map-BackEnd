@@ -13,8 +13,7 @@ public interface BoardService {
     MyWorkListResponseDto getMyWorkList();
     Slice<WorkResponseDto> getWorkListByView(int pageNum);
     Slice<WorkResponseDto> getWorkListByUpdateDate(int pageNum);
-
     List<Map<String, Object>> getWorkByCategoryAndGenre(Long categoryId, Long genreId);
-
     Map<String, CategoryResultDto> findWorksBySearch(SearchDto searchDto);
+    Map<String, Long> getWorksCount();
 }

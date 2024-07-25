@@ -118,4 +118,18 @@ public class BoardController {
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
+    @GetMapping("/workCount")
+    @Operation(summary = "작품 갯수", description = "나의 완성 작품과 미완성 작품 갯수 가져오기")
+    public ResponseEntity<SuccessResponse> getWorkCount() {
+        Map<String, Long> worksCount = boardService.getWorksCount();
+
+        SuccessResponse res = SuccessResponse.builder()
+                .result(worksCount)
+                .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
+                .build();
+
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
 }

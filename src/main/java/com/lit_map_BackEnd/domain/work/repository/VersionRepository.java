@@ -42,5 +42,4 @@ public interface VersionRepository extends JpaRepository<Version, Long> {
             "ORDER BY max_updated_date DESC "
             , nativeQuery = true)
     Slice<Object[]> findLatestUpdateDates(Pageable pageable);
-
 }

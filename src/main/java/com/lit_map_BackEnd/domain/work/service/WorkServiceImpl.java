@@ -168,6 +168,8 @@ public class WorkServiceImpl implements WorkService{
                 WorkAuthor workAuthor = WorkAuthor.builder().work(work).author(authorName).build();
                 work.getWorkAuthors().add(workAuthor);
             }
+        } else {
+            work.mainAuthorSetting("미상");
         }
 
         // 각 캐릭터 저장

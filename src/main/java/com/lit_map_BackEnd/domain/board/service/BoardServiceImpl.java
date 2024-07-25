@@ -17,6 +17,7 @@ import com.lit_map_BackEnd.domain.work.repository.VersionRepository;
 import com.lit_map_BackEnd.domain.work.repository.WorkAuthorRepository;
 import com.lit_map_BackEnd.domain.work.repository.WorkRepository;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -261,6 +262,41 @@ public class BoardServiceImpl implements BoardService{
         return processWorks(worksByQuestion, result);
     }
 
+    @Override
+    public Map<String, Long> getWorksCount() {
+        Map<String, Long> map = new HashMap<>();
+
+        Member member = memberRepository.findById(1L)
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
+
+        // 각 멤버의 작품을 검색하고 각 작품의 버전을 검색해서 complete와 나머지를 따로 검색
+        QWork work = QWork.work;
+        QVersion version = QVersion.version;
+        long fullCount = jpaQueryFactory
+                .select(Expressions.constant(member.getId()))
+                .from(version)
+                .join(work)
+                .on(version.work.id.eq(work.id))
+                .where(work.member.id.eq(member.getId()))
+                .fetchCount();
+
+        long completeCount = jpaQueryFactory
+                .select(Expressions.constant(member.getId()))
+                .from(version)
+                .join(work)
+                .on(version.work.id.eq(work.id))
+                .where(work.member.id.eq(member.getId())
+                        .and(version.confirm.eq(Confirm.COMPLETE)))
+                .fetchCount();
+
+        System.out.println("fullCount = " + fullCount);
+        System.out.println("completeCount = " + completeCount);
+        map.put("작성한 글", completeCount);
+        map.put("작성중인 글", fullCount - completeCount);
+
+        return map;
+    }
+
     private Map<String, CategoryResultDto> processWorks(List<Work> worksByQuestion, Map<String, CategoryResultDto> map) {
         for (Work work : worksByQuestion) {
             String name = work.getCategory().getName();
@@ -277,10 +313,9 @@ public class BoardServiceImpl implements BoardService{
     private WorkResponseDto convertToWorkResponseDto(Work work) {
         return WorkResponseDto.builder()
                 .workId(work.getId())
+                .mainAuthor(work.getMainAuthor())
                 .imageUrl(work.getImageUrl())
                 .title(work.getTitle())
                 .build();
     }
-
-
 }
