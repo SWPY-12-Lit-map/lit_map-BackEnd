@@ -4,10 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @Builder
-public class VersionInfo {
-    private String versionName;
-    private String confirm;
+public class MyWorkListResponseDto {
+    private int totalCount;
+    private List<MyWorkListDto> list;
 }

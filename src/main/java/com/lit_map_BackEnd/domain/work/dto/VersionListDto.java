@@ -6,13 +6,17 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VersionListDto implements Comparable<VersionListDto>{
+    private Long versionId;
     private Double versionNum;
     private String versionName;
+    private LocalDateTime lastUpdateDate;
     private Confirm confirm;
 
     @Override

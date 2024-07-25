@@ -19,6 +19,8 @@ public interface WorkRepository extends JpaRepository<Work, Long> {
     boolean existsByTitle(String title);
     Work findByTitle(String title);
     void deleteById(Long workId);
+
+    @Query("select w from Work w where w.member = :member")
     List<Work> findByMember(Member member);
 
     @Modifying

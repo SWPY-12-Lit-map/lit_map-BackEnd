@@ -2,10 +2,7 @@ package com.lit_map_BackEnd.domain.board.controller;
 
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
-import com.lit_map_BackEnd.domain.board.dto.CategoryResultDto;
-import com.lit_map_BackEnd.domain.board.dto.ConfirmListDto;
-import com.lit_map_BackEnd.domain.board.dto.SearchDto;
-import com.lit_map_BackEnd.domain.board.dto.VersionInfo;
+import com.lit_map_BackEnd.domain.board.dto.*;
 import com.lit_map_BackEnd.domain.board.service.BoardService;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,7 +42,7 @@ public class BoardController {
     @GetMapping("/myWorkList")
     @Operation(summary = "나의 작품 목록", description = "내가 등록한 작품-버전 list로 가져오기")
     public ResponseEntity<SuccessResponse> getMyWorkList() {
-        Map<String, List<VersionInfo>> myWorkList = boardService.getMyWorkList();
+        MyWorkListResponseDto myWorkList = boardService.getMyWorkList();
 
         SuccessResponse res = SuccessResponse.builder()
                 .result(myWorkList)

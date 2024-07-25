@@ -2,10 +2,7 @@ package com.lit_map_BackEnd.domain.board.service;
 
 import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
 import com.lit_map_BackEnd.common.exception.code.ErrorCode;
-import com.lit_map_BackEnd.domain.board.dto.CategoryResultDto;
-import com.lit_map_BackEnd.domain.board.dto.ConfirmListDto;
-import com.lit_map_BackEnd.domain.board.dto.SearchDto;
-import com.lit_map_BackEnd.domain.board.dto.VersionInfo;
+import com.lit_map_BackEnd.domain.board.dto.*;
 import com.lit_map_BackEnd.domain.category.entity.Category;
 import com.lit_map_BackEnd.domain.category.repository.CategoryRepository;
 import com.lit_map_BackEnd.domain.category.service.CategoryService;
@@ -13,6 +10,7 @@ import com.lit_map_BackEnd.domain.genre.entity.Genre;
 import com.lit_map_BackEnd.domain.genre.repository.GenreRepository;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.repository.MemberRepository;
+import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
 import com.lit_map_BackEnd.domain.work.entity.*;
 import com.lit_map_BackEnd.domain.work.repository.VersionRepository;
@@ -27,6 +25,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -77,14 +76,30 @@ public class BoardServiceImpl implements BoardService{
 
     @Override
     @Transactional(readOnly = true)
-    public Map<String, List<VersionInfo>> getMyWorkList() {
+    public MyWorkListResponseDto getMyWorkList() {
         // 멤버 아이디 가져오고 그걸로 멤버 찾아서 null 확인
         Member member = memberRepository.findById(1L)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
+        // 각 멤버의 작품을 가져와서 map에 미리 저장
+        List<Work> byMember = workRepository.findByMember(member);
+        Map<Long, MyWorkListDto> map = new HashMap<>();
+
+        // map에 해당 작품 정보 미리 저장
+        for (Work work : byMember) {
+            MyWorkListDto build = MyWorkListDto.builder()
+                    .title(work.getTitle())
+                    .category(work.getCategory().getName())
+                    .mainAuthor(work.getMainAuthor())
+                    .publisher(work.getPublisher().getPublisherName())
+                    .build();
+
+            map.put(work.getId(), build);
+        }
+
+        // 2. 각 작품의 버전 리스트 삽입
         QWork work = QWork.work;
         QVersion version = QVersion.version;
-
         // memberId를 이용한 작성 작품 가져오기
         JPQLQuery<Long> subQuery = JPAExpressions
                 .select(work.id)
@@ -92,29 +107,42 @@ public class BoardServiceImpl implements BoardService{
                 .where(work.member.id.eq(member.getId()));
 
         List<Tuple> fetch = jpaQueryFactory
-                .select(work.title, version.versionName, version.confirm)
+                .select(work.id, version.id, version.versionName,
+                        version.updatedDate, version.confirm)
                 .from(work)
                 .join(version)
                 .on(version.work.id.eq(work.id))
                 .where(work.id.in(subQuery))
                 .fetch();
 
-        Map<String, List<VersionInfo>> workToVersionsMap = new HashMap<>();
         for (Tuple tuple : fetch) {
-            String workTitle = tuple.get(work.title);
+            Long workId = tuple.get(work.id);
+            Long versionId = tuple.get(version.id);
             String versionName = tuple.get(version.versionName);
+            LocalDateTime versionUpdateDate = tuple.get(version.updatedDate);
             Confirm confirm = tuple.get(version.confirm);
 
-            VersionInfo build = VersionInfo.builder()
+            VersionListDto build = VersionListDto.builder()
+                    .versionId(versionId)
                     .versionName(versionName)
-                    .confirm(confirm.name())
+                    .lastUpdateDate(versionUpdateDate)
+                    .confirm(confirm)
                     .build();
 
-            workToVersionsMap.computeIfAbsent(workTitle, k -> new ArrayList<>())
-                    .add(build);
+            // 만들어진 버전 정보 반환값에 저장
+            MyWorkListDto myWorkListDtos = map.get(workId);
+            myWorkListDtos.getVersionLists().add(build);
         }
 
-        return workToVersionsMap;
+        // 전체 작품 갯수
+        int totalSize = map.values().stream()
+                .mapToInt(dto -> dto.getVersionLists().size())
+                .sum();
+
+        return MyWorkListResponseDto.builder()
+                .totalCount(totalSize)
+                .list(new ArrayList<>(map.values()))
+                .build();
     }
 
     @Override
