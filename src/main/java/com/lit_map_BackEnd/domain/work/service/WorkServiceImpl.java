@@ -176,6 +176,8 @@ public class WorkServiceImpl implements WorkService{
                 WorkAuthor workAuthor = WorkAuthor.builder().work(work).author(authorName).build();
                 work.getWorkAuthors().add(workAuthor);
             }
+        } else {
+            work.mainAuthorSetting("미상");
         }
 
         // 각 캐릭터 저장
@@ -306,6 +308,7 @@ public class WorkServiceImpl implements WorkService{
                 .genre(workGenresList)
                 .author(workAuthorsList)
                 .imageUrl(work.getImageUrl())
+                .publisherDate(work.getPublisherDate())
                 .memberName(memberName)
                 .title(work.getTitle())
                 .contents(work.getContent())
