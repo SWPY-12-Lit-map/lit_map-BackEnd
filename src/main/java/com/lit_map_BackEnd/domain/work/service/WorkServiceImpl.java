@@ -67,6 +67,7 @@ public class WorkServiceImpl implements WorkService{
         Work work = null;
         Version version = null;
 
+        // 회원 증명
         Member member = memberRepository.findById(workRequestDto.getMemberId())
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
@@ -76,9 +77,6 @@ public class WorkServiceImpl implements WorkService{
             // 중복으로 작품이 작성되는 것은 막아야 하기 떄문에 기존에 작성하던것을 불러와서 더티 체킹으로 저장
             work = workRepository.findById(workRequestDto.getWorkId())
                     .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
-            if (!work.getMember().getId().equals(workRequestDto.getMemberId())) {
-                throw new BusinessExceptionHandler(ErrorCode.WRITER_WRONG);
-            }
         } else {
             // 없다면 새롭게 추가
             work = Work.builder()

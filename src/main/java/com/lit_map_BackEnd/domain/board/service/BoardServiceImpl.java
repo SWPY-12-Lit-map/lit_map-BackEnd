@@ -28,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -115,7 +114,7 @@ public class BoardServiceImpl implements BoardService{
 
         List<Tuple> fetch = jpaQueryFactory
                 .select(work.id, version.id, version.versionName,
-                        version.updatedDate, version.confirm)
+                        version.updatedDate, version.confirm, version.versionNum)
                 .from(work)
                 .join(version)
                 .on(version.work.id.eq(work.id))
@@ -126,12 +125,14 @@ public class BoardServiceImpl implements BoardService{
             Long workId = tuple.get(work.id);
             Long versionId = tuple.get(version.id);
             String versionName = tuple.get(version.versionName);
+            Double versionNum = tuple.get(version.versionNum);
             LocalDateTime versionUpdateDate = tuple.get(version.updatedDate);
             Confirm confirm = tuple.get(version.confirm);
 
             VersionListDto build = VersionListDto.builder()
                     .versionId(versionId)
                     .versionName(versionName)
+                    .versionNum(versionNum)
                     .lastUpdateDate(versionUpdateDate)
                     .confirm(confirm)
                     .build();

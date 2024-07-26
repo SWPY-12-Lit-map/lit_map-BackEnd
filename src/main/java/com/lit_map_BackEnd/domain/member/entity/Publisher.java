@@ -38,12 +38,10 @@ public class Publisher {
     @OneToMany(mappedBy = "publisher", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @Builder.Default
-    @JsonBackReference
     private List<Member> memberList = new ArrayList<>();
 
     @OneToMany(mappedBy = "publisher", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @Builder.Default
-    @JsonBackReference
     private List<Work> workList = new ArrayList<>();
 }
