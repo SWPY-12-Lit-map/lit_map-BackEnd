@@ -3,7 +3,7 @@ name: deploy To Ec2
 on:
   push:
     branches:
-      - feat-32
+      - dev
 
 jobs :
   deploy:
