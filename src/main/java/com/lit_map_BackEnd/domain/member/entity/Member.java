@@ -1,6 +1,8 @@
 package com.lit_map_BackEnd.domain.member.entity;
 
+import com.lit_map_BackEnd.domain.category.entity.Category;
 import com.lit_map_BackEnd.domain.work.entity.Work;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,9 +17,10 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Data
 @Getter
-@Setter
 public class Member {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
@@ -47,12 +50,13 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberRoleStatus memberRoleStatus;
 
-    @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    @Column(nullable = false)
     private Boolean withdrawalRequested = false; // 탈퇴 요청 여부, 기본값 false
+
 
     // 회원 여러 명 : 출판사 한 개
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "publisher_id")
+    @JoinColumn(name = "fk_member_publisher_id")
     private Publisher publisher;
 
     // 회원 한 명 : 작품 여러 개
@@ -74,5 +78,4 @@ public class Member {
     // 어드민 auth
     // create_data
     // update_data
-
 }

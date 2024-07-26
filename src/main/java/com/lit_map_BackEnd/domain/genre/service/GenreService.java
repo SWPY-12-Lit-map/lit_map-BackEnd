@@ -10,5 +10,4 @@ public interface GenreService {
     Genre checkGenre(String name);
 
     List<Genre> getGenres();
-
 }

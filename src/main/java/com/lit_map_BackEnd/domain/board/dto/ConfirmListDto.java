@@ -6,10 +6,13 @@ import lombok.Data;
 
 import java.util.List;
 
+
 @Data
 @AllArgsConstructor
 @Builder
-public class MyWorkListResponseDto {
-    private int totalCount;
-    private List<MyWorkListDto> list;
+public class ConfirmListDto {
+    // 작품 이름
+    String workTitle;
+    // 그 안에 승인 필요한 버전 정보는 리스트로 가져오기
+    List<String> versionList;
 }

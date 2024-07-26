@@ -18,7 +18,7 @@ public class HealthCheckController {
     public ResponseEntity<SuccessResponse> checkRequest() {
 
         SuccessResponse res = SuccessResponse.builder()
-                .result("health check 성공")
+                .result("2번째 health check 성공")
                 .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
                 .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
                 .build();

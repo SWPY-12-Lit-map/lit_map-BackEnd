@@ -41,8 +41,6 @@ public enum ErrorCode {
     INSERT_ERROR(500, "데이터 삽입 문제 발생"),
     UPDATE_ERROR(500, "데이터 업데이트 문제 발생"),
     DELETE_ERROR(500, "데이터 삭제 문제 발생"),
-    // 권한 문제
-    FORBIDDEN_ERROR(500, "관리자 권한이 아닙니다."),
 
     ;
 

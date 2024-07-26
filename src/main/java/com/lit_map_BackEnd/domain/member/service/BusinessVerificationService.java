@@ -3,14 +3,12 @@ package com.lit_map_BackEnd.domain.member.service;
 import com.lit_map_BackEnd.domain.member.dto.BusinessVerificationRequest;
 import com.lit_map_BackEnd.domain.member.dto.BusinessVerificationResponse;
 import org.springframework.beans.factory.annotation.Value;
-
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Collections;
-
 
 @Service
 public class BusinessVerificationService {
