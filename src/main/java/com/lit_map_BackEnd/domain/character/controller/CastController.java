@@ -24,7 +24,6 @@ public class CastController {
     public ResponseEntity<SuccessResponse> deleteCastInVersion(@PathVariable(name = "workId") Long workId,
                                                                @PathVariable(name = "versionNum") Double versionNum,
                                                                @PathVariable(name = "castName") String castName) {
-
         castService.deleteCastInVersion(workId, versionNum, castName);
 
         SuccessResponse res = SuccessResponse.builder()

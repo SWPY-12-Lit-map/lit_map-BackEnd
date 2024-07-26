@@ -37,7 +37,7 @@ public class S3ServiceImpl implements S3Service{
 
     @Override
     public String uploadImage(MultipartFile multipartFile, String path) throws IOException {
-       // 해당 파일이 jpg, png, jpeg가 아니라면 예외처리
+        // 해당 파일이 jpg, png, jpeg가 아니라면 예외처리
         String fileExtension = extractFileExtension(multipartFile);
 
         // UUID를 새로운 이름에 추가해서 유일한 이름으로 제작
