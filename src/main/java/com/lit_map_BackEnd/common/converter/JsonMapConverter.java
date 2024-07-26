@@ -30,7 +30,6 @@ public class JsonMapConverter implements AttributeConverter<Map<String, Object>,
         }
 
         try {
-
             return objectMapper.readValue(dbData, HashMap.class);
         } catch (IOException e) {
             throw new RuntimeException("Error converting JSON to map", e);

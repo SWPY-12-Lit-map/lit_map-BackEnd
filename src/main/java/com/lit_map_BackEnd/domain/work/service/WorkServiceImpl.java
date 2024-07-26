@@ -70,15 +70,17 @@ public class WorkServiceImpl implements WorkService{
         Member member = memberRepository.findById(workRequestDto.getMemberId())
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
-        // 이미 존재하는 제목이 있다면 추가 불가
-        if (workRepository.existsByTitle(workRequestDto.getTitle())) {
+        // 이미 존재하는 작품이 있다면 기존의 작품 불러오기
+        if(workRequestDto.getWorkId() != null) {
             // 수정을 하는 것인지 확인하기 위해 기존에 작성하던 사람인지 확인
             // 중복으로 작품이 작성되는 것은 막아야 하기 떄문에 기존에 작성하던것을 불러와서 더티 체킹으로 저장
-            work = workRepository.findByTitle(workRequestDto.getTitle());
+            work = workRepository.findById(workRequestDto.getWorkId())
+                    .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
             if (!work.getMember().getId().equals(workRequestDto.getMemberId())) {
                 throw new BusinessExceptionHandler(ErrorCode.WRITER_WRONG);
             }
         } else {
+            // 없다면 새롭게 추가
             work = Work.builder()
                     .title(workRequestDto.getTitle())
                     .content(workRequestDto.getContents())
@@ -99,8 +101,6 @@ public class WorkServiceImpl implements WorkService{
         if (workRequestDto.getCategory() != null && !workRequestDto.getCategory().isBlank()) {
             category = categoryService.checkCategory(workRequestDto.getCategory());
             work.changeCategory(category);
-
-            // 카테고리가 존재해야 장르를 저장한다.
         }
 
         // 이미지 추가
