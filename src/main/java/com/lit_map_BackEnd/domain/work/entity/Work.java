@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-@Table(name = "work", uniqueConstraints = {@UniqueConstraint(columnNames = "title")})
+@Table(name = "work")
 public class Work extends BaseTimeEntity {
 
     @Id
