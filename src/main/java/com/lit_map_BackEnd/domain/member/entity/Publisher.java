@@ -1,6 +1,6 @@
 package com.lit_map_BackEnd.domain.member.entity;
 
-import com.lit_map_BackEnd.domain.category.entity.Category;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.lit_map_BackEnd.domain.work.entity.Work;
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,8 +32,8 @@ public class Publisher {
     @Setter
     private String publisherCeo; // 대표자 이름
 
-    @Setter
-    private boolean withdrawalRequested = false;  // 탈퇴 요청 여부
+    @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    private Boolean withdrawalRequested = false;
 
     @OneToMany(mappedBy = "publisher", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude

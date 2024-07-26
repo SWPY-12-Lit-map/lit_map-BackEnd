@@ -45,4 +45,6 @@ public class PublisherDto {
     private String myMessage;
 
     private String userImage;
+
+    private Boolean withdrawalRequested = false;  // 기본값 설정
 }

@@ -34,5 +34,4 @@ public class EmailController {
             return new ResponseEntity<>(new SuccessResponse<>(null, HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 }

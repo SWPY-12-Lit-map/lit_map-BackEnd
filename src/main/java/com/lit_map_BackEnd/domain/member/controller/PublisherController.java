@@ -2,14 +2,11 @@ package com.lit_map_BackEnd.domain.member.controller;
 
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
-import com.lit_map_BackEnd.domain.member.dto.MemberDto;
 import com.lit_map_BackEnd.domain.member.dto.PublisherDto;
-import com.lit_map_BackEnd.domain.member.dto.PublisherMemberRequestDto;
 import com.lit_map_BackEnd.domain.member.dto.PublisherUpdateDto;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.entity.Publisher;
 import com.lit_map_BackEnd.domain.member.service.MemberPublisherService;
-import com.lit_map_BackEnd.domain.member.service.PublisherService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class PublisherController {
 
-    private final PublisherService publisherService;
     private final MemberPublisherService memberPublisherService;
     private final HttpSession session;
 
@@ -39,6 +35,16 @@ public class PublisherController {
                 .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())
                 .build();
         return new ResponseEntity<>(res, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/check-email")
+    public ResponseEntity<?> checkEmail(@RequestParam String litmapEmail) {
+        boolean exists = memberPublisherService.checkLitmapEmailExists(litmapEmail);
+        if (exists) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 존재하는 이메일입니다.");
+        } else {
+            return ResponseEntity.ok("사용 가능한 이메일입니다.");
+        }
     }
 
     @GetMapping("/fetch")
@@ -73,30 +79,6 @@ public class PublisherController {
         Member updatedPublisher = memberPublisherService.updatePublisherMember(user.getUsername(), publisherUpdateDto);
         SuccessResponse<Member> res = SuccessResponse.<Member>builder()
                 .result(updatedPublisher)
-                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
-                .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
-                .build();
-        return new ResponseEntity<>(res, HttpStatus.OK);
-    }
-
-    @PostMapping("/{memberId}/request-withdrawal")
-    @Operation(summary = "출판사 탈퇴 요청", description = "출판사 회원의 탈퇴를 요청합니다.")
-    public ResponseEntity<SuccessResponse<String>> requestPublisherWithdrawal(@PathVariable Long memberId) {
-        publisherService.requestPublisherWithdrawal(memberId);
-        SuccessResponse<String> res = SuccessResponse.<String>builder()
-                .result("출판사 탈퇴 요청이 완료되었습니다.")
-                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
-                .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
-                .build();
-        return new ResponseEntity<>(res, HttpStatus.OK);
-    }
-
-    @PostMapping("/{memberId}/approve-withdrawal")
-    @Operation(summary = "출판사 탈퇴 승인", description = "출판사 회원의 탈퇴를 승인합니다.")
-    public ResponseEntity<SuccessResponse<String>> approvePublisherWithdrawal(@PathVariable Long memberId) {
-        publisherService.approvePublisherWithdrawal(memberId);
-        SuccessResponse<String> res = SuccessResponse.<String>builder()
-                .result("출판사 탈퇴가 승인되었습니다.")
                 .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
                 .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
                 .build();

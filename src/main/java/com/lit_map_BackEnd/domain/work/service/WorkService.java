@@ -11,4 +11,6 @@ public interface WorkService {
     WorkResponseDto getWork(Long workId);
 
     void deleteWork(Long workId);
+    WorkResponseDto getWorkData(Long workId, Double versionNum);
+
 }

@@ -1,19 +1,23 @@
 package com.lit_map_BackEnd.domain.member.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
 public class PublisherUpdateDto extends MemberUpdateDto{
-    private String publisherName;
-    private String publisherAddress;
-    private String publisherPhoneNumber;
-    private String publisherCeo;
 
-    private String name; // 공통 필드
-    private String password; // 공통 필드
-    private String confirmPassword; // 공통 필드
-    private String nickname; // 공통 필드
-    private String userImage; // 공통 필드
-    private String myMessage; // 공통 필드
+    @NotBlank(message = "출판사 이름을 입력해주세요.")
+    private String publisherName; // 출판사 이름
+
+    @NotBlank(message = "출판사 주소를 입력해주세요.")
+    private String publisherAddress; // 출판사 주소
+
+    @NotBlank(message = "출판사 연락처를 입력해주세요.")
+    private String publisherPhoneNumber; // 출판사 연락처
+
+    @NotBlank(message = "대표자 이름을 입력해주세요.")
+    private String publisherCeo; // 대표자 이름
+
+    private Boolean withdrawalRequested = false;  // 기본값 설정
 
 }
