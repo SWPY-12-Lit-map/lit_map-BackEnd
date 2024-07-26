@@ -32,18 +32,13 @@ public class Publisher {
     @Setter
     private String publisherCeo; // 대표자 이름
 
-    @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
-    private Boolean withdrawalRequested = false;
-
     @OneToMany(mappedBy = "publisher", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @Builder.Default
-    @JsonBackReference
     private List<Member> memberList = new ArrayList<>();
 
     @OneToMany(mappedBy = "publisher", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @Builder.Default
-    @JsonBackReference
     private List<Work> workList = new ArrayList<>();
 }

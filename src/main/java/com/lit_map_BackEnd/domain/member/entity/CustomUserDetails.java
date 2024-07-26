@@ -20,7 +20,7 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return member.getAuthorities();
-    } // 사용자 권한 반환 , Security에서 사용자의 권한을 확인할 때 사용
+    } // 사용자 권한 반환, Security에서 사용자의 권한을 확인할 때 사용
 
     @Override
     public String getPassword() {

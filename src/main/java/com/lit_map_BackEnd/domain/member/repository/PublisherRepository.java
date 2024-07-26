@@ -11,8 +11,6 @@ public interface PublisherRepository extends JpaRepository<Publisher,Long> {
 
     List<Publisher> findByPublisherNumber(Long publisherNumber);
 
-    //Optional<Publisher> findByLitmapEmail(String litmapEmail);
-
     // Member의 litmapEmail로 Publisher를 찾는 메서드
     Optional<Publisher> findByMemberListLitmapEmail(String litmapEmail);
 
