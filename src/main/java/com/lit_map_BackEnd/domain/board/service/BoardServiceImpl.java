@@ -9,6 +9,7 @@ import com.lit_map_BackEnd.domain.category.service.CategoryService;
 import com.lit_map_BackEnd.domain.genre.entity.Genre;
 import com.lit_map_BackEnd.domain.genre.repository.GenreRepository;
 import com.lit_map_BackEnd.domain.member.entity.Member;
+import com.lit_map_BackEnd.domain.member.entity.Publisher;
 import com.lit_map_BackEnd.domain.member.repository.MemberRepository;
 import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
@@ -93,11 +94,17 @@ public class BoardServiceImpl implements BoardService{
 
         // map에 해당 작품 정보 미리 저장
         for (Work work : byMember) {
+            String publisher = null;
+            if (work.getPublisher() != null) {
+                publisher = work.getPublisher().getPublisherName();
+            }
+
             MyWorkListDto build = MyWorkListDto.builder()
+                    .workId(work.getId())
                     .title(work.getTitle())
                     .category(work.getCategory().getName())
                     .mainAuthor(work.getMainAuthor())
-                    .publisher(work.getPublisher().getPublisherName())
+                    .publisher(publisher)
                     .build();
 
             map.put(work.getId(), build);
