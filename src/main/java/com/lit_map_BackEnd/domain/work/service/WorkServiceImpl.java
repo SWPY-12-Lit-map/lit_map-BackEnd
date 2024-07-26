@@ -225,7 +225,6 @@ public class WorkServiceImpl implements WorkService{
     public void deleteWork(Long workId) {
         workRepository.findById(workId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
-
         workRepository.deleteById(workId);
     }
 
@@ -244,9 +243,8 @@ public class WorkServiceImpl implements WorkService{
         // 작성자의 이름이 없을 수 있다 ( 탈퇴하였을 경우 )
         String memberName = "";
         Member member = work.getMember();
-        if (member == null) {
-            memberName = "탈퇴한 회원입니다.";
-        }
+        if (member == null) memberName = "탈퇴한 회원입니다.";
+        else memberName = member.getNickname();
 
         // 카테고리
         Category category = categoryService.checkCategory(work.getCategory().getName());
@@ -270,7 +268,6 @@ public class WorkServiceImpl implements WorkService{
             workAuthorsList.add(name);
         }
 
-        // 기존의 작품의 버전 관련된 내용을 전부 가져오는 과정에서 그냥 0.1버전 하나만 가져오는 것으로 변경
         // 이는 초기 로딩 속도와 네트워크 효율성을 고려하여 제작
         VersionResponseDto version = versionService.findVersionByWorkAndNumber(work.getId(), versionNum);
 
@@ -286,7 +283,6 @@ public class WorkServiceImpl implements WorkService{
         List<Youtube> youtubeList = new ArrayList<>();
 
         if (youtubeInfo != null) {
-
             for (Youtube info : youtubeInfo) {
                 Youtube youtube = new Youtube(
                         info.getTitle(),
@@ -297,7 +293,6 @@ public class WorkServiceImpl implements WorkService{
                 );
                 youtubeList.add(youtube);
             }
-
         }
 
         return WorkResponseDto.builder()
