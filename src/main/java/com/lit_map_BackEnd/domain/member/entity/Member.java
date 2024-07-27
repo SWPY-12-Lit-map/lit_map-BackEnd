@@ -1,8 +1,6 @@
 package com.lit_map_BackEnd.domain.member.entity;
 
-import com.lit_map_BackEnd.domain.category.entity.Category;
 import com.lit_map_BackEnd.domain.work.entity.Work;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,10 +15,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Data
 @Getter
+@Setter
 public class Member {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
@@ -50,9 +47,8 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberRoleStatus memberRoleStatus;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    private Category category;
+    @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    private Boolean withdrawalRequested = false; // 탈퇴 요청 여부, 기본값 false
 
     // 회원 여러 명 : 출판사 한 개
     @ManyToOne(fetch = FetchType.LAZY)
@@ -64,7 +60,19 @@ public class Member {
     @Builder.Default
     private List<Work> works = new ArrayList<>();
 
+    // 역할 상태를 설정하는 메서드
+    public void setRoleStatus(MemberRoleStatus roleStatus) {
+        this.memberRoleStatus = roleStatus;
+    }
+
+    // 역할 상태를 반환하는 메서드
+    public MemberRoleStatus getRoleStatus() {
+        return memberRoleStatus;
+    }
+
+
     // 어드민 auth
     // create_data
     // update_data
+
 }

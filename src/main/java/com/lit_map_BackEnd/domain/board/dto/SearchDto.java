@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @Builder
-public class VersionInfo {
-    private String versionName;
-    private String confirm;
+public class SearchDto {
+    private SearchType searchType;
+    private String question;
 }

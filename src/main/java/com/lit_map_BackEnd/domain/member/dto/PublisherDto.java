@@ -25,8 +25,6 @@ public class PublisherDto {
     @NotBlank(message = "대표자 이름을 입력해주세요.")
     private String publisherCeo;
 
-    private Long categoryId;
-
     @NotBlank(message = "litmap 이메일을 입력해주세요.")
     @Email(message = "유효한 이메일 주소를 입력해주세요.")
     private String litmapEmail;
@@ -47,4 +45,6 @@ public class PublisherDto {
     private String myMessage;
 
     private String userImage;
+
+    private Boolean withdrawalRequested = false;  // 기본값 설정
 }

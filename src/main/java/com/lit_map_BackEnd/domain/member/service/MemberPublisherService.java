@@ -10,6 +10,9 @@ public interface MemberPublisherService {
     Member saveMember(MemberDto memberDto); // 작가 회원가입
     Publisher savePublisher(PublisherDto publisherDto); // 출판사 회원가입
 
+    // 이메일 중복 여부 확인 메서드
+    boolean checkLitmapEmailExists(String litmapEmail);
+
     Member login(String litmapEmail, String password); // 로그인
     void logout(); // 로그아웃
 

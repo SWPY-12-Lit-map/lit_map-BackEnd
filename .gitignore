@@ -16,6 +16,10 @@ build/
 bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
+<<<<<<< HEAD
+src/main/generated/
+=======
+>>>>>>> origin/feat-39
 
 ### IntelliJ IDEA ###
 application.yml
@@ -36,3 +40,7 @@ out/
 
 ### VS Code ###
 .vscode/
+<<<<<<< HEAD
+.DS_Store
+=======
+>>>>>>> origin/feat-39

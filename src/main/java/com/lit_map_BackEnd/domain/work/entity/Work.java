@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-@Table(name = "work", uniqueConstraints = {@UniqueConstraint(columnNames = "title")})
+@Table(name = "work")
 public class Work extends BaseTimeEntity {
 
     @Id
@@ -41,11 +41,16 @@ public class Work extends BaseTimeEntity {
     @OneToMany(mappedBy = "work", cascade = CascadeType.ALL)
     private List<WorkAuthor> workAuthors = new ArrayList<>();
 
+    private String mainAuthor;
+
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
 
-    private String publisherName;
+    @ManyToOne
+    @JoinColumn(name = "publisher_id")
+    private Publisher publisher;
+
     private LocalDateTime publisherDate;
 
     private String imageUrl;
@@ -65,6 +70,7 @@ public class Work extends BaseTimeEntity {
 
     @Builder.Default
     @OneToMany(mappedBy = "work", cascade = CascadeType.ALL)
+
     private List<Cast> casts = new ArrayList<>();
 
     private int view;
@@ -81,7 +87,7 @@ public class Work extends BaseTimeEntity {
         this.content = content;
     }
 
-    @ManyToOne
-    @JoinColumn(name = "publisher_id")
-    private Publisher publisher;
+    public void mainAuthorSetting(String mainAuthor) {
+        this.mainAuthor = mainAuthor;
+    }
 }

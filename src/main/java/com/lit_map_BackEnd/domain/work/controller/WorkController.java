@@ -57,12 +57,8 @@ public class WorkController {
     @PostMapping("")
     @Operation(summary = "작품 등록", description = "작품의 데이터 저장")
     public ResponseEntity<SuccessResponse> saveWork(@RequestBody @Valid WorkRequestDto workRequestDto) {
-        //int result = workService.saveWork(workRequestDto);
+        int result = workService.saveWork(workRequestDto);
 
-        int result = 0;
-        for (int i = 0; i < 10000; i++) {
-            result = workService.saveWork(workRequestDto, i);
-        }
         SuccessResponse res = SuccessResponse.builder()
                 .result(result)
                 .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
@@ -75,6 +71,7 @@ public class WorkController {
     @DeleteMapping("/{id}")
     @Operation(summary = "작품 삭제", description = "작품을 삭제하고 관련 내용도 같이 삭제")
     public ResponseEntity<SuccessResponse> deleteWork(@PathVariable(name = "id") Long id) {
+
         workService.deleteWork(id);
 
         SuccessResponse res = SuccessResponse.builder()

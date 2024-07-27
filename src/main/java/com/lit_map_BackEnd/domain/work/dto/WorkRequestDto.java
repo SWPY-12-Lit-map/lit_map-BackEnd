@@ -15,12 +15,13 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class WorkRequestDto {
+    private Long workId;
     private boolean confirmCheck;
     private String category;
 
     private String genre;
 
-    private String author;
+    private List<String> author;
 
     private String imageUrl;
 

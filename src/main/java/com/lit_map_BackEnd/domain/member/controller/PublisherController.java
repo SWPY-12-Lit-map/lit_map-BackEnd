@@ -2,14 +2,11 @@ package com.lit_map_BackEnd.domain.member.controller;
 
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
-import com.lit_map_BackEnd.domain.member.dto.MemberDto;
 import com.lit_map_BackEnd.domain.member.dto.PublisherDto;
-import com.lit_map_BackEnd.domain.member.dto.PublisherMemberRequestDto;
 import com.lit_map_BackEnd.domain.member.dto.PublisherUpdateDto;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.entity.Publisher;
 import com.lit_map_BackEnd.domain.member.service.MemberPublisherService;
-import com.lit_map_BackEnd.domain.member.service.PublisherService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class PublisherController {
 
-    private final PublisherService publisherService;
     private final MemberPublisherService memberPublisherService;
     private final HttpSession session;
 
@@ -39,6 +35,16 @@ public class PublisherController {
                 .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())
                 .build();
         return new ResponseEntity<>(res, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/check-email")
+    public ResponseEntity<?> checkEmail(@RequestParam String litmapEmail) {
+        boolean exists = memberPublisherService.checkLitmapEmailExists(litmapEmail);
+        if (exists) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 존재하는 이메일입니다.");
+        } else {
+            return ResponseEntity.ok("사용 가능한 이메일입니다.");
+        }
     }
 
     @GetMapping("/fetch")
@@ -80,12 +86,3 @@ public class PublisherController {
     }
 
 }
-
-/**
- 일반 인증키
- (Encoding)
- %2BmsntrcPO90hTQeYGDTU2JwE3JFHhrN%2BO5og1JMt%2BkzGgctd8VpJB7uaYtwIQg%2FYyZxNwt8iZawKy4a3IZISVQ%3D%3D
- 일반 인증키
- (Decoding)
- +msntrcPO90hTQeYGDTU2JwE3JFHhrN+O5og1JMt+kzGgctd8VpJB7uaYtwIQg/YyZxNwt8iZawKy4a3IZISVQ==
- */
