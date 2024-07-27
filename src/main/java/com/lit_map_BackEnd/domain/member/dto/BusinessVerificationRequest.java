@@ -4,12 +4,27 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class BusinessVerificationRequest {
-    private String b_no; // 사업자번호 숫자만나열
+    private String b_no; // 사업자번호 숫자만 나열
     private String start_dt; // 개업일자 -> YYYYMMDD 형식
     private String p_nm; // 대표자명
 
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class BusinessVerificationRequestWrapper {
+        private List<BusinessVerificationRequest> businesses;
+    }
 }
+
+/**
+ * b_no 1098177256
+ * start_dt : 20020401
+ * p_nm : 박상권
+ * 테스트용
+ */

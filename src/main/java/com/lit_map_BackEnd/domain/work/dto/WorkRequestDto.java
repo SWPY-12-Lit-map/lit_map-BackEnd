@@ -15,6 +15,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class WorkRequestDto {
+    private Long workId;
     private boolean confirmCheck;
     private String category;
 

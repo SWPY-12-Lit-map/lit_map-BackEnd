@@ -136,37 +136,39 @@ public class VersionServiceImpl implements VersionService{
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
         Version version = versionRepository.findByVersionNumAndWork(versionNum, work);
 
-        // 수정을 누를때마다 기존의 롤백 데이터는 삭제
-        if (rollBackVersionRepository.existsByWorkAndVersionNum(work, versionNum)) {
-            rollBackVersionRepository.deleteRollBackVersionByWorkAndVersionNum(work, versionNum);
+        if (version.getConfirm() == Confirm.COMPLETE) {
+            // 수정을 누를때마다 기존의 롤백 데이터는 삭제
+            if (rollBackVersionRepository.existsByWorkAndVersionNum(work, versionNum)) {
+                rollBackVersionRepository.deleteRollBackVersionByWorkAndVersionNum(work, versionNum);
+            }
+
+            // 롤백 데이터 버전 저장
+            RollBackVersion rollBackVersion = RollBackVersion.builder()
+                    .work(version.getWork())
+                    .versionName(version.getVersionName())
+                    .versionNum(version.getVersionNum())
+                    .confirm(version.getConfirm())
+                    .relationship(version.getRelationship())
+                    .build();
+
+            // 해당 버전의 연결된 캐릭터 받아오기
+            List<Cast> casts = version.getCasts();
+
+            // 받아온 캐릭터 RollBackCast에 저장
+            for (Cast cast : casts) {
+                // 각 캐릭터를 저장하고 rollbackversion에 연결시킨다.
+                RollBackCast rollBackCast = castService.insertRollBackCast(cast);
+                rollBackCast.changeRollBackVersion(rollBackVersion);
+                rollBackVersion.getCasts().add(rollBackCast);
+            }
+
+            // work 에 롤백 데이터가 들어갈때 같이 들어가야함 -> 삭제 될때 같이 삭제 되어야 한다.
+            work.getRollBackVersions().add(rollBackVersion);
+            // 기존 데이터는 다시 승인 전으로 돌리기
+            version.confirmSetting(Confirm.LOAD);
+
+            rollBackVersionRepository.save(rollBackVersion);
         }
-
-        // 롤백 데이터 버전 저장
-        RollBackVersion rollBackVersion = RollBackVersion.builder()
-                .work(version.getWork())
-                .versionName(version.getVersionName())
-                .versionNum(version.getVersionNum())
-                .confirm(version.getConfirm())
-                .relationship(version.getRelationship())
-                .build();
-
-        // 해당 버전의 연결된 캐릭터 받아오기
-        List<Cast> casts = version.getCasts();
-
-        // 받아온 캐릭터 RollBackCast에 저장
-        for (Cast cast : casts) {
-            // 각 캐릭터를 저장하고 rollbackversion에 연결시킨다.
-            RollBackCast rollBackCast = castService.insertRollBackCast(cast);
-            rollBackCast.changeRollBackVersion(rollBackVersion);
-            rollBackVersion.getCasts().add(rollBackCast);
-        }
-
-        // work 에 롤백 데이터가 들어갈때 같이 들어가야함 -> 삭제 될때 같이 삭제 되어야 한다.
-        work.getRollBackVersions().add(rollBackVersion);
-        // 기존 데이터는 다시 승인 전으로 돌리기
-        version.confirmSetting(Confirm.LOAD);
-
-        rollBackVersionRepository.save(rollBackVersion);
     }
 
     //추가

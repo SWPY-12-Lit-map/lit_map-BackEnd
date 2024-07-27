@@ -18,7 +18,10 @@ public interface WorkAuthorRepository extends JpaRepository<WorkAuthor, Long> {
     @Query("select wa.work " +
             "from WorkAuthor wa " +
             "join Author a on wa.author.id = a.id " +
-            "where a.name like :question")
+            "join Version v on wa.work.id = v.work.id " +
+            "left join RollBackVersion rv on v.versionName = rv.versionName " +
+            "where a.name like :question " +
+            "and (v.confirm = 'COMPLETE' or rv.confirm = 'COMPLETE')")
     List<Work> findByAuthorName(String question);
 
 }

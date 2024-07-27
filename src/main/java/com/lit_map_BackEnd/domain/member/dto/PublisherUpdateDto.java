@@ -6,9 +6,6 @@ import lombok.Data;
 @Data
 public class PublisherUpdateDto extends MemberUpdateDto{
 
-    @NotBlank(message = "출판사 이름을 입력해주세요.")
-    private String publisherName; // 출판사 이름
-
     @NotBlank(message = "출판사 주소를 입력해주세요.")
     private String publisherAddress; // 출판사 주소
 
@@ -17,7 +14,5 @@ public class PublisherUpdateDto extends MemberUpdateDto{
 
     @NotBlank(message = "대표자 이름을 입력해주세요.")
     private String publisherCeo; // 대표자 이름
-
-    private Boolean withdrawalRequested = false;  // 기본값 설정
 
 }

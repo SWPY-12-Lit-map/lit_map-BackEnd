@@ -1,6 +1,6 @@
 package com.lit_map_BackEnd.domain.member.controller;
 
-import com.lit_map_BackEnd.domain.member.dto.BusinessVerificationRequest;
+import com.lit_map_BackEnd.domain.member.dto.BusinessVerificationRequest.BusinessVerificationRequestWrapper;
 import com.lit_map_BackEnd.domain.member.dto.BusinessVerificationResponse;
 import com.lit_map_BackEnd.domain.member.service.BusinessVerificationService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ public class BusinessVerificationController {
     private final BusinessVerificationService businessVerificationService;
 
     @PostMapping("/verify")
-    public ResponseEntity<BusinessVerificationResponse> verifyBusiness(@RequestBody BusinessVerificationRequest request) {
+    public ResponseEntity<BusinessVerificationResponse> verifyBusiness(@RequestBody BusinessVerificationRequestWrapper request) {
         BusinessVerificationResponse response = businessVerificationService.verifyBusiness(request);
         return ResponseEntity.ok(response);
     }
