@@ -8,6 +8,7 @@ public interface MemberPublisherService {
     // 1인작가, 출판사 : 회원가입, 로그인, 비밀번호찾기
 
     Member saveMember(MemberDto memberDto); // 작가 회원가입
+    Member approveMember(Long memberId); // 회원 승인
     Publisher savePublisher(PublisherDto publisherDto); // 출판사 회원가입
 
     // 이메일 중복 여부 확인 메서드
@@ -15,6 +16,8 @@ public interface MemberPublisherService {
 
     Member login(String litmapEmail, String password); // 로그인
     void logout(); // 로그아웃
+
+    Member findByLitmapEmail(String litmapEmail);
 
     String findPw(MailDto request) throws Exception; // 비밀번호 찾기 - 릿맵이메일 공통
 
