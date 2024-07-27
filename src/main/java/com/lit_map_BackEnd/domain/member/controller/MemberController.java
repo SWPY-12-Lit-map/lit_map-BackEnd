@@ -2,6 +2,7 @@ package com.lit_map_BackEnd.domain.member.controller;
 
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
+import com.lit_map_BackEnd.common.util.SessionUtil;
 import com.lit_map_BackEnd.domain.member.dto.*;
 import com.lit_map_BackEnd.domain.member.entity.CustomUserDetails;
 import com.lit_map_BackEnd.domain.member.entity.Member;
@@ -24,6 +25,7 @@ public class MemberController {
     private final MemberPublisherService memberPublisherService;
     private final MemberService memberService;
     private final HttpSession session;
+    private final SessionUtil sessionUtil; // SessionUtil 주입
 
     @PostMapping("/register")
     @Operation(summary = "회원가입", description = "새로운 회원을 등록합니다.")
@@ -102,6 +104,12 @@ public class MemberController {
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
+    @GetMapping("/profile")
+    @Operation(summary = "회원 프로필 조회", description = "현재 로그인된 사용자의 프로필을 조회합니다.")
+    public ResponseEntity<?> getProfile() {
+        return sessionUtil.getProfile();
+    }
+
     @PutMapping("/update")
     @Operation(summary = "회원 정보 수정", description = "현재 로그인된 사용자의 정보를 수정합니다.")
     public ResponseEntity<SuccessResponse<Member>> updateMember(HttpSession session, @RequestBody @Validated MemberUpdateDto memberUpdateDto) {
@@ -117,26 +125,6 @@ public class MemberController {
                 .result(updatedMember)
                 .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
                 .resultMsg("Update successful")
-                .build();
-
-        return new ResponseEntity<>(res, HttpStatus.OK);
-    }
-
-    @GetMapping("/profile")
-    @Operation(summary = "회원 프로필 조회", description = "현재 로그인된 사용자의 프로필을 조회합니다.")
-    public ResponseEntity<SuccessResponse<Member>> getProfile(HttpSession session) {
-        CustomUserDetails userDetails = (CustomUserDetails) session.getAttribute("loggedInUser");
-        if (userDetails == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
-        String litmapEmail = userDetails.getUsername();
-        Member memberProfile = memberPublisherService.findByLitmapEmail(litmapEmail);
-
-        SuccessResponse<Member> res = SuccessResponse.<Member>builder()
-                .result(memberProfile)
-                .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
-                .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
                 .build();
 
         return new ResponseEntity<>(res, HttpStatus.OK);
