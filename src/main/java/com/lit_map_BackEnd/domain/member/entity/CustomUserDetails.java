@@ -32,6 +32,10 @@ public class CustomUserDetails implements UserDetails {
         return member.getLitmapEmail();
     } // 사용자의 이름(여기서는 이메일)을 반환
 
+    public boolean isAdmin() {
+        return member.getMemberRoleStatus() == MemberRoleStatus.ADMIN;
+    } // 사용자가 관리자인지 확인하는 메서드
+
     @Override
     public boolean isAccountNonExpired() {
         return true;
