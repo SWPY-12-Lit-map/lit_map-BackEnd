@@ -26,13 +26,14 @@ import org.springframework.web.bind.annotation.*;
 public class PublisherController {
 
     private final MemberPublisherService memberPublisherService;
-    private final HttpSession session;
     private final SessionUtil sessionUtil; // SessionUtil 주입
 
     @PostMapping("/register")
     @Operation(summary = "출판사 회원가입", description = "새로운 출판사 회원을 등록합니다.")
-    public ResponseEntity<SuccessResponse<Publisher>> registerPublisher(@RequestBody @Validated PublisherDto publisherDto) {
+    public ResponseEntity<SuccessResponse<Publisher>> registerPublisher(@RequestBody @Validated PublisherDto publisherDto, HttpSession session) {
         Publisher savedPublisher = memberPublisherService.savePublisher(publisherDto);
+        session.setAttribute("loggedInUser", new CustomUserDetails(savedPublisher.getMemberList().get(0))); // 세션에 로그인된 사용자 정보 저장
+
         SuccessResponse<Publisher> res = SuccessResponse.<Publisher>builder()
                 .result(savedPublisher)
                 .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
@@ -49,7 +50,7 @@ public class PublisherController {
         } else {
             return ResponseEntity.ok("사용 가능한 이메일입니다.");
         }
-    }
+    } // 회원가입시 유효성 체크
 
     @GetMapping("/fetch")
     @Operation(summary = "공공API를 사용하여 출판사 정보 가져오기", description = "공공API를 사용하여 출판사 정보를 가져옵니다.")
@@ -88,7 +89,12 @@ public class PublisherController {
 
     @PutMapping("/update")
     @Operation(summary = "출판사 직원 정보 수정", description = "출판사 직원의 마이페이지 정보를 수정합니다.")
-    public ResponseEntity<SuccessResponse<Member>> updatePublisher(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody @Validated PublisherUpdateDto publisherUpdateDto) {
+    public ResponseEntity<SuccessResponse<Member>> updatePublisher(HttpSession session, @RequestBody @Validated PublisherUpdateDto publisherUpdateDto) {
+        CustomUserDetails userDetails = (CustomUserDetails) session.getAttribute("loggedInUser");
+        if (userDetails == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
         String litmapEmail = userDetails.getUsername(); // 세션에서 가져온 사용자 이메일
         Member updatedPublisher = memberPublisherService.updatePublisherMember(litmapEmail, publisherUpdateDto);
 

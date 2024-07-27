@@ -24,13 +24,13 @@ public class MemberController {
 
     private final MemberPublisherService memberPublisherService;
     private final MemberService memberService;
-    private final HttpSession session;
     private final SessionUtil sessionUtil; // SessionUtil 주입
 
     @PostMapping("/register")
     @Operation(summary = "회원가입", description = "새로운 회원을 등록합니다.")
-    public ResponseEntity<SuccessResponse<Member>> registerMember(@RequestBody @Validated MemberDto memberDto) {
+    public ResponseEntity<SuccessResponse<Member>> registerMember(@RequestBody @Validated MemberDto memberDto, HttpSession session) {
         Member savedMember = memberPublisherService.saveMember(memberDto);
+        session.setAttribute("loggedInUser", new CustomUserDetails(savedMember)); // 세션에 로그인된 사용자 정보 저장
 
         SuccessResponse<Member> res = SuccessResponse.<Member>builder()
                 .result(savedMember)
@@ -63,7 +63,7 @@ public class MemberController {
         } else {
             return ResponseEntity.ok("사용 가능한 이메일입니다.");
         }
-    }
+    } // 회원가입시 유효성 체크
 
     @PostMapping("/login")
     @Operation(summary = "로그인", description = "회원이 로그인합니다.")
