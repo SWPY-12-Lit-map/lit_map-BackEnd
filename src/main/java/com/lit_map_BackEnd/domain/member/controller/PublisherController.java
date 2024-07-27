@@ -2,6 +2,7 @@ package com.lit_map_BackEnd.domain.member.controller;
 
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
+import com.lit_map_BackEnd.common.util.SessionUtil;
 import com.lit_map_BackEnd.domain.member.dto.FindPublisherEmailDto;
 import com.lit_map_BackEnd.domain.member.dto.PublisherDto;
 import com.lit_map_BackEnd.domain.member.dto.PublisherUpdateDto;
@@ -26,6 +27,7 @@ public class PublisherController {
 
     private final MemberPublisherService memberPublisherService;
     private final HttpSession session;
+    private final SessionUtil sessionUtil; // SessionUtil 주입
 
     @PostMapping("/register")
     @Operation(summary = "출판사 회원가입", description = "새로운 출판사 회원을 등록합니다.")
@@ -76,6 +78,12 @@ public class PublisherController {
                 .build();
 
         return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+    @GetMapping("/profile")
+    @Operation(summary = "회원 프로필 조회", description = "현재 로그인된 사용자의 프로필을 조회합니다.")
+    public ResponseEntity<?> getProfile() {
+        return sessionUtil.getProfile();
     }
 
     @PutMapping("/update")

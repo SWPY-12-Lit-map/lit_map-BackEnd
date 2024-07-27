@@ -104,6 +104,12 @@ public class MemberController {
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
+    @GetMapping("/profile")
+    @Operation(summary = "회원 프로필 조회", description = "현재 로그인된 사용자의 프로필을 조회합니다.")
+    public ResponseEntity<?> getProfile() {
+        return sessionUtil.getProfile();
+    }
+
     @PutMapping("/update")
     @Operation(summary = "회원 정보 수정", description = "현재 로그인된 사용자의 정보를 수정합니다.")
     public ResponseEntity<SuccessResponse<Member>> updateMember(HttpSession session, @RequestBody @Validated MemberUpdateDto memberUpdateDto) {
@@ -122,12 +128,6 @@ public class MemberController {
                 .build();
 
         return new ResponseEntity<>(res, HttpStatus.OK);
-    }
-
-    @GetMapping("/profile")
-    @Operation(summary = "회원 프로필 조회", description = "현재 로그인된 사용자의 프로필을 조회합니다.")
-    public ResponseEntity<?> getProfile() {
-        return sessionUtil.getProfile();
     }
 
     @PostMapping("/{memberId}/request-withdrawal")

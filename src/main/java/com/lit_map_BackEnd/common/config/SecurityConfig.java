@@ -37,7 +37,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // CSRF 보호를 비활성화
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/api/members/update").authenticated()
+                        //.requestMatchers("/api/members/**").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN") // 경로는 ADMIN 역할을 가진 사용자만 접근
                         .anyRequest().permitAll()
                 )
@@ -47,11 +47,12 @@ public class SecurityConfig {
                         .sessionRegistry(sessionRegistry())
                         //.sessionFixation().migrateSession() // 세션 고정 공격 방지
                 )
-                .formLogin(formLogin -> formLogin
-                        .loginPage("/login")
-                        .permitAll()
-                        .defaultSuccessUrl("/main")
-                )
+//                .formLogin(formLogin -> formLogin
+//                        .loginPage("/login")
+//                        .permitAll()
+//                        .defaultSuccessUrl("/main")
+//                )
+                .formLogin(formLogin -> formLogin.disable()) // 폼 로그인 비활성화
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/main")
