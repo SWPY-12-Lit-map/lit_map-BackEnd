@@ -34,11 +34,11 @@ public class CastServiceImpl implements CastService {
         // 임시 사진 설정 하는 곳
         // 동물과 사람(남성, 여성)을 구분해서 임시 사진을 넣어주어야 한다
         if (imageUrl.isBlank()) {
-            if (castRequestDto.getType().equals("사람") && castRequestDto.getGender().equals("남자")) {
+            if (castRequestDto.getType().equals("인간") && castRequestDto.getGender().equals("남성")) {
                 // 남성 임시 사진
                 imageUrl = "https://image.litmap.store/empty/ce7f7646-38cb-4703-99bc-c9d43d1dad4d.png";
             }
-            if (castRequestDto.getType().equals("사람") && castRequestDto.getGender().equals("여자")) {
+            if (castRequestDto.getType().equals("인간") && castRequestDto.getGender().equals("여성")) {
                 // 여성 임시 사진
                 imageUrl = "https://image.litmap.store/empty/b57fc6ba-0b38-4567-9125-f65b71a33ac2.png";
             }
