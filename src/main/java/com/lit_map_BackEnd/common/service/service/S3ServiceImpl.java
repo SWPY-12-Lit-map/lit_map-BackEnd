@@ -16,6 +16,7 @@ import com.lit_map_BackEnd.common.service.S3Service;
 import java.io.*;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -67,12 +68,8 @@ public class S3ServiceImpl implements S3Service {
 
         boolean isExist = amazonS3.doesObjectExist(bucket, key);
         if (isExist) {
-            try {
-                String decodedFileName = URLDecoder.decode(key, "UTF-8");
-                amazonS3.deleteObject(bucket, decodedFileName);
-            } catch (UnsupportedEncodingException e) {
-                throw new BusinessExceptionHandler(ErrorCode.ENCODING_ERROR);
-            }
+            String decodedFileName = URLDecoder.decode(key, StandardCharsets.UTF_8);
+            amazonS3.deleteObject(bucket, decodedFileName);
         }
     }
 
