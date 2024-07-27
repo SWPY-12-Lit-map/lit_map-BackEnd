@@ -1,5 +1,6 @@
 package com.lit_map_BackEnd.domain.member.service;
 
+import com.lit_map_BackEnd.domain.mail.dto.MailDto;
 import com.lit_map_BackEnd.domain.member.dto.*;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.entity.Publisher;

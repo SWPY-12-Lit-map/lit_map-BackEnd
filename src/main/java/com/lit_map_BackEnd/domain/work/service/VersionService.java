@@ -1,12 +1,10 @@
 package com.lit_map_BackEnd.domain.work.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.lit_map_BackEnd.domain.mail.dto.MailWorkDto;
 import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
 import com.lit_map_BackEnd.domain.work.dto.VersionResponseDto;
 import com.lit_map_BackEnd.domain.work.entity.Version;
 import com.lit_map_BackEnd.domain.work.entity.Work;
-import com.lit_map_BackEnd.domain.work.entity.Confirm;
-import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import java.util.Map;
@@ -23,6 +21,13 @@ public interface VersionService {
     List<VersionListDto> versionList(Work work);
 
     void rollBackDataSave(Long workId, Double versionNum);
-    void confirmVersion(Long versionId, Authentication authentication);
+
+
+    MailWorkDto sendMailWithTemplate(Long versionId, String subject, String content);
+
+    void approveMail(Long versionId);
+
+    void declineMail(Long versionId, String reason);
+
 
 }

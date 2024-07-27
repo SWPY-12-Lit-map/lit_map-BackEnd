@@ -2,6 +2,7 @@ package com.lit_map_BackEnd.domain.member.service;
 
 import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
 import com.lit_map_BackEnd.common.exception.code.ErrorCode;
+import com.lit_map_BackEnd.domain.mail.service.MailService;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.entity.MemberRoleStatus;
 import com.lit_map_BackEnd.domain.member.repository.MemberRepository;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Service;
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
-    private final EmailService emailService;
+    private final MailService mailService;
 
     @Override
     @Transactional

@@ -2,8 +2,8 @@ package com.lit_map_BackEnd.domain.member.service;
 
 import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
 import com.lit_map_BackEnd.common.exception.code.ErrorCode;
-import com.lit_map_BackEnd.domain.category.entity.Category;
-import com.lit_map_BackEnd.domain.category.repository.CategoryRepository;
+import com.lit_map_BackEnd.domain.mail.dto.MailDto;
+import com.lit_map_BackEnd.domain.mail.service.MailService;
 import com.lit_map_BackEnd.domain.member.dto.*;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.entity.Publisher;
@@ -31,7 +31,7 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
     private final MemberRepository memberRepository;
     private final PublisherRepository publisherRepository;
     private final PasswordEncoder passwordEncoder;
-    private final EmailService emailService;
+    private final MailService mailService;
     private final HttpSession session;
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -117,7 +117,7 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
                 + memberDto.getName()
                 + "님 회원 가입 승인되었습니다.</h4></div>";
 
-        emailService.sendEmail(memberDto.getLitmapEmail(), subject, content);
+        mailService.sendEmail(memberDto.getLitmapEmail(), subject, content);
 
         return savedMember;
 
@@ -172,7 +172,7 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
                 + publisherDto.getPublisherName()
                 + "님 회원 가입 승인되었습니다.</h4></div>";
 
-        emailService.sendEmail(publisherDto.getLitmapEmail(), subject, content);
+        mailService.sendEmail(publisherDto.getLitmapEmail(), subject, content);
 
         return savedPublisher;
 
@@ -217,7 +217,7 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
                         + "</h4><br><button style=\\\"background-color: #1890FF; color: white; font-size: 16px; border: none; border-radius: 5px; padding: 10px 20px;\\\">복사하기</button></div>";
 
         // 이메일 전송
-        emailService.sendEmail(member.getLitmapEmail(), subject, content);  // 수신자를 litmapEmail로 설정
+        mailService.sendEmail(member.getLitmapEmail(), subject, content);  // 수신자를 litmapEmail로 설정
 
         // 회원의 비밀번호를 임시 비밀번호로 설정
         member.setPassword(passwordEncoder.encode(tempPw));
