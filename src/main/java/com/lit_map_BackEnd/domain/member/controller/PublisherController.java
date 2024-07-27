@@ -2,8 +2,10 @@ package com.lit_map_BackEnd.domain.member.controller;
 
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
+import com.lit_map_BackEnd.domain.member.dto.FindPublisherEmailDto;
 import com.lit_map_BackEnd.domain.member.dto.PublisherDto;
 import com.lit_map_BackEnd.domain.member.dto.PublisherUpdateDto;
+import com.lit_map_BackEnd.domain.member.entity.CustomUserDetails;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.entity.Publisher;
 import com.lit_map_BackEnd.domain.member.service.MemberPublisherService;
@@ -49,7 +51,7 @@ public class PublisherController {
 
     @GetMapping("/fetch")
     @Operation(summary = "공공API를 사용하여 출판사 정보 가져오기", description = "공공API를 사용하여 출판사 정보를 가져옵니다.")
-    public ResponseEntity<SuccessResponse<Publisher>> fetchPublisherFromApi(@RequestParam Long publisherNumber) {
+    public ResponseEntity<SuccessResponse<Publisher>> fetchPublisherFromApi(@RequestBody Long publisherNumber) {
         Publisher fetchedPublisher = memberPublisherService.fetchPublisherFromApi(publisherNumber);
         SuccessResponse<Publisher> res = SuccessResponse.<Publisher>builder()
                 .result(fetchedPublisher)
@@ -61,8 +63,11 @@ public class PublisherController {
 
     @PostMapping("/find-email")
     @Operation(summary = "이메일 찾기", description = "사업자 번호, 출판사명, 이름을 사용하여 이메일을 찾습니다.")
-    public ResponseEntity<SuccessResponse<String>> findEmail(@RequestParam Long publisherNumber, @RequestParam String publisherName, @RequestParam String memberName) {
-        String foundEmail = memberPublisherService.findPublisherEmail(publisherNumber, publisherName, memberName);
+    public ResponseEntity<SuccessResponse<String>> findEmail(@RequestBody FindPublisherEmailDto findPublisherEmailDto) {
+        String foundEmail = memberPublisherService.findPublisherEmail(
+                findPublisherEmailDto.getPublisherNumber(),
+                findPublisherEmailDto.getPublisherName(),
+                findPublisherEmailDto.getMemberName());
 
         SuccessResponse<String> res = SuccessResponse.<String>builder()
                 .result(foundEmail)
@@ -74,14 +79,17 @@ public class PublisherController {
     }
 
     @PutMapping("/update")
-    @Operation(summary = "출판사 직원 마이페이지 수정", description = "출판사 직원의 마이페이지 정보를 수정합니다.")
-    public ResponseEntity<SuccessResponse<Member>> updatePublisher(@AuthenticationPrincipal User user, @RequestBody @Validated PublisherUpdateDto publisherUpdateDto) {
-        Member updatedPublisher = memberPublisherService.updatePublisherMember(user.getUsername(), publisherUpdateDto);
+    @Operation(summary = "출판사 직원 정보 수정", description = "출판사 직원의 마이페이지 정보를 수정합니다.")
+    public ResponseEntity<SuccessResponse<Member>> updatePublisher(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody @Validated PublisherUpdateDto publisherUpdateDto) {
+        String litmapEmail = userDetails.getUsername(); // 세션에서 가져온 사용자 이메일
+        Member updatedPublisher = memberPublisherService.updatePublisherMember(litmapEmail, publisherUpdateDto);
+
         SuccessResponse<Member> res = SuccessResponse.<Member>builder()
                 .result(updatedPublisher)
                 .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
-                .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
+                .resultMsg("Update successful")
                 .build();
+
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 

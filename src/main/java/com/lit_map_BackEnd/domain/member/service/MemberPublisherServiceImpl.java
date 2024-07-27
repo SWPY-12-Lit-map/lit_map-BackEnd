@@ -5,6 +5,7 @@ import com.lit_map_BackEnd.common.exception.code.ErrorCode;
 import com.lit_map_BackEnd.domain.category.entity.Category;
 import com.lit_map_BackEnd.domain.category.repository.CategoryRepository;
 import com.lit_map_BackEnd.domain.member.dto.*;
+import com.lit_map_BackEnd.domain.member.entity.CustomUserDetails;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.entity.Publisher;
 import com.lit_map_BackEnd.domain.member.entity.MemberRoleStatus;
@@ -14,7 +15,10 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -34,6 +38,7 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
     private final EmailService emailService;
     private final HttpSession session;
     private final RestTemplate restTemplate = new RestTemplate();
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Value("${external.api.publisher.url}")
     private String publisherApiUrl;
@@ -99,30 +104,41 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
                 .myMessage(memberDto.getMyMessage())
                 .userImage(memberDto.getUserImage())
                 .urlLink(memberDto.getUrlLink())
-                .memberRoleStatus(memberDto.getMemberRoleStatus() != null ? memberDto.getMemberRoleStatus() : MemberRoleStatus.PENDING_MEMBER) // 기본값 설정
-                .withdrawalRequested(false) // 기본 값 설정
-                //.role(Role.PENDING_MEMBER) // 기본값 설정
+                .memberRoleStatus(MemberRoleStatus.PENDING_MEMBER) // 기본값 설정
                 .build();
 
-//        if (member.getWithdrawalRequested() == null) {
-//            member.setWithdrawalRequested(false);  // 기본값 설정
-//        }
-      //  return memberRepository.save(member);
-            Member savedMember = memberRepository.save(member);
+        Member savedMember = memberRepository.save(member);
 
-        // (1인작가) 회원 가입 승인 이메일 전송
-        String subject = "[litmap] 회원 가입 승인";
+        // (1인작가) 회원 가입 대기 이메일 전송
+        String subject = "[litmap] 회원 가입 대기";
         String content = "<div style=\"margin:30px;\"><img src=\"data:image/png;base64,iVBORw0qMPdgAAAAASUVORK5CYII=\\\"/>"
                 + "<br><h2>회원 가입 완료</h2><h4>"
                 + memberDto.getName()
-                + "님 회원 가입 승인되었습니다.</h4></div>";
+                + "님 회원 가입이 완료되었습니다. 관리자의 승인을 기다려주세요.</h4></div>";
 
         emailService.sendEmail(memberDto.getLitmapEmail(), subject, content);
-
         return savedMember;
-
-
     } // 1인작가 회원가입
+
+    @Override
+    @Transactional
+    public Member approveMember(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
+
+        member.setMemberRoleStatus(MemberRoleStatus.ACTIVE_MEMBER);
+        memberRepository.save(member);
+
+        // 승인 이메일 전송
+        String subject = "[litmap] 회원 가입 승인";
+        String content = "<div style=\"margin:30px;\"><img src=\"data:image/png;base64,iVBORw0qMPdgAAAAASUVORK5CYII=\\\"/>"
+                + "<br><h2>회원 가입 승인</h2><h4>"
+                + member.getName()
+                + "님 회원 가입이 승인되었습니다. 환영합니다!</h4></div>";
+
+        emailService.sendEmail(member.getLitmapEmail(), subject, content);
+        return member;
+    }
 
     public boolean checkLitmapEmailExists(String litmapEmail) {
         return memberRepository.findByLitmapEmail(litmapEmail).isPresent();
@@ -131,9 +147,6 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
     @Override
     @Transactional
     public Publisher savePublisher(PublisherDto publisherDto) {
-//        if (publisherRepository.findByPublisherNumber(publisherDto.getPublisherNumber()).isPresent()) {
-//            throw new BusinessExceptionHandler(ErrorCode.DUPLICATE_PUBLISHER);
-//        }
 
         if (memberRepository.findByLitmapEmail(publisherDto.getLitmapEmail()).isPresent()) {
             throw new BusinessExceptionHandler(ErrorCode.DUPLICATE_EMAIL);
@@ -155,13 +168,9 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
                 .myMessage(publisherDto.getMyMessage())
                 .userImage(publisherDto.getUserImage())
                 .publisher(publisher)
-                .withdrawalRequested(false) // 기본 값 설정
-                //.role(Role.PUBLISHER_MEMBER) // 출판사 회원 역할 설정
+                .memberRoleStatus(MemberRoleStatus.ACTIVE_MEMBER)
                 .build();
-
         publisher.getMemberList().add(member);
-
-        //return publisherRepository.save(publisher);
 
         Publisher savedPublisher = publisherRepository.save(publisher);
 
@@ -174,10 +183,23 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
 
         emailService.sendEmail(publisherDto.getLitmapEmail(), subject, content);
 
+        // 출판사 직원 로그인 상태 유지
+        loginAfterRegistration(publisherDto.getLitmapEmail(), publisherDto.getPassword());
         return savedPublisher;
-
-
     } // 출판사 회원가입
+
+    private void loginAfterRegistration(String email, String password) {
+        CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(email);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, password, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
+    }
+
+    @Override
+    public Member findByLitmapEmail(String litmapEmail) {
+        return memberRepository.findByLitmapEmail(litmapEmail)
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
+    }
 
     @Override
     public Member login(String litmapEmail, String password) {
@@ -294,6 +316,8 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         }
     } // 출판사 이메일 찾기 : 사업자번호, 출판사이름, 회원이름 사용 / 모든 결과를 검사하여 필요한 경우 여러 결과 중 하나를 반환
 
+    @Override
+    @Transactional
     public Member updateMember(String litmapEmail, MemberUpdateDto memberUpdateDto) {
         Member member = memberRepository.findByLitmapEmail(litmapEmail)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
@@ -302,6 +326,8 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         return memberRepository.save(member);
     } // 1인 작가 마이페이지 수정
 
+    @Override
+    @Transactional
     public Member updatePublisherMember(String litmapEmail, PublisherUpdateDto publisherUpdateDto) {
         Member member = memberRepository.findByLitmapEmail(litmapEmail)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
@@ -310,11 +336,10 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         if (publisher == null) {
             throw new BusinessExceptionHandler(ErrorCode.PUBLISHER_NOT_FOUND);
         }
-
         updatePublisherFields(publisher, publisherUpdateDto);
         updateMemberFields(member, publisherUpdateDto);
-
-        return memberRepository.save(member);
+        memberRepository.save(member); // 출판사 직원 정보를 업데이트할 때, memberRepository에 저장
+        return member;
     } // 출판사 직원 마이페이지 수정
 
     private void updateMemberFields(Member member, MemberUpdateDto memberUpdateDto) {
@@ -352,5 +377,4 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
             publisher.setPublisherCeo(publisherUpdateDto.getPublisherCeo());
         }
     }
-
 }

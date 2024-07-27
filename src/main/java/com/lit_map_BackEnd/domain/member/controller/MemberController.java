@@ -2,13 +2,9 @@ package com.lit_map_BackEnd.domain.member.controller;
 
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
-import com.lit_map_BackEnd.domain.member.dto.MemberDto;
-import com.lit_map_BackEnd.domain.member.dto.MemberUpdateDto;
-import com.lit_map_BackEnd.domain.member.dto.PublisherDto;
-import com.lit_map_BackEnd.domain.member.dto.PublisherUpdateDto;
+import com.lit_map_BackEnd.domain.member.dto.*;
 import com.lit_map_BackEnd.domain.member.entity.CustomUserDetails;
 import com.lit_map_BackEnd.domain.member.entity.Member;
-import com.lit_map_BackEnd.domain.member.entity.Publisher;
 import com.lit_map_BackEnd.domain.member.service.MemberPublisherService;
 import com.lit_map_BackEnd.domain.member.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,6 +39,20 @@ public class MemberController {
         return new ResponseEntity<>(res, HttpStatus.CREATED);
     }
 
+    @PostMapping("/{memberId}/approve")
+    @Operation(summary = "회원 승인", description = "관리자가 회원 가입을 승인합니다.")
+    public ResponseEntity<SuccessResponse<Member>> approveMember(@PathVariable Long memberId) {
+        Member approvedMember = memberPublisherService.approveMember(memberId);
+
+        SuccessResponse<Member> res = SuccessResponse.<Member>builder()
+                .result(approvedMember)
+                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
+                .resultMsg("회원 가입이 승인되었습니다.")
+                .build();
+
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
     @GetMapping("/check-email")
     public ResponseEntity<?> checkEmail(@RequestParam String litmapEmail) {
         boolean exists = memberPublisherService.checkLitmapEmailExists(litmapEmail);
@@ -55,10 +65,9 @@ public class MemberController {
 
     @PostMapping("/login")
     @Operation(summary = "로그인", description = "회원이 로그인합니다.")
-    public ResponseEntity<SuccessResponse<Member>> login(@RequestParam String litmapEmail, @RequestParam String password) {
-        Member loggedMember = memberPublisherService.login(litmapEmail, password);
-
-        session.setAttribute("loggedInUser", loggedMember); // 세션에 로그인된 사용자 정보 저장
+    public ResponseEntity<SuccessResponse<Member>> login(@RequestBody LoginDto loginDto, HttpSession session) {
+        Member loggedMember = memberPublisherService.login(loginDto.getLitmapEmail(), loginDto.getPassword());
+        session.setAttribute("loggedInUser", new CustomUserDetails(loggedMember)); // 세션에 로그인된 사용자 정보 저장
 
         SuccessResponse<Member> res = SuccessResponse.<Member>builder()
                 .result(loggedMember)
@@ -71,8 +80,8 @@ public class MemberController {
 
     @GetMapping("/logout")
     @Operation(summary = "로그아웃", description = "사용자를 로그아웃하고 세션을 무효화합니다.")
-    public ResponseEntity<SuccessResponse<String>> logout() {
-        memberPublisherService.logout();
+    public ResponseEntity<SuccessResponse<String>> logout(HttpSession session) {
+        session.invalidate(); // 세션 무효화
         SuccessResponse<String> res = SuccessResponse.<String>builder()
                 .result("로그아웃 되었습니다.")
                 .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
@@ -83,8 +92,8 @@ public class MemberController {
 
     @PostMapping("/find-email")
     @Operation(summary = "이메일 찾기", description = "업무용 이메일과 이름을 사용하여 이메일을 찾습니다.")
-    public ResponseEntity<SuccessResponse<String>> findEmail(@RequestParam String workEmail, @RequestParam String name) {
-        String foundEmail = memberPublisherService.findMemberEmail(workEmail, name);
+    public ResponseEntity<SuccessResponse<String>> findEmail(@RequestBody FindEmailDto findEmailDto) {
+        String foundEmail = memberPublisherService.findMemberEmail(findEmailDto.getWorkEmail(), findEmailDto.getName());
         SuccessResponse<String> res = SuccessResponse.<String>builder()
                 .result(foundEmail)
                 .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
@@ -94,15 +103,42 @@ public class MemberController {
     }
 
     @PutMapping("/update")
-    @Operation(summary = "마이페이지 수정", description = "회원의 마이페이지 정보를 수정합니다.")
-    public ResponseEntity<SuccessResponse<Member>> updateMember(
-            @AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody @Validated MemberUpdateDto memberUpdateDto) {
-        Member updatedMember = memberPublisherService.updateMember(userDetails.getMember().getLitmapEmail(), memberUpdateDto);
+    @Operation(summary = "회원 정보 수정", description = "현재 로그인된 사용자의 정보를 수정합니다.")
+    public ResponseEntity<SuccessResponse<Member>> updateMember(HttpSession session, @RequestBody @Validated MemberUpdateDto memberUpdateDto) {
+        CustomUserDetails userDetails = (CustomUserDetails) session.getAttribute("loggedInUser");
+        if (userDetails == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        String litmapEmail = userDetails.getUsername(); // 세션에서 가져온 사용자 이메일
+        Member updatedMember = memberPublisherService.updateMember(litmapEmail, memberUpdateDto);
+
         SuccessResponse<Member> res = SuccessResponse.<Member>builder()
                 .result(updatedMember)
                 .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
-                .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
+                .resultMsg("Update successful")
                 .build();
+
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+    @GetMapping("/profile")
+    @Operation(summary = "회원 프로필 조회", description = "현재 로그인된 사용자의 프로필을 조회합니다.")
+    public ResponseEntity<SuccessResponse<Member>> getProfile(HttpSession session) {
+        CustomUserDetails userDetails = (CustomUserDetails) session.getAttribute("loggedInUser");
+        if (userDetails == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        String litmapEmail = userDetails.getUsername();
+        Member memberProfile = memberPublisherService.findByLitmapEmail(litmapEmail);
+
+        SuccessResponse<Member> res = SuccessResponse.<Member>builder()
+                .result(memberProfile)
+                .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
+                .build();
+
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
