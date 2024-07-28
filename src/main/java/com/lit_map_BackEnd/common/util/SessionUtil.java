@@ -16,21 +16,22 @@ import org.springframework.stereotype.Component;
 public class SessionUtil {
 
     private final MemberPublisherService memberPublisherService;
+
     public ResponseEntity<?> getProfile() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); // 인증되지 않은 경우 401 응답
         }
 
         Object principal = authentication.getPrincipal();
         if (!(principal instanceof CustomUserDetails)) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); // 올바른 사용자 정보가 아닌 경우 401 응답
         }
 
         CustomUserDetails userDetails = (CustomUserDetails) principal;
         String litmapEmail = userDetails.getUsername();
         Member memberProfile = memberPublisherService.findByLitmapEmail(litmapEmail);
 
-        return new ResponseEntity<>(memberProfile, HttpStatus.OK);
+        return new ResponseEntity<>(memberProfile, HttpStatus.OK); // 사용자 프로필 반환
     }
 }

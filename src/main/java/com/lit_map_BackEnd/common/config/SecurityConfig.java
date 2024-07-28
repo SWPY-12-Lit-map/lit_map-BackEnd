@@ -37,30 +37,21 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // CSRF 보호를 비활성화
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        //.requestMatchers("/api/members/**").authenticated()
-                        //.requestMatchers("/admin/**").hasRole("ADMIN") // 경로는 ADMIN 역할을 가진 사용자만 접근
                         .anyRequest().permitAll() // 모든 요청을 허용
                 )
                 .sessionManagement(sessionManagement -> sessionManagement
-                        .maximumSessions(1)
-                        .maxSessionsPreventsLogin(false)
+                        .maximumSessions(1) // 동시 세션 수 제한
+                        .maxSessionsPreventsLogin(false) // 새 로그인이 기존 세션을 무효화하지 않음
                         .sessionRegistry(sessionRegistry())
-                        //.sessionFixation().migrateSession() // 세션 고정 공격 방지
                 )
-//                .formLogin(formLogin -> formLogin
-//                        .loginPage("/login")
-//                        .permitAll()
-//                        .defaultSuccessUrl("/main")
-//                        //.disable() // 폼 로그인 비활성화
-//                )
                 .formLogin(formLogin -> formLogin.disable()) // 폼 로그인 비활성화
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/main")
-                        .invalidateHttpSession(true)
+                        .invalidateHttpSession(true) // 로그아웃 시 세션 무효화
                         .deleteCookies("JSESSIONID")
                 )
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정
                 .userDetailsService(customUserDetailsService);
 
         return http.build();
@@ -81,21 +72,6 @@ public class SecurityConfig {
         return new ConcurrentSessionControlAuthenticationStrategy(sessionRegistry());
     }
 
-//    @Bean
-//    public SessionAuthenticationStrategy concurrentSessionControlAuthenticationStrategy() {
-//        return new ConcurrentSessionControlAuthenticationStrategy(sessionRegistry()) {
-//            @Override
-//            public void onAuthentication(Authentication authentication, HttpServletRequest request, HttpServletResponse response) {
-//                // 인증된 사용자 정보를 CustomUserDetails로 가져옴
-//                CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-//                // 사용자가 관리자가 아닌 경우 중복 로그인 방지 적용
-//                if (!userDetails.isAdmin()) {
-//                    super.onAuthentication(authentication, request, response);
-//                }
-//            }
-//        };
-//    }
-
     @Bean
     public SessionRegistryImpl sessionRegistry() {
         return new SessionRegistryImpl();
@@ -104,14 +80,14 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:8080", "https://api.litmap.store"));
+        configuration.setAllowedOrigins(List.of("http://localhost:8080", "https://api.litmap.store", "http://localhost:3000"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
+        configuration.setAllowCredentials(true); // 자격 증명을 포함한 CORS 요청 허용
+        configuration.setMaxAge(3600L); // CORS 구성 캐싱 시간
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/**", configuration); // 모든 경로에 대해 CORS 구성 등록
         return source;
     }
 }
