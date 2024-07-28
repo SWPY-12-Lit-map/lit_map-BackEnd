@@ -24,6 +24,8 @@ public class SessionUtil {
     public ResponseEntity<?> getProfile() {
         System.out.println("session = " + session.getAttributeNames());
         System.out.println("session = " + session.getId());
+        Object attribute = session.getAttribute("loggedInUser");
+        System.out.println("attribute = " + attribute);
         CustomUserDetails userDetails = (CustomUserDetails) session.getAttribute("loggedInUser");
         if (userDetails == null) {
             System.out.println("세션이 존재하지 않음");

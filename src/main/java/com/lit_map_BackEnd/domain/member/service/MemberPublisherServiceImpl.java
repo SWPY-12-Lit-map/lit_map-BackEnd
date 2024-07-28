@@ -211,6 +211,7 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
                 session.setAttribute("loggedInUser", new CustomUserDetails(member)); // 세션에 사용자 정보 저장
                 CustomUserDetails userDetails = (CustomUserDetails) session.getAttribute("loggedInUser");
                 String username = userDetails.getUsername();
+                System.out.println("sessionId = " + session.getId());
                 System.out.println("username 저장하는 중 = " + username);
                 return member;
             } else {
