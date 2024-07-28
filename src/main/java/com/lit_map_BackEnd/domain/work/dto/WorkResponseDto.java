@@ -30,6 +30,6 @@ public class WorkResponseDto {
     private List<VersionListDto> versionList;
     private List<Youtube> youtubes;
     private String mainAuthor;
- //   private List<Work> recommendedWorks;
-    private List<WorkResponseDto> recommendedWorks;
+
+
 }

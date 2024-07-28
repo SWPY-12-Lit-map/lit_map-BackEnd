@@ -3,6 +3,7 @@ package com.lit_map_BackEnd.domain.relation.controller;
 import com.lit_map_BackEnd.domain.relation.service.RelationService;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
 import com.lit_map_BackEnd.domain.work.entity.Work;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,6 +44,7 @@ public class RelationController {
   */
 
     @GetMapping("/related/{workId}")
+    @Operation(summary = "연관 작품 추천 (테스트)", description = "연관 작품 추천 (테스트)")
     public List<Work> getRelatedWorks(@PathVariable Long workId) {
         return relationService.findRelatedWorks(workId);
     }

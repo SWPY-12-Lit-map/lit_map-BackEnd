@@ -19,24 +19,19 @@ public class RelationServiceImpl implements RelationService {
 
     private final RelationRepository relationRepository;
     private final WorkRepository workRepository;
- //   @Autowired
-  //  private WorkRepository workRepository;
 
     public List<Work> findRelatedWorks(Long workId) {
         Work baseWork = workRepository.findById(workId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
 
-        // Find works with same category, genre, sorted by author
         List<Work> relatedWorksByAuthor = relationRepository.findOtherWorksWithSameCategoryGenreSortedByAuthor(workId);
 
-        // Find works with same category, author, but different genre
         List<Work> relatedWorksByGenre = relationRepository.findWorksWithSameCategoryAndAuthorButDifferentGenre(workId);
 
         Set<Work> uniqueWorks = new HashSet<>(relatedWorksByAuthor);
         relatedWorksByAuthor.clear();
         relatedWorksByAuthor.addAll(uniqueWorks);
 
-        // For demonstration purposes, just return the two lists combined
         relatedWorksByAuthor.addAll(relatedWorksByGenre);
         System.out.println(relatedWorksByAuthor);
         return relatedWorksByAuthor;
