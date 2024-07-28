@@ -47,11 +47,12 @@ public class SecurityConfig {
                         .sessionRegistry(sessionRegistry())
                         //.sessionFixation().migrateSession() // 세션 고정 공격 방지
                 )
-                .formLogin(formLogin -> formLogin
-                        .loginPage("/login")
-                        .permitAll()
-                        .defaultSuccessUrl("/main")
-                )
+//                .formLogin(formLogin -> formLogin
+//                        .loginPage("/login")
+//                        .permitAll()
+//                        .defaultSuccessUrl("/main")
+//                        //.disable() // 폼 로그인 비활성화
+//                )
                 .formLogin(formLogin -> formLogin.disable()) // 폼 로그인 비활성화
                 .logout(logout -> logout
                         .logoutUrl("/logout")
@@ -80,20 +81,20 @@ public class SecurityConfig {
         return new ConcurrentSessionControlAuthenticationStrategy(sessionRegistry());
     }
 
-    @Bean
-    public SessionAuthenticationStrategy concurrentSessionControlAuthenticationStrategy() {
-        return new ConcurrentSessionControlAuthenticationStrategy(sessionRegistry()) {
-            @Override
-            public void onAuthentication(Authentication authentication, HttpServletRequest request, HttpServletResponse response) {
-                // 인증된 사용자 정보를 CustomUserDetails로 가져옴
-                CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-                // 사용자가 관리자가 아닌 경우 중복 로그인 방지 적용
-                if (!userDetails.isAdmin()) {
-                    super.onAuthentication(authentication, request, response);
-                }
-            }
-        };
-    }
+//    @Bean
+//    public SessionAuthenticationStrategy concurrentSessionControlAuthenticationStrategy() {
+//        return new ConcurrentSessionControlAuthenticationStrategy(sessionRegistry()) {
+//            @Override
+//            public void onAuthentication(Authentication authentication, HttpServletRequest request, HttpServletResponse response) {
+//                // 인증된 사용자 정보를 CustomUserDetails로 가져옴
+//                CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+//                // 사용자가 관리자가 아닌 경우 중복 로그인 방지 적용
+//                if (!userDetails.isAdmin()) {
+//                    super.onAuthentication(authentication, request, response);
+//                }
+//            }
+//        };
+//    }
 
     @Bean
     public SessionRegistryImpl sessionRegistry() {

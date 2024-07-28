@@ -11,12 +11,16 @@ import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.entity.Publisher;
 import com.lit_map_BackEnd.domain.member.service.MemberPublisherService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,13 +30,19 @@ import org.springframework.web.bind.annotation.*;
 public class PublisherController {
 
     private final MemberPublisherService memberPublisherService;
-    private final SessionUtil sessionUtil; // SessionUtil 주입
+    private final SessionUtil sessionUtil;
 
     @PostMapping("/register")
     @Operation(summary = "출판사 회원가입", description = "새로운 출판사 회원을 등록합니다.")
-    public ResponseEntity<SuccessResponse<Publisher>> registerPublisher(@RequestBody @Validated PublisherDto publisherDto, HttpSession session) {
+    public ResponseEntity<SuccessResponse<Publisher>> registerPublisher(@RequestBody @Validated PublisherDto publisherDto, HttpServletRequest request) {
         Publisher savedPublisher = memberPublisherService.savePublisher(publisherDto);
-        session.setAttribute("loggedInUser", new CustomUserDetails(savedPublisher.getMemberList().get(0))); // 세션에 로그인된 사용자 정보 저장
+
+        CustomUserDetails userDetails = new CustomUserDetails(savedPublisher.getMemberList().get(0));
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        HttpSession session = request.getSession(true);
+        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
 
         SuccessResponse<Publisher> res = SuccessResponse.<Publisher>builder()
                 .result(savedPublisher)
@@ -89,13 +99,19 @@ public class PublisherController {
 
     @PutMapping("/update")
     @Operation(summary = "출판사 직원 정보 수정", description = "출판사 직원의 마이페이지 정보를 수정합니다.")
-    public ResponseEntity<SuccessResponse<Member>> updatePublisher(HttpSession session, @RequestBody @Validated PublisherUpdateDto publisherUpdateDto) {
-        CustomUserDetails userDetails = (CustomUserDetails) session.getAttribute("loggedInUser");
-        if (userDetails == null) {
+    public ResponseEntity<SuccessResponse<Member>> updatePublisher(@RequestBody @Validated PublisherUpdateDto publisherUpdateDto) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
-        String litmapEmail = userDetails.getUsername(); // 세션에서 가져온 사용자 이메일
+        Object principal = authentication.getPrincipal();
+        if (!(principal instanceof CustomUserDetails)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        CustomUserDetails userDetails = (CustomUserDetails) principal;
+        String litmapEmail = userDetails.getUsername();
         Member updatedPublisher = memberPublisherService.updatePublisherMember(litmapEmail, publisherUpdateDto);
 
         SuccessResponse<Member> res = SuccessResponse.<Member>builder()
@@ -106,5 +122,4 @@ public class PublisherController {
 
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
-
 }

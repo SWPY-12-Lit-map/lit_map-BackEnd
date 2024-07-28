@@ -13,7 +13,12 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,9 +33,15 @@ public class MemberController {
 
     @PostMapping("/register")
     @Operation(summary = "회원가입", description = "새로운 회원을 등록합니다.")
-    public ResponseEntity<SuccessResponse<Member>> registerMember(@RequestBody @Validated MemberDto memberDto, HttpSession session) {
+    public ResponseEntity<SuccessResponse<Member>> registerMember(@RequestBody @Validated MemberDto memberDto, HttpServletRequest request) {
         Member savedMember = memberPublisherService.saveMember(memberDto);
-        session.setAttribute("loggedInUser", new CustomUserDetails(savedMember)); // 세션에 로그인된 사용자 정보 저장
+
+        CustomUserDetails userDetails = new CustomUserDetails(savedMember);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        HttpSession session = request.getSession(true);
+        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
 
         SuccessResponse<Member> res = SuccessResponse.<Member>builder()
                 .result(savedMember)
@@ -67,9 +78,15 @@ public class MemberController {
 
     @PostMapping("/login")
     @Operation(summary = "로그인", description = "회원이 로그인합니다.")
-    public ResponseEntity<SuccessResponse<Member>> login(@RequestBody LoginDto loginDto, HttpSession session) {
+    public ResponseEntity<SuccessResponse<Member>> login(@RequestBody LoginDto loginDto, HttpServletRequest request) {
         Member loggedMember = memberPublisherService.login(loginDto.getLitmapEmail(), loginDto.getPassword());
-        session.setAttribute("loggedInUser", new CustomUserDetails(loggedMember)); // 세션에 로그인된 사용자 정보 저장
+
+        CustomUserDetails userDetails = new CustomUserDetails(loggedMember);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        HttpSession session = request.getSession(true);
+        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
 
         SuccessResponse<Member> res = SuccessResponse.<Member>builder()
                 .result(loggedMember)
@@ -111,14 +128,19 @@ public class MemberController {
     }
 
     @PutMapping("/update")
-    @Operation(summary = "회원 정보 수정", description = "현재 로그인된 사용자의 정보를 수정합니다.")
-    public ResponseEntity<SuccessResponse<Member>> updateMember(HttpSession session, @RequestBody @Validated MemberUpdateDto memberUpdateDto) {
-        CustomUserDetails userDetails = (CustomUserDetails) session.getAttribute("loggedInUser");
-        if (userDetails == null) {
+    public ResponseEntity<SuccessResponse<Member>> updateMember(@RequestBody @Validated MemberUpdateDto memberUpdateDto) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
-        String litmapEmail = userDetails.getUsername(); // 세션에서 가져온 사용자 이메일
+        Object principal = authentication.getPrincipal();
+        if (!(principal instanceof CustomUserDetails)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        CustomUserDetails userDetails = (CustomUserDetails) principal;
+        String litmapEmail = userDetails.getUsername();
         Member updatedMember = memberPublisherService.updateMember(litmapEmail, memberUpdateDto);
 
         SuccessResponse<Member> res = SuccessResponse.<Member>builder()
