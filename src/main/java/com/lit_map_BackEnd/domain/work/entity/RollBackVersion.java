@@ -40,4 +40,6 @@ public class RollBackVersion extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     private Confirm confirm;
+
+    private Long originVersionId;
 }
