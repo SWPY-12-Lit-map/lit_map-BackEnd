@@ -80,6 +80,7 @@ public class CastServiceImpl implements CastService {
     public List<CastResponseDto> findCharacterByWork(Work work) {
         return castRepository.findByWork(work).stream()
                 .map(cast -> CastResponseDto.builder()
+                        .castId(cast.getId())
                         .name(cast.getName())
                         .imageUrl(cast.getImageUrl())
                         .type(cast.getType())

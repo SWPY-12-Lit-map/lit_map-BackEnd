@@ -8,6 +8,7 @@ import lombok.Data;
 @AllArgsConstructor
 @Builder
 public class CastResponseDto {
+    private Long castId;
     private String name;
     private String imageUrl;
     private String type;
