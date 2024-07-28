@@ -22,18 +22,12 @@ public class SessionUtil {
     private final HttpSession session;
 
     public ResponseEntity<?> getProfile() {
-        System.out.println("session = " + session.getAttributeNames());
-        System.out.println("session = " + session.getId());
-        Object attribute = session.getAttribute("loggedInUser");
-        System.out.println("attribute = " + attribute);
         CustomUserDetails userDetails = (CustomUserDetails) session.getAttribute("loggedInUser");
         if (userDetails == null) {
-            System.out.println("세션이 존재하지 않음");
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
         String litmapEmail = userDetails.getUsername();
-        System.out.println("litmapEmail = " + litmapEmail);
         Member memberProfile = memberPublisherService.findByLitmapEmail(litmapEmail);
 
         return new ResponseEntity<>(memberProfile, HttpStatus.OK);
