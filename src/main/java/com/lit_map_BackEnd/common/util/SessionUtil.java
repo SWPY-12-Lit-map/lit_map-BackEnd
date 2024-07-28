@@ -27,6 +27,7 @@ public class SessionUtil {
         }
 
         String litmapEmail = userDetails.getUsername();
+        System.out.println("litmapEmail = " + litmapEmail);
         Member memberProfile = memberPublisherService.findByLitmapEmail(litmapEmail);
 
         return new ResponseEntity<>(memberProfile, HttpStatus.OK);
