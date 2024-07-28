@@ -2,6 +2,7 @@ package com.lit_map_BackEnd.domain.member.controller;
 
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
+import com.lit_map_BackEnd.common.util.SessionUtil;
 import com.lit_map_BackEnd.domain.member.dto.FindPublisherEmailDto;
 import com.lit_map_BackEnd.domain.member.dto.PublisherDto;
 import com.lit_map_BackEnd.domain.member.dto.PublisherUpdateDto;
@@ -19,13 +20,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.Duration;
 
 @RestController
 @RequestMapping("/api/publishers")
@@ -47,13 +45,7 @@ public class PublisherController {
         session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
 
         // 세션 쿠키 설정
-        session.setMaxInactiveInterval((int) Duration.ofDays(1).toSeconds());
-        Cookie sessionCookie = new Cookie("JSESSIONID", session.getId());
-        sessionCookie.setPath("/");
-        sessionCookie.setHttpOnly(true);
-        sessionCookie.setSecure(true);
-        sessionCookie.setMaxAge((int) Duration.ofDays(1).toSeconds());
-        response.addCookie(sessionCookie);
+        SessionUtil.createSessionCookie(session, response);
 
         SuccessResponse<Publisher> res = SuccessResponse.<Publisher>builder()
                 .result(savedPublisher)
