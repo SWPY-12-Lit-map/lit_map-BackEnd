@@ -14,7 +14,7 @@ public interface CastService {
 
     List<CastResponseDto> findCharacterByWork(Work work);
 
-    void deleteCastInVersion(Long workId, Double versionId, String name);
+    void deleteCastInVersion(Long castId);
 
     RollBackCast insertRollBackCast(Cast cast);
 }
