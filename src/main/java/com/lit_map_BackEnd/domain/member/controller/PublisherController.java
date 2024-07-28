@@ -11,14 +11,15 @@ import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.entity.Publisher;
 import com.lit_map_BackEnd.domain.member.service.MemberPublisherService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.validation.annotation.Validated;
@@ -30,11 +31,10 @@ import org.springframework.web.bind.annotation.*;
 public class PublisherController {
 
     private final MemberPublisherService memberPublisherService;
-    private final SessionUtil sessionUtil;
 
     @PostMapping("/register")
     @Operation(summary = "출판사 회원가입", description = "새로운 출판사 회원을 등록합니다.")
-    public ResponseEntity<SuccessResponse<Publisher>> registerPublisher(@RequestBody @Validated PublisherDto publisherDto, HttpServletRequest request) {
+    public ResponseEntity<SuccessResponse<Publisher>> registerPublisher(@RequestBody @Validated PublisherDto publisherDto, HttpServletRequest request, HttpServletResponse response) {
         Publisher savedPublisher = memberPublisherService.savePublisher(publisherDto);
 
         CustomUserDetails userDetails = new CustomUserDetails(savedPublisher.getMemberList().get(0));
@@ -43,6 +43,9 @@ public class PublisherController {
 
         HttpSession session = request.getSession(true);
         session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
+
+        // 세션 쿠키 설정
+        SessionUtil.createSessionCookie(session, response);
 
         SuccessResponse<Publisher> res = SuccessResponse.<Publisher>builder()
                 .result(savedPublisher)
@@ -89,12 +92,6 @@ public class PublisherController {
                 .build();
 
         return new ResponseEntity<>(res, HttpStatus.OK);
-    }
-
-    @GetMapping("/profile")
-    @Operation(summary = "회원 프로필 조회", description = "현재 로그인된 사용자의 프로필을 조회합니다.")
-    public ResponseEntity<?> getProfile() {
-        return sessionUtil.getProfile();
     }
 
     @PutMapping("/update")
