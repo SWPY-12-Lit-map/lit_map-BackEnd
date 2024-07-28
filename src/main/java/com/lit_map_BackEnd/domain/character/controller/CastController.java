@@ -19,13 +19,13 @@ public class CastController {
 
     private final CastService castService;
 
-    @DeleteMapping("/{workId}/{versionNum}/{castName}")
+    @DeleteMapping("/{workId}/{versionNum}/{castId}")
     @Operation(summary = "특정 캐릭터 삭제", description = "혹여 캐릭터를 삭제할때 이미 데이터베이스에 들어가있는것을 대비하여 삭제할 경우 삭제 API 필요")
     public ResponseEntity<SuccessResponse> deleteCastInVersion(@PathVariable(name = "workId") Long workId,
                                                                @PathVariable(name = "versionNum") Double versionNum,
-                                                               @PathVariable(name = "castName") String castName) {
+                                                               @PathVariable(name = "castId") Long castId) {
 
-        castService.deleteCastInVersion(workId, versionNum, castName);
+        castService.deleteCastInVersion(workId, versionNum, castId);
 
         SuccessResponse res = SuccessResponse.builder()
                 .result("삭제 성공")
