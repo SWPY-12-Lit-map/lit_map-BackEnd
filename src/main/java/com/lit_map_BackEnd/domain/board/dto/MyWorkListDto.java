@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class MyWorkListDto {
+    private Long workId;
     private String title;
     private String category;
     private String mainAuthor;

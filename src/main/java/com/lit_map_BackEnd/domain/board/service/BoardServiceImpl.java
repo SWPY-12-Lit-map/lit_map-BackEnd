@@ -9,6 +9,7 @@ import com.lit_map_BackEnd.domain.category.service.CategoryService;
 import com.lit_map_BackEnd.domain.genre.entity.Genre;
 import com.lit_map_BackEnd.domain.genre.repository.GenreRepository;
 import com.lit_map_BackEnd.domain.member.entity.Member;
+import com.lit_map_BackEnd.domain.member.entity.Publisher;
 import com.lit_map_BackEnd.domain.member.repository.MemberRepository;
 import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
@@ -28,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -94,11 +94,17 @@ public class BoardServiceImpl implements BoardService{
 
         // map에 해당 작품 정보 미리 저장
         for (Work work : byMember) {
+            String publisher = null;
+            if (work.getPublisher() != null) {
+                publisher = work.getPublisher().getPublisherName();
+            }
+
             MyWorkListDto build = MyWorkListDto.builder()
+                    .workId(work.getId())
                     .title(work.getTitle())
                     .category(work.getCategory().getName())
                     .mainAuthor(work.getMainAuthor())
-                    .publisher(work.getPublisher().getPublisherName())
+                    .publisher(publisher)
                     .build();
 
             map.put(work.getId(), build);
@@ -115,7 +121,7 @@ public class BoardServiceImpl implements BoardService{
 
         List<Tuple> fetch = jpaQueryFactory
                 .select(work.id, version.id, version.versionName,
-                        version.updatedDate, version.confirm)
+                        version.updatedDate, version.confirm, version.versionNum)
                 .from(work)
                 .join(version)
                 .on(version.work.id.eq(work.id))
@@ -126,12 +132,14 @@ public class BoardServiceImpl implements BoardService{
             Long workId = tuple.get(work.id);
             Long versionId = tuple.get(version.id);
             String versionName = tuple.get(version.versionName);
+            Double versionNum = tuple.get(version.versionNum);
             LocalDateTime versionUpdateDate = tuple.get(version.updatedDate);
             Confirm confirm = tuple.get(version.confirm);
 
             VersionListDto build = VersionListDto.builder()
                     .versionId(versionId)
                     .versionName(versionName)
+                    .versionNum(versionNum)
                     .lastUpdateDate(versionUpdateDate)
                     .confirm(confirm)
                     .build();

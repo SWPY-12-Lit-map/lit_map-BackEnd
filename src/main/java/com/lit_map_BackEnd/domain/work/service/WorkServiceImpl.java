@@ -67,18 +67,18 @@ public class WorkServiceImpl implements WorkService{
         Work work = null;
         Version version = null;
 
+        // 회원 증명
         Member member = memberRepository.findById(workRequestDto.getMemberId())
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
-        // 이미 존재하는 제목이 있다면 추가 불가
-        if (workRepository.existsByTitle(workRequestDto.getTitle())) {
+        // 이미 존재하는 작품이 있다면 기존의 작품 불러오기
+        if(workRequestDto.getWorkId() != null) {
             // 수정을 하는 것인지 확인하기 위해 기존에 작성하던 사람인지 확인
             // 중복으로 작품이 작성되는 것은 막아야 하기 떄문에 기존에 작성하던것을 불러와서 더티 체킹으로 저장
-            work = workRepository.findByTitle(workRequestDto.getTitle());
-            if (!work.getMember().getId().equals(workRequestDto.getMemberId())) {
-                throw new BusinessExceptionHandler(ErrorCode.WRITER_WRONG);
-            }
+            work = workRepository.findById(workRequestDto.getWorkId())
+                    .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
         } else {
+            // 없다면 새롭게 추가
             work = Work.builder()
                     .title(workRequestDto.getTitle())
                     .content(workRequestDto.getContents())
@@ -99,14 +99,12 @@ public class WorkServiceImpl implements WorkService{
         if (workRequestDto.getCategory() != null && !workRequestDto.getCategory().isBlank()) {
             category = categoryService.checkCategory(workRequestDto.getCategory());
             work.changeCategory(category);
-
-            // 카테고리가 존재해야 장르를 저장한다.
         }
 
         // 이미지 추가
         if (workRequestDto.getImageUrl() != null && !workRequestDto.getImageUrl().isBlank()) {
             work.changeImageUrl(workRequestDto.getImageUrl());
-        } else work.changeImageUrl("대체 이미지 URL");
+        } else work.changeImageUrl("https://image.litmap.store/empty/804db002-d8d4-43c5-9924-edef78c4efbd.png");
 
 
         // 설명 추가
@@ -141,8 +139,8 @@ public class WorkServiceImpl implements WorkService{
         }
 
         // 장르 저장 ( 중복 저장 되지 않도록 저장 )
-        if (workRequestDto.getGenre() != null && !workRequestDto.getGenre().isBlank()) {
-            String[] genres = workRequestDto.getGenre().split(",");
+        if (workRequestDto.getGenre() != null && workRequestDto.getGenre().size() != 0) {
+        List<String> genres = workRequestDto.getGenre();
             // 작품에 관련된 장르 전체 삭제
             workGenreRepository.deleteByWork(work);
             for (String str : genres) {
@@ -227,7 +225,6 @@ public class WorkServiceImpl implements WorkService{
     public void deleteWork(Long workId) {
         workRepository.findById(workId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
-
         workRepository.deleteById(workId);
     }
 
@@ -246,9 +243,8 @@ public class WorkServiceImpl implements WorkService{
         // 작성자의 이름이 없을 수 있다 ( 탈퇴하였을 경우 )
         String memberName = "";
         Member member = work.getMember();
-        if (member == null) {
-            memberName = "탈퇴한 회원입니다.";
-        }
+        if (member == null) memberName = "탈퇴한 회원입니다.";
+        else memberName = member.getNickname();
 
         // 카테고리
         Category category = categoryService.checkCategory(work.getCategory().getName());
@@ -272,7 +268,6 @@ public class WorkServiceImpl implements WorkService{
             workAuthorsList.add(name);
         }
 
-        // 기존의 작품의 버전 관련된 내용을 전부 가져오는 과정에서 그냥 0.1버전 하나만 가져오는 것으로 변경
         // 이는 초기 로딩 속도와 네트워크 효율성을 고려하여 제작
         VersionResponseDto version = versionService.findVersionByWorkAndNumber(work.getId(), versionNum);
 
@@ -288,7 +283,6 @@ public class WorkServiceImpl implements WorkService{
         List<Youtube> youtubeList = new ArrayList<>();
 
         if (youtubeInfo != null) {
-
             for (Youtube info : youtubeInfo) {
                 Youtube youtube = new Youtube(
                         info.getTitle(),
@@ -299,7 +293,6 @@ public class WorkServiceImpl implements WorkService{
                 );
                 youtubeList.add(youtube);
             }
-
         }
 
         return WorkResponseDto.builder()
