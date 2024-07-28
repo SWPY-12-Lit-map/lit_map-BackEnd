@@ -207,7 +207,8 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         if (memberOptional.isPresent()) {
             Member member = memberOptional.get();
             if (passwordEncoder.matches(password, member.getPassword())) {
-                session.setAttribute("member", member);
+                //session.setAttribute("member", member);
+                session.setAttribute("loggedInUser", new CustomUserDetails(member)); // 세션에 사용자 정보 저장
                 return member;
             } else {
                 throw new BusinessExceptionHandler(ErrorCode.PASSWORDS_DO_NOT_MATCH);
