@@ -23,6 +23,7 @@ public class SessionUtil {
     public ResponseEntity<?> getProfile() {
         CustomUserDetails userDetails = (CustomUserDetails) session.getAttribute("loggedInUser");
         if (userDetails == null) {
+            System.out.println("세션이 존재하지 않음");
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
