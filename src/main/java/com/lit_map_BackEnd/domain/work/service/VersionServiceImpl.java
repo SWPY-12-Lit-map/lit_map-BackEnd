@@ -151,6 +151,7 @@ public class VersionServiceImpl implements VersionService{
                     .versionName(version.getVersionName())
                     .versionNum(version.getVersionNum())
                     .confirm(version.getConfirm())
+                    .originVersionId(version.getId())
                     .relationship(version.getRelationship())
                     .build();
 
