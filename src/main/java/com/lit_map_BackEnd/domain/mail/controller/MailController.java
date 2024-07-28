@@ -21,6 +21,7 @@ public class MailController {
     @PostMapping("/find-password")
     @Operation(summary = "비밀번호 찾기", description = "회원의 이메일을 사용하여 임시 비밀번호를 발급합니다.")
     public ResponseEntity<SuccessResponse<String>> findPassword(@RequestBody @Validated MailDto findPwMailDto) {
+        //    public ResponseEntity<SuccessResponse> findPassword(Long versionId, @RequestParam String summary) {
         try {
             String result = memberPublisherService.findPw(findPwMailDto);
             SuccessResponse<String> res = SuccessResponse.<String>builder()

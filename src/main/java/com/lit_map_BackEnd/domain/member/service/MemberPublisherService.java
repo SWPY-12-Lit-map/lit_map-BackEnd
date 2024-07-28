@@ -12,6 +12,7 @@ public interface MemberPublisherService {
     Member approveMember(Long memberId); // 회원 승인
     Publisher savePublisher(PublisherDto publisherDto); // 출판사 회원가입
 
+
     // 이메일 중복 여부 확인 메서드
     boolean checkLitmapEmailExists(String litmapEmail);
 

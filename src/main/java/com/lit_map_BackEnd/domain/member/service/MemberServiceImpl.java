@@ -16,6 +16,7 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
     private final MailService mailService;
+    private final AdminService adminService;
 
     @Override
     @Transactional
@@ -33,8 +34,13 @@ public class MemberServiceImpl implements MemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
-        member.setMemberRoleStatus(MemberRoleStatus.UNKNOWN_MEMBER);
-        memberRepository.save(member);
+       if (adminService.isAdmin()) {
+
+            member.setMemberRoleStatus(MemberRoleStatus.UNKNOWN_MEMBER);
+            memberRepository.save(member);
+        }
+        throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
+
     }
 
     //관리자 - 회원 강제 탈퇴
