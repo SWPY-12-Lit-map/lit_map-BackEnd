@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.Enumeration;
 
 @Component
 @RequiredArgsConstructor
@@ -21,6 +22,8 @@ public class SessionUtil {
     private final HttpSession session;
 
     public ResponseEntity<?> getProfile() {
+        System.out.println("session = " + session.getAttributeNames());
+        System.out.println("session = " + session.getId());
         CustomUserDetails userDetails = (CustomUserDetails) session.getAttribute("loggedInUser");
         if (userDetails == null) {
             System.out.println("세션이 존재하지 않음");
