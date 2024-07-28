@@ -95,18 +95,8 @@ public class CastServiceImpl implements CastService {
 
     @Override
     @Transactional
-    public void deleteCastInVersion(Long workId, Double versionNum, String name) {
-        Work work = workRepository.findById(workId)
-                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
-
-        Version version = null;
-        if (versionRepository.existsByVersionNumAndWork(versionNum, work)) {
-            version = versionRepository.findByVersionNumAndWork(versionNum, work);
-        } else {
-            throw new BusinessExceptionHandler(ErrorCode.VERSION_NOT_FOUND);
-        }
-
-        castRepository.deleteByWorkAndVersionAndName(work, version, name);
+    public void deleteCastInVersion(Long castId) {
+        castRepository.deleteById(castId);
     }
 
     @Override
