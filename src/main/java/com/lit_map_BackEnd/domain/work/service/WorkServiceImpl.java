@@ -311,8 +311,7 @@ public class WorkServiceImpl implements WorkService{
                 .title(work.getTitle())
                 .contents(work.getContent())
                 .versions(version)
-            //    .youtubes(youtubeList)
-         //       .recommendedWorks(recommendedWorks)
+                .youtubes(youtubeList)
                 .build();
     }
 }

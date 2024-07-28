@@ -34,12 +34,11 @@ public class MemberServiceImpl implements MemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
-       if (adminService.isAdmin()) {
-
+        if (!adminService.isAdmin()) {
+            throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
+        }
             member.setMemberRoleStatus(MemberRoleStatus.UNKNOWN_MEMBER);
             memberRepository.save(member);
-        }
-        throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
 
     }
 

@@ -121,7 +121,9 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
-        if (adminService.isAdmin()) {
+        if (!adminService.isAdmin()) {
+            throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
+        }
 
             member.setMemberRoleStatus(MemberRoleStatus.ACTIVE_MEMBER);
             memberRepository.save(member);
@@ -136,8 +138,6 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
             mailService.sendEmail(member.getLitmapEmail(), subject, content);
             return member;
 
-        }
-        throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
 
     }
 

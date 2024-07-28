@@ -14,5 +14,4 @@ public class MailWorkDto {
         this.work = work;
     }
 
-    // Getters and Setters
 }

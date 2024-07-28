@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService{
 /*
+ //ver 1
     @Autowired
     private MemberRepository memberRepository;
 
@@ -30,8 +31,9 @@ public class AdminServiceImpl implements AdminService{
         return member.getRoleStatus() == MemberRoleStatus.ADMIN;
     }
   */
+    //ver 2
         public boolean isAdmin() {
-
+/*
             // 현재 인증된 사용자 정보 가져오기
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -44,10 +46,10 @@ public class AdminServiceImpl implements AdminService{
 
             if (principal instanceof CustomUserDetails) {
                 CustomUserDetails userDetails = (CustomUserDetails) principal;
-                //return userDetails.isAdmin();
+                //return userDetails.isAdmin();*/
                 return true;
-            }
-            throw new IllegalStateException("Unexpected principal type: " + principal.getClass().getName());
+          //  }
+         //   throw new IllegalStateException("Unexpected principal type: " + principal.getClass().getName());
         }
 
 

@@ -34,19 +34,4 @@ public class MailServiceImpl implements MailService {
         }
     }
 
-//    @Override
-//    public void sendEmail(String to, String subject, String text) {
-//        MimeMessage mimeMessage = mailSender.createMimeMessage();
-//        try {
-//            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-//            helper.setTo(to);
-//            helper.setSubject(subject);
-//            helper.setText(text, true); // true to enable HTML content
-//            helper.setFrom("sooho7767@naver.com"); // 발신자 이메일 설정
-//            mailSender.send(mimeMessage);
-//        } catch (Exception e) {
-//            e.printStackTrace(); // 예외를 로깅
-//            throw new BusinessExceptionHandler(ErrorCode.EMAIL_SEND_FAILED);
-//        }
-//    }
 }

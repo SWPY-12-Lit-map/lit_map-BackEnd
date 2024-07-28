@@ -1,8 +1,6 @@
 package com.lit_map_BackEnd.domain.relation.repository;
 
 import com.lit_map_BackEnd.domain.work.entity.Work;
-import com.lit_map_BackEnd.domain.work.entity.WorkAuthor;
-import com.lit_map_BackEnd.domain.work.entity.WorkCategoryGenre;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,6 +12,7 @@ import java.util.List;
 public interface RelationRepository extends JpaRepository<Work,Long> {
 
 
+    //같은 카테고리, 같은 장르 조회 후 같은 작가에서 다른작가로 정렬
     @Query("SELECT w FROM Work w " +
             "WHERE w.id <> :workId " +  // Exclude the same work
             "AND w.category.id = (SELECT wcg.category.id FROM WorkCategoryGenre wcg WHERE wcg.work.id = :workId) " +
@@ -22,11 +21,11 @@ public interface RelationRepository extends JpaRepository<Work,Long> {
             "ORDER BY " +
             "CASE WHEN w.mainAuthor = (SELECT wa2.author.name FROM WorkAuthor wa2 WHERE wa2.work.id = :workId) THEN 0 ELSE 1 END, " +  // Sort by matching author_id first
             "w.title ASC")
-        // Then sort by title in ascending order
     List<Work> findOtherWorksWithSameCategoryGenreSortedByAuthor(
             @Param("workId") Long workId
     );
 
+    //같은 카테고리, 같은 작가 일때 다른 장르 조회
     @Query("SELECT w FROM Work w " +
             "WHERE w.id <> :workId " +
             "AND w.category.id = (SELECT wcg.category.id FROM WorkCategoryGenre wcg WHERE wcg.work.id = :workId) " +
