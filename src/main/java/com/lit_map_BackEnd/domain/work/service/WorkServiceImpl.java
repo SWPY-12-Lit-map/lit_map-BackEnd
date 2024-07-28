@@ -104,7 +104,7 @@ public class WorkServiceImpl implements WorkService{
         // 이미지 추가
         if (workRequestDto.getImageUrl() != null && !workRequestDto.getImageUrl().isBlank()) {
             work.changeImageUrl(workRequestDto.getImageUrl());
-        } else work.changeImageUrl("대체 이미지 URL");
+        } else work.changeImageUrl("https://image.litmap.store/empty/804db002-d8d4-43c5-9924-edef78c4efbd.png");
 
 
         // 설명 추가

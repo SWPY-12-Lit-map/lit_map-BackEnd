@@ -35,17 +35,21 @@ public class CastServiceImpl implements CastService {
         // 동물과 사람(남성, 여성)을 구분해서 임시 사진을 넣어주어야 한다
         if (imageUrl.isBlank()) {
             if (castRequestDto.getType().equals("인간") && castRequestDto.getGender().equals("남성")) {
-                imageUrl = "남성 임시 사진";
+                // 남성 임시 사진
+                imageUrl = "https://image.litmap.store/empty/ce7f7646-38cb-4703-99bc-c9d43d1dad4d.png";
             }
             if (castRequestDto.getType().equals("인간") && castRequestDto.getGender().equals("여성")) {
-                imageUrl = "여성 임시 사진";
+                // 여성 임시 사진
+                imageUrl = "https://image.litmap.store/empty/b57fc6ba-0b38-4567-9125-f65b71a33ac2.png";
             }
             if (castRequestDto.getType().equals("사물")) {
-                imageUrl = "사물 임시 사진";
+                // 사물 임시 사진
+                imageUrl = "https://image.litmap.store/empty/0f9d560e-4f74-4f77-ab4d-05f0c740d897.png";
             }
         }
 
-        if (imageUrl.isBlank()) imageUrl = "남성 임시 사진";
+        // 남성 임시 사진
+        if (imageUrl.isBlank()) imageUrl = "https://image.litmap.store/empty/ce7f7646-38cb-4703-99bc-c9d43d1dad4d.png";
 
         // 이름이 같다면 해당 인물은 더티 체킹으로 데이터 저장
         // version와 name을 비교해서 이미 있다면 걔는 정보만 수정

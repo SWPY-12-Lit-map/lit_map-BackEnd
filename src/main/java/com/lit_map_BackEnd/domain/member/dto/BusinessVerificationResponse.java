@@ -5,9 +5,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 public class BusinessVerificationResponse {
     private String status;
     private String message;
+
+    public BusinessVerificationResponse() {
+        this.status = "default status";
+        this.message = "default message";
+    }
 }
