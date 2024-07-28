@@ -110,6 +110,14 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
 
         Member savedMember = memberRepository.save(member);
 
+        // (1인작가) 회원 가입 대기 이메일 전송
+        String subject = "[litmap] 회원 가입 대기";
+        String content = "<div style=\"margin:30px;\"><img src=\"data:image/png;base64,iVBORw0qMPdgAAAAASUVORK5CYII=\\\"/>"
+                + "<br><h2>회원 가입 완료</h2><h4>"
+                + memberDto.getName()
+                + "님 회원 가입이 완료되었습니다. 관리자의 승인을 기다려주세요.</h4></div>";
+
+        emailService.sendEmail(memberDto.getLitmapEmail(), subject, content);
         return savedMember;
 
 
@@ -213,7 +221,8 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         if (memberOptional.isPresent()) {
             Member member = memberOptional.get();
             if (passwordEncoder.matches(password, member.getPassword())) {
-                session.setAttribute("member", member);
+                //session.setAttribute("member", member);
+                session.setAttribute("loggedInUser", new CustomUserDetails(member)); // 세션에 사용자 정보 저장
                 return member;
             } else {
                 throw new BusinessExceptionHandler(ErrorCode.PASSWORDS_DO_NOT_MATCH);

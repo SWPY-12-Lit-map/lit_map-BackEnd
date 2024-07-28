@@ -105,7 +105,7 @@ public class WorkServiceImpl implements WorkService{
         // 이미지 추가
         if (workRequestDto.getImageUrl() != null && !workRequestDto.getImageUrl().isBlank()) {
             work.changeImageUrl(workRequestDto.getImageUrl());
-        } else work.changeImageUrl("대체 이미지 URL");
+        } else work.changeImageUrl("https://image.litmap.store/empty/804db002-d8d4-43c5-9924-edef78c4efbd.png");
 
 
         // 설명 추가
@@ -140,8 +140,8 @@ public class WorkServiceImpl implements WorkService{
         }
 
         // 장르 저장 ( 중복 저장 되지 않도록 저장 )
-        if (workRequestDto.getGenre() != null && !workRequestDto.getGenre().isBlank()) {
-            String[] genres = workRequestDto.getGenre().split(",");
+        if (workRequestDto.getGenre() != null && workRequestDto.getGenre().size() != 0) {
+        List<String> genres = workRequestDto.getGenre();
             // 작품에 관련된 장르 전체 삭제
             workGenreRepository.deleteByWork(work);
             for (String str : genres) {

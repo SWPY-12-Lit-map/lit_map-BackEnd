@@ -25,28 +25,32 @@ public interface WorkRepository extends JpaRepository<Work, Long> {
     @Query("update Work w set w.view = w.view + 1 where w.id = :workId")
     void countUpView(Long workId);
 
-    @Query("select w from Work w join fetch w.category join fetch w.member order by w.view desc")
+    @Query("select w from Work w " +
+            "join Version v on w.id = v.work.id " +
+            "left join RollBackVersion rv on v.id = rv.originVersionId " +
+            "where v.confirm = 'COMPLETE' or rv.confirm = 'COMPLETE' " +
+            "order by w.view desc ")
     Slice<Work> findWorks(Pageable pageable);
 
-    @Query("SELECT w FROM Work w " +
-            "JOIN Version wv ON w.id = wv.work.id " +
-            "LEFT JOIN RollBackVersion rv ON wv.versionName = rv.versionName " +
-            "WHERE w.title LIKE %:question% " +
-            "AND (wv.confirm = 'COMPLETE' OR rv.confirm = 'COMPLETE')")
+    @Query("select w from Work w " +
+            "join Version v on w.id = v.work.id " +
+            "left join RollBackVersion rv on v.id = rv.originVersionId " +
+            "where w.title like %:question% " +
+            "and (v.confirm = 'COMPLETE' or rv.confirm = 'COMPLETE')")
     List<Work> findWorksByTitle(String question);
 
     @Query("SELECT w FROM Work w " +
-            "JOIN Version wv ON w.id = wv.work.id " +
-            "LEFT JOIN RollBackVersion rv ON wv.versionName = rv.versionName " +
+            "JOIN Version v ON w.id = v.work.id " +
+            "LEFT JOIN RollBackVersion rv ON v.id = rv.originVersionId " +
             "WHERE w.content LIKE %:question% " +
-            "AND (wv.confirm = 'COMPLETE' OR rv.confirm = 'COMPLETE')")
+            "AND (v.confirm = 'COMPLETE' OR rv.confirm = 'COMPLETE')")
     List<Work> findWorksByContents(String question);
 
-    @Query("SELECT w FROM Work w " +
-            "JOIN Version v on w.id = v.work.id " +
-            "LEFT JOIN RollBackVersion rv ON v.versionName = rv.versionName " +
-            "WHERE (w.content LIKE %:question% or w.title like %:question%) " +
-            "AND (v.confirm = 'COMPLETE' OR rv.confirm = 'COMPLETE')")
+    @Query("select w from Work w " +
+            "join Version v on w.id = v.work.id " +
+            "left join RollBackVersion rv on v.id = rv.originVersionId " +
+            "where (w.content like %:question% or w.title like %:question%) " +
+            "and (v.confirm = 'COMPLETE' or rv.confirm = 'COMPLETE')")
     List<Work> findWorksByTitleAndContents(String question);
 
     @Query("select w " +

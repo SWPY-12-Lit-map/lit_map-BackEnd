@@ -13,8 +13,5 @@ public interface CastRepository extends JpaRepository<Cast, Long> {
     List<Cast> findByWork(Work work);
 
     Cast findByVersionAndName(Version version, String name);
-
-    void deleteByWorkAndVersionAndName(Work work, Version version, String name);
-
     List<Cast> findByVersion(Version version);
 }

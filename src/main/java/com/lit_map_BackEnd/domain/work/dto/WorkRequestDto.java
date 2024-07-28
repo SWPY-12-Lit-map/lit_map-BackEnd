@@ -19,7 +19,7 @@ public class WorkRequestDto {
     private boolean confirmCheck;
     private String category;
 
-    private String genre;
+    private List<String> genre;
 
     private List<String> author;
 

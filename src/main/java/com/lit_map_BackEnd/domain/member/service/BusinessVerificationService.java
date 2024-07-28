@@ -9,6 +9,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.http.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.util.Collections;
 
@@ -21,24 +23,14 @@ public class BusinessVerificationService {
     @Value("${external.api.business.verification.url}")
     private String verificationApiUrl;
 
-    @Value("${external.api.business.verification.serviceKey}")
-    private String serviceKey;
-
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public BusinessVerificationResponse verifyBusiness(BusinessVerificationRequestWrapper request) {
-        try {
-            URLDecoder.decode(serviceKey, "UTF-8");
-        } catch (Exception e) {
-            System.out.println(serviceKey);
-            e.printStackTrace();
-        }
+    public BusinessVerificationResponse verifyBusiness(BusinessVerificationRequestWrapper request) throws URISyntaxException {
 
-        String url = UriComponentsBuilder.fromHttpUrl(verificationApiUrl)
-                .queryParam("serviceKey", serviceKey)
-                .toUriString();
+        URI url = new URI(verificationApiUrl);
 
         log.info("Request URL: {}", url); // 로그에 URL 출력
+        log.info("Request Body: {}", request); // 요청 내용 로깅
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -55,9 +47,16 @@ public class BusinessVerificationService {
             );
             return response.getBody();
         } catch (HttpClientErrorException e) {
+            log.error("HTTP error: {}", e.getStatusCode(), e);
             BusinessVerificationResponse errorResponse = new BusinessVerificationResponse();
             errorResponse.setStatus(e.getStatusCode().toString());
             errorResponse.setMessage(e.getResponseBodyAsString());
+            return errorResponse;
+        } catch (Exception e) {
+            log.error("Unexpected error: ", e);
+            BusinessVerificationResponse errorResponse = new BusinessVerificationResponse();
+            errorResponse.setStatus("500");
+            errorResponse.setMessage("An unexpected error occurred");
             return errorResponse;
         }
     }

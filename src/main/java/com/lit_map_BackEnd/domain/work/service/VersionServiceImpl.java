@@ -68,6 +68,7 @@ public class VersionServiceImpl implements VersionService{
         // 해당 버전에 관련된 캐릭터 불러오기
         List<CastResponseDto> casts = castRepository.findByVersion(version).stream()
                 .map(cast -> CastResponseDto.builder()
+                        .castId(cast.getId())
                         .name(cast.getName())
                         .imageUrl(cast.getImageUrl())
                         .type(cast.getType())
@@ -151,6 +152,7 @@ public class VersionServiceImpl implements VersionService{
                     .versionName(version.getVersionName())
                     .versionNum(version.getVersionNum())
                     .confirm(version.getConfirm())
+                    .originVersionId(version.getId())
                     .relationship(version.getRelationship())
                     .build();
 
