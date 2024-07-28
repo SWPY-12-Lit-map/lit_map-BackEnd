@@ -1,3 +1,4 @@
+
 package com.lit_map_BackEnd.domain.member.service;
 
 import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -158,6 +160,7 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
                 .publisherAddress(publisherDto.getPublisherAddress())
                 .publisherPhoneNumber(publisherDto.getPublisherPhoneNumber())
                 .publisherCeo(publisherDto.getPublisherCeo())
+                .memberList(new ArrayList<>()) // memberList 초기화
                 .build();
 
         Member member = Member.builder()
@@ -170,6 +173,7 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
                 .publisher(publisher)
                 .memberRoleStatus(MemberRoleStatus.ACTIVE_MEMBER)
                 .build();
+
         publisher.getMemberList().add(member);
 
         Publisher savedPublisher = publisherRepository.save(publisher);

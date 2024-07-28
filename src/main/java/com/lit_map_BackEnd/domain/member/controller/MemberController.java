@@ -143,6 +143,7 @@ public class MemberController {
     }
 
     @PutMapping("/update")
+    @Operation(summary = "1인작가 정보 수정", description = "1인작가의 마이페이지 정보를 수정")
     public ResponseEntity<SuccessResponse<Member>> updateMember(@RequestBody @Validated MemberUpdateDto memberUpdateDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -168,7 +169,7 @@ public class MemberController {
     }
 
     @PostMapping("/{memberId}/request-withdrawal")
-    @Operation(summary = "회원 탈퇴 요청", description = "회원의 탈퇴를 요청합니다.")
+    @Operation(summary = "작가,직원 탈퇴 요청", description = "작가,직원 탈퇴를 요청")
     public ResponseEntity<SuccessResponse<String>> requestMemberWithdrawal(@PathVariable Long memberId) {
         memberService.requestWithdrawal(memberId);
         SuccessResponse<String> res = SuccessResponse.<String>builder()
@@ -180,7 +181,7 @@ public class MemberController {
     }
 
     @PostMapping("/{memberId}/approve-withdrawal")
-    @Operation(summary = "회원 탈퇴 승인", description = "회원의 탈퇴를 승인합니다.")
+    @Operation(summary = "작가,직원 탈퇴 승인", description = "작가,직원 탈퇴 승인")
     public ResponseEntity<SuccessResponse<String>> approveMemberWithdrawal(@PathVariable Long memberId) {
         memberService.approveWithdrawal(memberId);
         SuccessResponse<String> res = SuccessResponse.<String>builder()
