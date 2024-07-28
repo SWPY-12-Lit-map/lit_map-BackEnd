@@ -2,7 +2,6 @@ package com.lit_map_BackEnd.domain.member.controller;
 
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
-import com.lit_map_BackEnd.common.util.SessionUtil;
 import com.lit_map_BackEnd.domain.member.dto.*;
 import com.lit_map_BackEnd.domain.member.entity.CustomUserDetails;
 import com.lit_map_BackEnd.domain.member.entity.Member;
@@ -36,7 +35,6 @@ public class MemberController {
     private static final Logger logger = LoggerFactory.getLogger(MemberController.class);
     private final MemberPublisherService memberPublisherService;
     private final MemberService memberService;
-    private final SessionUtil sessionUtil; // SessionUtil 주입
 
     @PostMapping("/register")
     @Operation(summary = "회원가입", description = "새로운 회원을 등록합니다.")
@@ -51,7 +49,7 @@ public class MemberController {
         session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
 
         // 세션 쿠키 설정
-        session.setMaxInactiveInterval((int) Duration.ofDays(1).toSeconds());
+        session.setMaxInactiveInterval((int) Duration.ofDays(1).toSeconds()); // 세션 유효 기간 설정
         Cookie sessionCookie = new Cookie("JSESSIONID", session.getId());
         sessionCookie.setPath("/");
         sessionCookie.setHttpOnly(true); // HttpOnly 속성 설정
@@ -103,11 +101,11 @@ public class MemberController {
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(auth);
 
-        HttpSession session = request.getSession(true);
+        HttpSession session = request.getSession(true); // 새로운 세션 생성
         session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
 
         // 세션 쿠키 설정
-        session.setMaxInactiveInterval((int) Duration.ofDays(1).toSeconds());
+        session.setMaxInactiveInterval((int) Duration.ofDays(1).toSeconds()); // 세션 유효 기간 설정
         Cookie sessionCookie = new Cookie("JSESSIONID", session.getId());
         sessionCookie.setPath("/");
         sessionCookie.setHttpOnly(true); // HttpOnly 속성 설정
@@ -151,29 +149,16 @@ public class MemberController {
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
-    @GetMapping("/profile")
-    @Operation(summary = "회원 프로필 조회", description = "현재 로그인된 사용자의 프로필을 조회합니다.")
-    public ResponseEntity<?> getProfile(HttpServletRequest request) {
-        HttpSession session = request.getSession(false); // 세션이 존재하는지 확인
-        if (session == null) {
-            logger.error("No session found");
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); // 세션이 없으면 401 응답
-        }
-        logger.info("Session ID: " + session.getId());
-
-        return sessionUtil.getProfile(); // SessionUtil을 통해 프로필 조회
-    }
-
     @PutMapping("/update")
     public ResponseEntity<SuccessResponse<Member>> updateMember(@RequestBody @Validated MemberUpdateDto memberUpdateDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); // 인증되지 않은 경우 401 응답
         }
 
         Object principal = authentication.getPrincipal();
         if (!(principal instanceof CustomUserDetails)) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); // 올바른 사용자 정보가 아닌 경우 401 응답
         }
 
         CustomUserDetails userDetails = (CustomUserDetails) principal;
