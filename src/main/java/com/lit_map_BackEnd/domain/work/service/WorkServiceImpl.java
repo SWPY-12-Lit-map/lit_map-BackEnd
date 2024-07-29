@@ -306,7 +306,7 @@ public class WorkServiceImpl implements WorkService{
                 .title(work.getTitle())
                 .contents(work.getContent())
                 .versions(version)
-                .youtubes(youtubeList)
+                //.youtubes(youtubeList)
                 .build();
     }
 }
