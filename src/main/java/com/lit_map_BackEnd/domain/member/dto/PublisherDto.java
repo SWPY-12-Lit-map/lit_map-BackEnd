@@ -51,4 +51,5 @@ public class PublisherDto {
 
     private String userImage;
 
+    private List<MemberDto> memberList;
 }

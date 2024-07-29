@@ -1,11 +1,12 @@
 package com.lit_map_BackEnd.domain.member.controller;
 
+import com.lit_map_BackEnd.common.exception.code.ErrorCode;
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
 import com.lit_map_BackEnd.common.util.SessionUtil;
 import com.lit_map_BackEnd.domain.member.dto.*;
-import com.lit_map_BackEnd.domain.member.entity.CustomUserDetails;
 import com.lit_map_BackEnd.domain.member.entity.Member;
+import com.lit_map_BackEnd.domain.member.entity.MemberRoleStatus;
 import com.lit_map_BackEnd.domain.member.service.MemberPublisherService;
 import com.lit_map_BackEnd.domain.member.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,13 +17,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/members")
@@ -32,7 +31,6 @@ public class MemberController {
     private static final Logger logger = LoggerFactory.getLogger(MemberController.class);
     private final MemberPublisherService memberPublisherService;
     private final MemberService memberService;
-    private final HttpSession session;
     private final SessionUtil sessionUtil;
 
     @PostMapping("/register")
@@ -40,22 +38,11 @@ public class MemberController {
     public ResponseEntity<SuccessResponse<Member>> registerMember(@RequestBody @Validated MemberDto memberDto, HttpServletRequest request, HttpServletResponse response) {
         Member savedMember = memberPublisherService.saveMember(memberDto);
 
-        CustomUserDetails userDetails = new CustomUserDetails(savedMember);
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(auth);
-
-        HttpSession session = request.getSession(true); // 새로운 세션 생성
-        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
-
-        // 세션 쿠키 설정
-        SessionUtil.createSessionCookie(session, response);
-
         SuccessResponse<Member> res = SuccessResponse.<Member>builder()
                 .result(savedMember)
                 .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
                 .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())
                 .build();
-
         return new ResponseEntity<>(res, HttpStatus.CREATED);
     }
 
@@ -81,35 +68,49 @@ public class MemberController {
         } else {
             return ResponseEntity.ok("사용 가능한 이메일입니다.");
         }
-    } // 회원가입시 유효성 체크
+    } // 회원가입시 이메일 중복 체크
 
     @PostMapping("/login")
     @Operation(summary = "로그인", description = "회원이 로그인합니다.")
-    public ResponseEntity<SuccessResponse<Member>> login(@RequestBody LoginDto loginDto, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<SuccessResponse<Object>> login(@RequestBody LoginDto loginDto, HttpServletRequest request, HttpServletResponse response) {
         logger.info("Login attempt for email: " + loginDto.getLitmapEmail());
 
-        Member loggedMember = memberPublisherService.login(loginDto.getLitmapEmail(), loginDto.getPassword());
+        try {
+            // 회원 로그인 처리
+            Member loggedMember = memberPublisherService.login(loginDto.getLitmapEmail(), loginDto.getPassword());
 
-        CustomUserDetails userDetails = new CustomUserDetails(loggedMember);
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(auth);
+            // 세션 생성 및 설정
+            HttpSession session = request.getSession(true);
+            SessionUtil.setLoggedInUser(session, loggedMember); // 세션에 사용자 정보 저장
 
-        HttpSession session = request.getSession(true); // 새로운 세션 생성
-        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
+            // 세션 쿠키 설정
+            SessionUtil.createSessionCookie(session, response);
 
-        // 세션 쿠키 설정
-        SessionUtil.createSessionCookie(session, response);
+            logger.info("User logged in: " + loginDto.getLitmapEmail());
+            logger.info("Session ID: " + session.getId());
 
-        logger.info("User logged in: " + loggedMember.getLitmapEmail());
-        logger.info("Session ID: " + session.getId());
+            // 로그인 결과로 회원 또는 출판사 직원 정보 반환
+            Object result = loggedMember;
+            if (session.getAttribute("publisherDto") != null) {
+                result = session.getAttribute("publisherDto");
+            }
 
-        SuccessResponse<Member> res = SuccessResponse.<Member>builder()
-                .result(loggedMember)
-                .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
-                .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
-                .build();
+            SuccessResponse<Object> res = SuccessResponse.builder()
+                    .result(result)
+                    .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
+                    .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
+                    .build();
 
-        return new ResponseEntity<>(res, HttpStatus.OK);
+            return new ResponseEntity<>(res, HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error("Login failed for email: " + loginDto.getLitmapEmail(), e);
+            SuccessResponse<Object> res = SuccessResponse.builder()
+                    .result(null)
+                    .resultCode(ErrorCode.NOT_VALID_ERROR.getStatus())
+                    .resultMsg("로그인 실패")
+                    .build();
+            return new ResponseEntity<>(res, HttpStatus.UNAUTHORIZED);
+        }
     }
 
     @GetMapping("/logout")
@@ -136,28 +137,55 @@ public class MemberController {
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
+//    @GetMapping("/mypage")
+//    @Operation(summary = "마이페이지 조회", description = "현재 로그인된 사용자의 마이페이지를 조회합니다.")
+//    public ResponseEntity<SuccessResponse<Object>> getMyPage(HttpServletRequest request) {
+//        HttpSession session = request.getSession(false); // 현재 세션 가져오기
+//        Member profile = SessionUtil.getLoggedInUser(session);
+//
+//        if (profile != null) {
+//            Object result = session.getAttribute("publisherDto") != null ? session.getAttribute("publisherDto") : profile;
+//            SuccessResponse<Object> res = SuccessResponse.builder()
+//                    .result(result)
+//                    .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
+//                    .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
+//                    .build();
+//            return new ResponseEntity<>(res, HttpStatus.OK);
+//        } else {
+//            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+//        }
+//    }
+
     @GetMapping("/mypage")
-    @Operation(summary = "마이페이지 조회", description = "현재 로그인된 사용자의 마이페이지를 조회합니다.")
-    public ResponseEntity<?> getMyPage() {
-        return sessionUtil.getProfile();
+    @Operation(summary = "1인작가 마이페이지 조회", description = "현재 로그인된 1인작가의 마이페이지를 조회합니다.")
+    public ResponseEntity<SuccessResponse<Object>> getMemberMyPage(HttpServletRequest request) {
+        HttpSession session = request.getSession(false); // 현재 세션 가져오기
+        Member profile = SessionUtil.getLoggedInUser(session);
+
+        if (profile != null && profile.getMemberRoleStatus() == MemberRoleStatus.ACTIVE_MEMBER) {
+            SuccessResponse<Object> res = SuccessResponse.builder()
+                    .result(profile)
+                    .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
+                    .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
+                    .build();
+            return new ResponseEntity<>(res, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
     }
 
     @PutMapping("/update")
     @Operation(summary = "1인작가 정보 수정", description = "1인작가의 마이페이지 정보를 수정")
-    public ResponseEntity<SuccessResponse<Member>> updateMember(@RequestBody @Validated MemberUpdateDto memberUpdateDto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
+    public ResponseEntity<SuccessResponse<Member>> updateMember(@RequestBody @Validated MemberUpdateDto memberUpdateDto, HttpSession session) {
+        Member loggedMember = SessionUtil.getLoggedInUser(session);
+        if (loggedMember == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); // 인증되지 않은 경우 401 응답
         }
 
-        Object principal = authentication.getPrincipal();
-        if (!(principal instanceof CustomUserDetails)) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); // 올바른 사용자 정보가 아닌 경우 401 응답
-        }
+        Member updatedMember = memberPublisherService.updateMember(loggedMember.getLitmapEmail(), memberUpdateDto);
 
-        CustomUserDetails userDetails = (CustomUserDetails) principal;
-        String litmapEmail = userDetails.getUsername();
-        Member updatedMember = memberPublisherService.updateMember(litmapEmail, memberUpdateDto);
+        // 세션 정보 업데이트
+        SessionUtil.setLoggedInUser(session, updatedMember);
 
         SuccessResponse<Member> res = SuccessResponse.<Member>builder()
                 .result(updatedMember)

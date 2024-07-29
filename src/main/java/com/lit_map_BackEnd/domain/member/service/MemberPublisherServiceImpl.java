@@ -1,25 +1,19 @@
-
 package com.lit_map_BackEnd.domain.member.service;
 
 import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
 import com.lit_map_BackEnd.common.exception.code.ErrorCode;
-import com.lit_map_BackEnd.domain.category.entity.Category;
-import com.lit_map_BackEnd.domain.category.repository.CategoryRepository;
 import com.lit_map_BackEnd.domain.member.dto.*;
-import com.lit_map_BackEnd.domain.member.entity.CustomUserDetails;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.entity.Publisher;
 import com.lit_map_BackEnd.domain.member.entity.MemberRoleStatus;
 import com.lit_map_BackEnd.domain.member.repository.MemberRepository;
 import com.lit_map_BackEnd.domain.member.repository.PublisherRepository;
+import com.lit_map_BackEnd.common.util.SessionUtil;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -40,7 +34,6 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
     private final EmailService emailService;
     private final HttpSession session;
     private final RestTemplate restTemplate = new RestTemplate();
-    private final CustomUserDetailsService customUserDetailsService;
 
     @Value("${external.api.publisher.url}")
     private String publisherApiUrl;
@@ -79,7 +72,7 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
     private boolean isValidPassword(String password) {
         String regex = "^(?=.*[a-z])(?=.*\\d)[a-z\\d]{8,20}$";
         return Pattern.compile(regex).matcher(password).matches();
-    } // 비밀번호 유효성 메서드 -> 영어+숫자 섞어서 사용
+    } // 비밀번호 유효성 메서드 -> 영어+숫자 섞어서 8자 ~ 20자 사용
 
     private boolean containsProhibitedWords(String nickname) {
         String[] prohibitedWords = {"admin", "관리자", "system"};
@@ -140,30 +133,26 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
 
         emailService.sendEmail(member.getLitmapEmail(), subject, content);
         return member;
-    }
+    } // 1인작가 회원승인
 
     public boolean checkLitmapEmailExists(String litmapEmail) {
         return memberRepository.findByLitmapEmail(litmapEmail).isPresent();
-    }
+    } // 회원가입시 사용하는 이메일 중복 여부 확인 메서드
 
-    @Override
-    @Transactional
-    public Publisher savePublisher(PublisherDto publisherDto) {
-
-        if (memberRepository.findByLitmapEmail(publisherDto.getLitmapEmail()).isPresent()) {
-            throw new BusinessExceptionHandler(ErrorCode.DUPLICATE_EMAIL);
-        }
-
-        Publisher publisher = Publisher.builder()
+    // PublisherDto를 Publisher 엔티티로 변환하는 메서드
+    private Publisher convertToPublisher(PublisherDto publisherDto) {
+        return Publisher.builder()
                 .publisherNumber(publisherDto.getPublisherNumber())
                 .publisherName(publisherDto.getPublisherName())
                 .publisherAddress(publisherDto.getPublisherAddress())
                 .publisherPhoneNumber(publisherDto.getPublisherPhoneNumber())
                 .publisherCeo(publisherDto.getPublisherCeo())
-                .memberList(new ArrayList<>()) // memberList 초기화
+                .memberList(new ArrayList<>()) // 초기화된 memberList 추가
                 .build();
-
-        Member member = Member.builder()
+    }
+    // PublisherDto와 Publisher 엔티티를 사용하여 Member 엔티티를 생성하는 메서드
+    private Member convertToMember(PublisherDto publisherDto, Publisher publisher) {
+        return Member.builder()
                 .litmapEmail(publisherDto.getLitmapEmail())
                 .name(publisherDto.getName())
                 .password(passwordEncoder.encode(publisherDto.getPassword()))
@@ -171,12 +160,23 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
                 .myMessage(publisherDto.getMyMessage())
                 .userImage(publisherDto.getUserImage())
                 .publisher(publisher)
-                .memberRoleStatus(MemberRoleStatus.ACTIVE_MEMBER)
+                .memberRoleStatus(MemberRoleStatus.PUBLISHER_MEMBER)
                 .build();
+    }
 
-        publisher.getMemberList().add(member);
+    @Override
+    @Transactional
+    public PublisherDto savePublisher(PublisherDto publisherDto) {
 
-        Publisher savedPublisher = publisherRepository.save(publisher);
+        if (memberRepository.findByLitmapEmail(publisherDto.getLitmapEmail()).isPresent()) {
+            throw new BusinessExceptionHandler(ErrorCode.DUPLICATE_EMAIL);
+        }
+        Publisher publisher = convertToPublisher(publisherDto); // PublisherDto를 Publisher 엔티티로 변환
+        Member member = convertToMember(publisherDto, publisher); // PublisherDto와 변환된 Publisher 엔티티를 사용하여 Member 엔티티를 생성
+
+        publisher.getMemberList().add(member); // publisher의 memberList에 생성된 member 추가
+
+        Publisher savedPublisher = publisherRepository.save(publisher); // Publisher 엔티티를 데이터베이스에 저장
 
         // (출판사) 회원 가입 승인 이메일 전송
         String subject = "[litmap] 회원 가입 승인";
@@ -188,16 +188,10 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         emailService.sendEmail(publisherDto.getLitmapEmail(), subject, content);
 
         // 출판사 직원 로그인 상태 유지
-        loginAfterRegistration(publisherDto.getLitmapEmail(), publisherDto.getPassword());
-        return savedPublisher;
-    } // 출판사 회원가입
+        loginAfterRegistration(member);
 
-    private void loginAfterRegistration(String email, String password) {
-        CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(email);
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, password, userDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
-    }
+        return convertToPublisherDto(savedPublisher); // 저장된 Publisher 엔티티를 PublisherDto로 변환하여 반환
+    } // 출판사 회원가입
 
     @Override
     public Member findByLitmapEmail(String litmapEmail) {
@@ -206,13 +200,40 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
     }
 
     @Override
+    @Transactional
+    public PublisherDto getProfile() {
+        Member member = SessionUtil.getLoggedInUser(session);
+        if (member == null || member.getPublisher() == null) {
+            throw new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND);
+        }
+        return convertToPublisherDto(member.getPublisher());
+    } // 프로필 조회
+
+    @Override
+    public PublisherDto getPublisherProfile(Long publisherId) {
+        Publisher publisher = publisherRepository.findById(publisherId)
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.PUBLISHER_NOT_FOUND));
+
+        return convertToPublisherDto(publisher);
+    } // 출판사 프로필 조회
+
+    private void loginAfterRegistration(Member member) { // 회원가입 후 로그인 상태 유지를 위한 메서드
+        SessionUtil.setLoggedInUser(session, member);
+    }
+
+    @Override
+    @Transactional
     public Member login(String litmapEmail, String password) {
         Optional<Member> memberOptional = memberRepository.findByLitmapEmail(litmapEmail);
         if (memberOptional.isPresent()) {
             Member member = memberOptional.get();
             if (passwordEncoder.matches(password, member.getPassword())) {
-                //session.setAttribute("member", member);
-                session.setAttribute("loggedInUser", new CustomUserDetails(member)); // 세션에 사용자 정보 저장
+                SessionUtil.setLoggedInUser(session, member); // 세션에 사용자 정보 저장
+                if (member.getPublisher() != null) {
+                    // 출판사 직원인 경우 PublisherDto를 세션에 저장
+                    PublisherDto publisherDto = convertToPublisherDto(member.getPublisher());
+                    session.setAttribute("publisherDto", publisherDto);
+                }
                 return member;
             } else {
                 throw new BusinessExceptionHandler(ErrorCode.PASSWORDS_DO_NOT_MATCH);
@@ -220,7 +241,12 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         } else {
             throw new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND);
         }
-    } // 로그인
+    }
+
+    @Override
+    public PublisherDto loginPublisher(String litmapEmail, String password) {
+        return null;
+    }
 
     @Override
     public void logout() {
@@ -285,7 +311,7 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
             return publisher;
         }
         throw new BusinessExceptionHandler(ErrorCode.PUBLISHER_NOT_FOUND);
-    }// 사업자 api로 변경하기
+    }// 공공 API를 통해 출판사 정보 가져오기 메서드 -> 있지만 아직 사용안함
 
     @Override
     public String findMemberEmail(String workEmail, String name) {
@@ -329,11 +355,11 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
 
         updateMemberFields(member, memberUpdateDto);
         return memberRepository.save(member);
-    } // 1인 작가 마이페이지 수정
+    } // 1인 작가 마이페이지 (회원정보) 수정
 
     @Override
     @Transactional
-    public Member updatePublisherMember(String litmapEmail, PublisherUpdateDto publisherUpdateDto) {
+    public PublisherDto updatePublisherMember(String litmapEmail, PublisherUpdateDto publisherUpdateDto) {
         Member member = memberRepository.findByLitmapEmail(litmapEmail)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
@@ -341,11 +367,18 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         if (publisher == null) {
             throw new BusinessExceptionHandler(ErrorCode.PUBLISHER_NOT_FOUND);
         }
+
         updatePublisherFields(publisher, publisherUpdateDto);
         updateMemberFields(member, publisherUpdateDto);
         memberRepository.save(member); // 출판사 직원 정보를 업데이트할 때, memberRepository에 저장
-        return member;
-    } // 출판사 직원 마이페이지 수정
+
+        PublisherDto updatedPublisherDto = convertToPublisherDto(publisher);
+
+        // 세션 정보 업데이트
+        session.setAttribute("publisherDto", updatedPublisherDto); // 세션에 수정된 출판사 정보 저장
+
+        return updatedPublisherDto;
+    } // 출판사 직원 마이페이지 (회원정보) 수정
 
     private void updateMemberFields(Member member, MemberUpdateDto memberUpdateDto) {
         if (memberUpdateDto.getWorkEmail() != null) {
@@ -369,7 +402,7 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         if (memberUpdateDto.getUrlLink() != null) {
             member.setUrlLink(memberUpdateDto.getUrlLink());
         }
-    }
+    } // 1인작가 정보 업데이트
 
     private void updatePublisherFields(Publisher publisher, PublisherUpdateDto publisherUpdateDto) {
         if (publisherUpdateDto.getPublisherAddress() != null) {
@@ -381,5 +414,22 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         if (publisherUpdateDto.getPublisherCeo() != null) {
             publisher.setPublisherCeo(publisherUpdateDto.getPublisherCeo());
         }
-    }
+    } // 출판사 정보 업데이트
+
+    private PublisherDto convertToPublisherDto(Publisher publisher) {
+        // 필요한 필드를 PublisherDto로 변환
+        return PublisherDto.builder()
+                .publisherNumber(publisher.getPublisherNumber())
+                .publisherName(publisher.getPublisherName())
+                .publisherAddress(publisher.getPublisherAddress())
+                .publisherPhoneNumber(publisher.getPublisherPhoneNumber())
+                .publisherCeo(publisher.getPublisherCeo())
+                .litmapEmail(publisher.getMemberList().get(0).getLitmapEmail())
+                .name(publisher.getMemberList().get(0).getName())
+                .password(publisher.getMemberList().get(0).getPassword())
+                .nickname(publisher.getMemberList().get(0).getNickname())
+                .myMessage(publisher.getMemberList().get(0).getMyMessage())
+                .userImage(publisher.getMemberList().get(0).getUserImage())
+                .build();
+    } // Publisher 엔티티를 PublisherDto로 변환하는 메서드
 }
