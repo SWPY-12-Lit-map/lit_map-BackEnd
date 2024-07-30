@@ -1,5 +1,6 @@
 package com.lit_map_BackEnd.domain.member.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.lit_map_BackEnd.domain.work.entity.Work;
 import jakarta.persistence.*;
 import lombok.*;
@@ -54,6 +55,7 @@ public class Member {
 
     // 회원 한 명 : 작품 여러 개
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     @Builder.Default
     private List<Work> works = new ArrayList<>();
 
