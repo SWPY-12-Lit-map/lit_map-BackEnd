@@ -83,11 +83,10 @@ public class PublisherController {
     @GetMapping("/mypage")
     @Operation(summary = "출판사 직원 마이페이지 조회", description = "현재 로그인된 출판사 직원의 마이페이지를 조회합니다.")
     public ResponseEntity<SuccessResponse<Object>> getPublisherMyPage(HttpServletRequest request) {
-        HttpSession session = request.getSession(false); // 현재 세션 가져오기
-        Member profile = SessionUtil.getLoggedInUser(session);
+        Member profile = SessionUtil.getLoggedInUser(request);
 
         if (profile != null && profile.getMemberRoleStatus() == MemberRoleStatus.PUBLISHER_MEMBER) {
-            PublisherDto publisherDto = (PublisherDto) session.getAttribute("publisherDto");
+            PublisherDto publisherDto = (PublisherDto) request.getSession(false).getAttribute("publisherDto");
             SuccessResponse<Object> res = SuccessResponse.builder()
                     .result(publisherDto)
                     .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
@@ -101,8 +100,8 @@ public class PublisherController {
 
     @PutMapping("/update")
     @Operation(summary = "출판사 직원 정보 수정", description = "출판사 직원의 마이페이지 정보를 수정합니다.")
-    public ResponseEntity<SuccessResponse<PublisherDto>> updatePublisher(@RequestBody @Validated PublisherUpdateDto publisherUpdateDto, HttpSession session) {
-        Member loggedMember = SessionUtil.getLoggedInUser(session);
+    public ResponseEntity<SuccessResponse<PublisherDto>> updatePublisher(@RequestBody @Validated PublisherUpdateDto publisherUpdateDto, HttpServletRequest request) {
+        Member loggedMember = SessionUtil.getLoggedInUser(request);
         if (loggedMember == null || loggedMember.getPublisher() == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); // 인증되지 않은 경우 401 응답
         }
@@ -110,7 +109,7 @@ public class PublisherController {
         PublisherDto updatedPublisher = memberPublisherService.updatePublisherMember(loggedMember.getLitmapEmail(), publisherUpdateDto);
 
         // 세션 정보 업데이트
-        SessionUtil.setLoggedInUser(session, loggedMember); // 세션에 수정된 출판사 직원 정보 저장
+        SessionUtil.setLoggedInUser(request, loggedMember); // 세션에 수정된 출판사 직원 정보 저장
 
         SuccessResponse<PublisherDto> res = SuccessResponse.<PublisherDto>builder()
                 .result(updatedPublisher)

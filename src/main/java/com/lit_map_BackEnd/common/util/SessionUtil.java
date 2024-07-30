@@ -3,6 +3,7 @@ package com.lit_map_BackEnd.common.util;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.service.MemberPublisherService;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +19,8 @@ public class SessionUtil {
     private final MemberPublisherService memberPublisherService;
 
     // 세션에서 프로필 정보를 가져오는 메서드
-    public Optional<Member> getProfile(HttpSession session) {
-        Member loggedInMember = getLoggedInUser(session);
+    public Optional<Member> getProfile(HttpServletRequest request) {
+        Member loggedInMember = getLoggedInUser(request);
         if (loggedInMember == null) {
             return Optional.empty();
         }
@@ -28,13 +29,25 @@ public class SessionUtil {
         return Optional.of(memberProfile);
     }
 
+    public static HttpSession getSession(HttpServletRequest request) {
+        return request.getSession(false); // 새로운 세션을 생성하지 않음
+    }
+
     // 세션에 로그인한 사용자 정보를 설정하는 메서드
-    public static void setLoggedInUser(HttpSession session, Member member) {
+    public static void setLoggedInUser(HttpServletRequest request, Member member) {
+        HttpSession session = getSession(request);
+        if (session == null) {
+            session = request.getSession(true); // 새로운 세션 생성
+        }
         session.setAttribute("loggedInUser", member);
     }
 
     // 세션에서 로그인한 사용자 정보를 가져오는 메서드
-    public static Member getLoggedInUser(HttpSession session) {
+    public static Member getLoggedInUser(HttpServletRequest request) {
+        HttpSession session = getSession(request);
+        if (session == null) {
+            return null;
+        }
         return (Member) session.getAttribute("loggedInUser");
     }
 

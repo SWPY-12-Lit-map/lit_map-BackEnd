@@ -38,6 +38,7 @@ public class SecurityConfig {
                         .maximumSessions(1) // 동시 세션 수 제한
                         .maxSessionsPreventsLogin(false) // 새 로그인이 기존 세션을 무효화하지 않음
                         .sessionRegistry(sessionRegistry())
+                        //.sessionFixation().migrateSession() // 세션 고정 공격 방지
                 )
                 .formLogin(formLogin -> formLogin.disable()) // 폼 로그인 비활성화
                 .logout(logout -> logout

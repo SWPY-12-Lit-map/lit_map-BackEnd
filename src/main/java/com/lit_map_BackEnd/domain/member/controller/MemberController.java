@@ -79,20 +79,16 @@ public class MemberController {
             // 회원 로그인 처리
             Member loggedMember = memberPublisherService.login(loginDto.getLitmapEmail(), loginDto.getPassword());
 
-            // 세션 생성 및 설정
-            HttpSession session = request.getSession(true);
-            SessionUtil.setLoggedInUser(session, loggedMember); // 세션에 사용자 정보 저장
-
             // 세션 쿠키 설정
-            SessionUtil.createSessionCookie(session, response);
+            SessionUtil.createSessionCookie(request.getSession(false), response);
 
             logger.info("User logged in: " + loginDto.getLitmapEmail());
-            logger.info("Session ID: " + session.getId());
+            logger.info("Session ID: " + request.getSession(false).getId());
 
             // 로그인 결과로 회원 또는 출판사 직원 정보 반환
             Object result = loggedMember;
-            if (session.getAttribute("publisherDto") != null) {
-                result = session.getAttribute("publisherDto");
+            if (request.getSession(false).getAttribute("publisherDto") != null) {
+                result = request.getSession(false).getAttribute("publisherDto");
             }
 
             SuccessResponse<Object> res = SuccessResponse.builder()
@@ -100,6 +96,7 @@ public class MemberController {
                     .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
                     .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
                     .build();
+
 
             return new ResponseEntity<>(res, HttpStatus.OK);
         } catch (Exception e) {
@@ -159,8 +156,7 @@ public class MemberController {
     @GetMapping("/mypage")
     @Operation(summary = "1인작가 마이페이지 조회", description = "현재 로그인된 1인작가의 마이페이지를 조회합니다.")
     public ResponseEntity<SuccessResponse<Object>> getMemberMyPage(HttpServletRequest request) {
-        HttpSession session = request.getSession(false); // 현재 세션 가져오기
-        Member profile = SessionUtil.getLoggedInUser(session);
+        Member profile = SessionUtil.getLoggedInUser(request);
 
         if (profile != null && profile.getMemberRoleStatus() == MemberRoleStatus.ACTIVE_MEMBER) {
             SuccessResponse<Object> res = SuccessResponse.builder()
@@ -176,8 +172,8 @@ public class MemberController {
 
     @PutMapping("/update")
     @Operation(summary = "1인작가 정보 수정", description = "1인작가의 마이페이지 정보를 수정")
-    public ResponseEntity<SuccessResponse<Member>> updateMember(@RequestBody @Validated MemberUpdateDto memberUpdateDto, HttpSession session) {
-        Member loggedMember = SessionUtil.getLoggedInUser(session);
+    public ResponseEntity<SuccessResponse<Member>> updateMember(@RequestBody @Validated MemberUpdateDto memberUpdateDto, HttpServletRequest request) {
+        Member loggedMember = SessionUtil.getLoggedInUser(request);
         if (loggedMember == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); // 인증되지 않은 경우 401 응답
         }
@@ -185,7 +181,7 @@ public class MemberController {
         Member updatedMember = memberPublisherService.updateMember(loggedMember.getLitmapEmail(), memberUpdateDto);
 
         // 세션 정보 업데이트
-        SessionUtil.setLoggedInUser(session, updatedMember);
+        SessionUtil.setLoggedInUser(request, updatedMember);
 
         SuccessResponse<Member> res = SuccessResponse.<Member>builder()
                 .result(updatedMember)
