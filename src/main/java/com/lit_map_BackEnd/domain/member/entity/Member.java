@@ -51,6 +51,7 @@ public class Member {
     // 회원 여러 명 : 출판사 한 개
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "publisher_id")
+    @JsonIgnore
     private Publisher publisher;
 
     // 회원 한 명 : 작품 여러 개

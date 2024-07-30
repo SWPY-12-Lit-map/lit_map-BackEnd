@@ -36,4 +36,7 @@ public interface MemberPublisherService {
 
     Member updateMember(String litmapEmail, MemberUpdateDto memberUpdateDto); // 1인작가 정보 수정
     PublisherDto updatePublisherMember(String litmapEmail, PublisherUpdateDto publisherUpdateDto); // 출판사 직원 정보 수정
+
+    // 새로운 메서드 정의
+    //Member getLatestMemberInfo(String litmapEmail);
 }

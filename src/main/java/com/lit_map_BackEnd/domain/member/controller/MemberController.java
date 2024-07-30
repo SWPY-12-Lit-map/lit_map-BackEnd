@@ -81,22 +81,19 @@ public class MemberController {
 
             // 세션 쿠키 설정
             SessionUtil.createSessionCookie(request.getSession(false), response);
+            SessionUtil.setLoggedInUser(request, loggedMember);
 
             logger.info("User logged in: " + loginDto.getLitmapEmail());
             logger.info("Session ID: " + request.getSession(false).getId());
 
-            // 로그인 결과로 회원 또는 출판사 직원 정보 반환
-            Object result = loggedMember;
-            if (request.getSession(false).getAttribute("publisherDto") != null) {
-                result = request.getSession(false).getAttribute("publisherDto");
-            }
+            // 세션에 사용자 정보 저장
+            SessionUtil.setLoggedInUser(request, loggedMember);
 
             SuccessResponse<Object> res = SuccessResponse.builder()
-                    .result(result)
+                    .result(loggedMember)
                     .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
                     .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
                     .build();
-
 
             return new ResponseEntity<>(res, HttpStatus.OK);
         } catch (Exception e) {
@@ -108,30 +105,6 @@ public class MemberController {
                     .build();
             return new ResponseEntity<>(res, HttpStatus.UNAUTHORIZED);
         }
-    }
-
-    @GetMapping("/logout")
-    @Operation(summary = "로그아웃", description = "사용자를 로그아웃하고 세션을 무효화합니다.")
-    public ResponseEntity<SuccessResponse<String>> logout(HttpSession session) {
-        session.invalidate(); // 세션 무효화
-        SuccessResponse<String> res = SuccessResponse.<String>builder()
-                .result("로그아웃 되었습니다.")
-                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
-                .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
-                .build();
-        return new ResponseEntity<>(res, HttpStatus.OK);
-    }
-
-    @PostMapping("/find-email")
-    @Operation(summary = "이메일 찾기", description = "업무용 이메일과 이름을 사용하여 이메일을 찾습니다.")
-    public ResponseEntity<SuccessResponse<String>> findEmail(@RequestBody FindEmailDto findEmailDto) {
-        String foundEmail = memberPublisherService.findMemberEmail(findEmailDto.getWorkEmail(), findEmailDto.getName());
-        SuccessResponse<String> res = SuccessResponse.<String>builder()
-                .result(foundEmail)
-                .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
-                .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
-                .build();
-        return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
 //    @GetMapping("/mypage")
@@ -159,8 +132,12 @@ public class MemberController {
         Member profile = SessionUtil.getLoggedInUser(request);
 
         if (profile != null && profile.getMemberRoleStatus() == MemberRoleStatus.ACTIVE_MEMBER) {
+            // 최신 정보를 가져와 세션을 업데이트합니다.
+            Member updatedProfile = memberPublisherService.findByLitmapEmail(profile.getLitmapEmail());
+            SessionUtil.setLoggedInUser(request, updatedProfile);
+
             SuccessResponse<Object> res = SuccessResponse.builder()
-                    .result(profile)
+                    .result(updatedProfile)
                     .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
                     .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
                     .build();
@@ -212,6 +189,30 @@ public class MemberController {
                 .result("회원 탈퇴가 승인되었습니다.")
                 .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
                 .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
+                .build();
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+    @GetMapping("/logout")
+    @Operation(summary = "로그아웃", description = "사용자를 로그아웃하고 세션을 무효화합니다.")
+    public ResponseEntity<SuccessResponse<String>> logout(HttpSession session) {
+        session.invalidate(); // 세션 무효화
+        SuccessResponse<String> res = SuccessResponse.<String>builder()
+                .result("로그아웃 되었습니다.")
+                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
+                .build();
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+    @PostMapping("/find-email")
+    @Operation(summary = "이메일 찾기", description = "업무용 이메일과 이름을 사용하여 이메일을 찾습니다.")
+    public ResponseEntity<SuccessResponse<String>> findEmail(@RequestBody FindEmailDto findEmailDto) {
+        String foundEmail = memberPublisherService.findMemberEmail(findEmailDto.getWorkEmail(), findEmailDto.getName());
+        SuccessResponse<String> res = SuccessResponse.<String>builder()
+                .result(foundEmail)
+                .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
                 .build();
         return new ResponseEntity<>(res, HttpStatus.OK);
     }

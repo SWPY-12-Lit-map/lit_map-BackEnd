@@ -86,6 +86,10 @@ public class PublisherController {
         Member profile = SessionUtil.getLoggedInUser(request);
 
         if (profile != null && profile.getMemberRoleStatus() == MemberRoleStatus.PUBLISHER_MEMBER) {
+            // 최신 정보를 가져와 세션을 업데이트합니다.
+            Member updatedProfile = memberPublisherService.findByLitmapEmail(profile.getLitmapEmail());
+            SessionUtil.setLoggedInUser(request, updatedProfile);
+
             PublisherDto publisherDto = (PublisherDto) request.getSession(false).getAttribute("publisherDto");
             SuccessResponse<Object> res = SuccessResponse.builder()
                     .result(publisherDto)
@@ -109,7 +113,8 @@ public class PublisherController {
         PublisherDto updatedPublisher = memberPublisherService.updatePublisherMember(loggedMember.getLitmapEmail(), publisherUpdateDto);
 
         // 세션 정보 업데이트
-        SessionUtil.setLoggedInUser(request, loggedMember); // 세션에 수정된 출판사 직원 정보 저장
+        Member updatedProfile = memberPublisherService.findByLitmapEmail(loggedMember.getLitmapEmail());
+        SessionUtil.setLoggedInUser(request, updatedProfile);
 
         SuccessResponse<PublisherDto> res = SuccessResponse.<PublisherDto>builder()
                 .result(updatedPublisher)

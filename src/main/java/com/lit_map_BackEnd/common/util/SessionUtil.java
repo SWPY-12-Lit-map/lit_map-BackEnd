@@ -30,24 +30,18 @@ public class SessionUtil {
     }
 
     public static HttpSession getSession(HttpServletRequest request) {
-        return request.getSession(false); // 새로운 세션을 생성하지 않음
+        return request.getSession(true); // 새로운 세션을 생성하거나 기존 세션을 반환
     }
 
     // 세션에 로그인한 사용자 정보를 설정하는 메서드
     public static void setLoggedInUser(HttpServletRequest request, Member member) {
         HttpSession session = getSession(request);
-        if (session == null) {
-            session = request.getSession(true); // 새로운 세션 생성
-        }
         session.setAttribute("loggedInUser", member);
     }
 
     // 세션에서 로그인한 사용자 정보를 가져오는 메서드
     public static Member getLoggedInUser(HttpServletRequest request) {
         HttpSession session = getSession(request);
-        if (session == null) {
-            return null;
-        }
         return (Member) session.getAttribute("loggedInUser");
     }
 
@@ -59,6 +53,8 @@ public class SessionUtil {
         sessionCookie.setHttpOnly(true); // HttpOnly 속성 설정
         sessionCookie.setSecure(true); // HTTPS 사용 시에만 설정
         sessionCookie.setMaxAge((int) Duration.ofDays(1).toSeconds()); // 쿠키 유효 기간 설정
-        response.addCookie(sessionCookie); // 응답에 쿠키 추가
+
+        // Set-Cookie 헤더를 사용하여 SameSite=None; Secure 속성 추가
+        response.addHeader("Set-Cookie", String.format("JSESSIONID=%s; Path=/; HttpOnly; Secure; SameSite=None", session.getId()));
     }
 }
