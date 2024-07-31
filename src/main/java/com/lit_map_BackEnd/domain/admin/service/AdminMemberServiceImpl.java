@@ -31,24 +31,4 @@ public class AdminMemberServiceImpl implements AdminMemberService {
         return adminMemberRepository.findByMemberRoleStatus(status); // 특정 상태의 회원들을 조회
     }
 
-    @Override
-    @Transactional
-    public Member approveMember(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
-
-        member.setMemberRoleStatus(MemberRoleStatus.ACTIVE_MEMBER);
-        Member approvedMember = memberRepository.save(member);
-
-        // 승인 이메일 전송
-        String subject = "[litmap] 회원 가입 승인";
-        String content = "<div style=\"margin:30px;\"><img src=\"data:image/png;base64,iVBORw0qMPdgAAAAASUVORK5CYII=\\\"/>"
-                + "<br><h2>회원 가입 승인</h2><h4>"
-                + member.getName()
-                + "님 회원 가입이 승인되었습니다. 환영합니다!</h4></div>";
-
-        emailService.sendEmail(member.getLitmapEmail(), subject, content);
-
-        return approvedMember;
-    }
 }
