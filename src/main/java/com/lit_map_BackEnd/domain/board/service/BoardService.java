@@ -10,7 +10,7 @@ import java.util.Map;
 
 public interface BoardService {
     List<WorkResponseDto> getConfirmData();
-    MyWorkListResponseDto getMyWorkList();
+    MyWorkListResponseDto getMyWorkList(Long memberId);
     Slice<WorkResponseDto> getWorkListByView(int pageNum);
     Slice<WorkResponseDto> getWorkListByUpdateDate(int pageNum);
     List<Map<String, Object>> getWorkByCategoryAndGenre(Long categoryId, Long genreId);

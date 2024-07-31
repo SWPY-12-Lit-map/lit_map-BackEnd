@@ -2,10 +2,13 @@ package com.lit_map_BackEnd.domain.board.controller;
 
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
+import com.lit_map_BackEnd.common.util.SessionUtil;
 import com.lit_map_BackEnd.domain.board.dto.*;
 import com.lit_map_BackEnd.domain.board.service.BoardService;
+import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
@@ -41,8 +44,9 @@ public class BoardController {
     // 내가 작성한 작품 목록
     @GetMapping("/myWorkList")
     @Operation(summary = "나의 작품 목록", description = "내가 등록한 작품-버전 list로 가져오기")
-    public ResponseEntity<SuccessResponse> getMyWorkList() {
-        MyWorkListResponseDto myWorkList = boardService.getMyWorkList();
+    public ResponseEntity<SuccessResponse> getMyWorkList(HttpServletRequest request) {
+        Member loggedInUser = SessionUtil.getLoggedInUser(request);
+        MyWorkListResponseDto myWorkList = boardService.getMyWorkList(loggedInUser.getId());
 
         SuccessResponse res = SuccessResponse.builder()
                 .result(myWorkList)
