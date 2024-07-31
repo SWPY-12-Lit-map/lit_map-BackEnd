@@ -10,7 +10,7 @@ public interface MemberPublisherService {
     // 1인작가, 출판사 : 회원가입, 로그인, 비밀번호찾기
 
     Member saveMember(MemberDto memberDto); // 작가 회원가입
-    Member approveMember(Long memberId); // 회원 승인
+    //Member approveMember(Long memberId); // 회원 승인
 
     boolean checkLitmapEmailExists(String litmapEmail);     // 이메일 중복 여부 확인 메서드
     PublisherDto savePublisher(PublisherDto publisherDto); // 출판사 회원가입
@@ -30,6 +30,8 @@ public interface MemberPublisherService {
     String findPw(MailDto request) throws Exception; // 비밀번호 찾기 - 릿맵이메일 공통
 
     Publisher fetchPublisherFromApi(Long publisherNumber); // 공공 API로 출판사 정보 가져오기 + 사업자확인도 필요
+
+    boolean verifyPassword(String litmapEmail, String password);
 
     String findMemberEmail(String workEmail, String name); // 1인작가 이메일 찾기
     String findPublisherEmail(Long publisherNumber, String publisherName, String name); // 출판사 이메일 찾기

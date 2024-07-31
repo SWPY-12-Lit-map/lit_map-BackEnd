@@ -32,6 +32,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // CSRF 보호를 비활성화
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                        //.antMatchers("/admin/**").hasRole("ADMIN") // 관리자 권한 설정
                         .anyRequest().permitAll() // 모든 요청을 허용
                 )
                 .sessionManagement(sessionManagement -> sessionManagement

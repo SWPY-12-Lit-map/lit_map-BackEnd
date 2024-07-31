@@ -117,25 +117,25 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         return savedMember;
     } // 1인작가 회원가입
 
-    @Override
-    @Transactional
-    public Member approveMember(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
-
-        member.setMemberRoleStatus(MemberRoleStatus.ACTIVE_MEMBER);
-        memberRepository.save(member);
-
-        // 승인 이메일 전송
-        String subject = "[litmap] 회원 가입 승인";
-        String content = "<div style=\"margin:30px;\"><img src=\"data:image/png;base64,iVBORw0qMPdgAAAAASUVORK5CYII=\\\"/>"
-                + "<br><h2>회원 가입 승인</h2><h4>"
-                + member.getName()
-                + "님 회원 가입이 승인되었습니다. 환영합니다!</h4></div>";
-
-        emailService.sendEmail(member.getLitmapEmail(), subject, content);
-        return member;
-    } // 1인작가 회원승인
+//    @Override
+//    @Transactional
+//    public Member approveMember(Long memberId) {
+//        Member member = memberRepository.findById(memberId)
+//                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
+//
+//        member.setMemberRoleStatus(MemberRoleStatus.ACTIVE_MEMBER);
+//        memberRepository.save(member);
+//
+//        // 승인 이메일 전송
+//        String subject = "[litmap] 회원 가입 승인";
+//        String content = "<div style=\"margin:30px;\"><img src=\"data:image/png;base64,iVBORw0qMPdgAAAAASUVORK5CYII=\\\"/>"
+//                + "<br><h2>회원 가입 승인</h2><h4>"
+//                + member.getName()
+//                + "님 회원 가입이 승인되었습니다. 환영합니다!</h4></div>";
+//
+//        emailService.sendEmail(member.getLitmapEmail(), subject, content);
+//        return member;
+//    } // 1인작가 회원승인
 
     public boolean checkLitmapEmailExists(String litmapEmail) {
         return memberRepository.findByLitmapEmail(litmapEmail).isPresent();
@@ -316,6 +316,17 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
     }// 공공 API를 통해 출판사 정보 가져오기 메서드 -> 있지만 아직 사용안함
 
     @Override
+    public boolean verifyPassword(String litmapEmail, String password) {
+        Optional<Member> memberOptional = memberRepository.findByLitmapEmail(litmapEmail);
+        if (memberOptional.isPresent()) {
+            Member member = memberOptional.get();
+            return passwordEncoder.matches(password, member.getPassword());
+        } else {
+            throw new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND);
+        }
+    }
+
+    @Override
     public String findMemberEmail(String workEmail, String name) {
         Optional<Member> memberOptional = memberRepository.findByWorkEmail(workEmail);
         if (memberOptional.isPresent()) {
@@ -410,6 +421,9 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         if (memberUpdateDto.getUrlLink() != null) {
             member.setUrlLink(memberUpdateDto.getUrlLink());
         }
+
+        // MemberRoleStatus 유지
+        member.setMemberRoleStatus(member.getMemberRoleStatus());
     } // 1인작가 정보 업데이트
 
     private void updatePublisherFields(Publisher publisher, PublisherUpdateDto publisherUpdateDto) {
