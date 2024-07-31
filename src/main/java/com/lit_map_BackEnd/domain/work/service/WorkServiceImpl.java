@@ -12,6 +12,7 @@ import com.lit_map_BackEnd.domain.character.service.CastService;
 import com.lit_map_BackEnd.domain.genre.entity.Genre;
 import com.lit_map_BackEnd.domain.genre.service.GenreService;
 import com.lit_map_BackEnd.domain.member.entity.Member;
+import com.lit_map_BackEnd.domain.member.entity.MemberRoleStatus;
 import com.lit_map_BackEnd.domain.member.repository.MemberRepository;
 import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
 import com.lit_map_BackEnd.domain.work.dto.VersionResponseDto;
@@ -30,6 +31,8 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -60,7 +63,7 @@ public class WorkServiceImpl implements WorkService{
 
     @Override
     @Transactional
-    public int saveWork(@Valid WorkRequestDto workRequestDto) {
+    public int saveWork(Member member, @Valid WorkRequestDto workRequestDto) {
         // 기존에 존재하는 작품인지 아닌지 확인
         boolean isNew = false;
 
@@ -68,8 +71,16 @@ public class WorkServiceImpl implements WorkService{
         Version version = null;
 
         // 회원 증명
-        Member member = memberRepository.findById(workRequestDto.getMemberId())
-                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
+        MemberRoleStatus memberRoleStatus = member.getMemberRoleStatus();
+        Set<MemberRoleStatus> invalidStatuses = Set.of(
+                MemberRoleStatus.PENDING_MEMBER,
+                MemberRoleStatus.UNKNOWN_MEMBER,
+                MemberRoleStatus.WITHDRAWN_MEMBER
+        );
+
+        if (invalidStatuses.contains(memberRoleStatus)) {
+            throw new BusinessExceptionHandler(ErrorCode.WRITER_INVALID);
+        }
 
         // 이미 존재하는 작품이 있다면 기존의 작품 불러오기
         if(workRequestDto.getWorkId() != null) {
@@ -85,7 +96,6 @@ public class WorkServiceImpl implements WorkService{
                     .member(member)
                     .publisher(member.getPublisher())
                     .publisherDate(workRequestDto.getPublisherDate())
-                    .category(null)
                     .view(0)
                     .build();
             isNew = true;
@@ -222,10 +232,15 @@ public class WorkServiceImpl implements WorkService{
 
     @Override
     @Transactional
-    public void deleteWork(Long workId) {
-        workRepository.findById(workId)
+    public void deleteWork(Member member, Long workId) {
+        Work work = workRepository.findById(workId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
-        workRepository.deleteById(workId);
+
+        if (member.getId().equals(work.getMember().getId()) || member.getMemberRoleStatus() == MemberRoleStatus.ADMIN) {
+            workRepository.deleteById(workId);
+        } else {
+            throw new BusinessExceptionHandler(ErrorCode.WRITER_WRONG);
+        }
     }
 
     // 제출(true)과 수정/임시저장(false)을 구분하는 메소드

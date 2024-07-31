@@ -7,6 +7,7 @@ import com.lit_map_BackEnd.domain.character.entity.Cast;
 import com.lit_map_BackEnd.domain.character.entity.RollBackCast;
 import com.lit_map_BackEnd.domain.character.repository.CastRepository;
 import com.lit_map_BackEnd.domain.character.service.CastService;
+import com.lit_map_BackEnd.domain.member.entity.MemberRoleStatus;
 import com.lit_map_BackEnd.domain.member.service.EmailService;
 import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
 import com.lit_map_BackEnd.domain.work.dto.VersionResponseDto;
@@ -90,11 +91,18 @@ public class VersionServiceImpl implements VersionService{
 
     @Override
     @Transactional
-    public void deleteVersion(Long workId, Double versionNum) {
+    public void deleteVersion(Member member, Long workId, Double versionNum) {
         Work work = workRepository.findById(workId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
 
-        versionRepository.deleteByWorkAndVersionNum(work, versionNum);
+        MemberRoleStatus writer = work.getMember().getMemberRoleStatus();
+        MemberRoleStatus memberRoleStatus = member.getMemberRoleStatus();
+        if (memberRoleStatus.equals(writer) || member.getMemberRoleStatus() == MemberRoleStatus.ADMIN) {
+            versionRepository.deleteByWorkAndVersionNum(work, versionNum);
+        } else {
+            throw new BusinessExceptionHandler(ErrorCode.WRITER_WRONG);
+        }
+
     }
 
     @Override
@@ -134,7 +142,9 @@ public class VersionServiceImpl implements VersionService{
 
     @Override
     @Transactional
-    public void rollBackDataSave(Long workId, Double versionNum) {
+    public void rollBackDataSave(Long memberId, Long workId, Double versionNum) {
+        memberRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WRITER_WRONG));
         Work work = workRepository.findById(workId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
         Version version = versionRepository.findByVersionNumAndWork(versionNum, work);

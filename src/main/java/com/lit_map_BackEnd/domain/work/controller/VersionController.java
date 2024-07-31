@@ -2,11 +2,14 @@ package com.lit_map_BackEnd.domain.work.controller;
 
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
+import com.lit_map_BackEnd.common.util.SessionUtil;
+import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
 import com.lit_map_BackEnd.domain.work.entity.Confirm;
 import com.lit_map_BackEnd.domain.work.service.VersionService;
 import com.lit_map_BackEnd.domain.work.service.WorkService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,9 +31,11 @@ public class VersionController {
 
     @DeleteMapping("/{workId}/{versionNum}")
     @Operation(summary = "특정 버전 삭제", description = "특정 버전만 삭제하고 관련 캐릭터들도 같이 삭제")
-    public ResponseEntity<SuccessResponse> deleteVersionInWork(@PathVariable(name = "workId") Long workId,
+    public ResponseEntity<SuccessResponse> deleteVersionInWork(HttpServletRequest request,
+                                                               @PathVariable(name = "workId") Long workId,
                                                                @PathVariable(name = "versionNum") Double versionNum) {
-        versionService.deleteVersion(workId, versionNum);
+        Member loggedInUser = SessionUtil.getLoggedInUser(request);
+        versionService.deleteVersion(loggedInUser, workId, versionNum);
 
         SuccessResponse res = SuccessResponse.builder()
                 .result("성공")
@@ -43,10 +48,12 @@ public class VersionController {
 
     @PutMapping("/rollback/{workId}/{versionNum}")
     @Operation(summary = "수정하기 버튼", description = "버전을 수정하면서 기존의 데이터를 롤백 테이블에 데이터 기입")
-    public ResponseEntity<SuccessResponse> updateVersion(@PathVariable(name = "workId") Long workId,
+    public ResponseEntity<SuccessResponse> updateVersion(HttpServletRequest request,
+                                                         @PathVariable(name = "workId") Long workId,
                                                          @PathVariable(name = "versionNum") Double versionNum) {
+        Member loggedInUser = SessionUtil.getLoggedInUser(request);
         // 롤백 테이블에 데이터 저장
-        versionService.rollBackDataSave(workId, versionNum);
+        versionService.rollBackDataSave(loggedInUser.getId(), workId, versionNum);
         // 데이터를 반환
         WorkResponseDto workData = workService.getWorkData(workId, versionNum);
 
