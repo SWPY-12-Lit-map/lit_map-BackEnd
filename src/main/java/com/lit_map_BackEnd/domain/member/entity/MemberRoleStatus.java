@@ -5,5 +5,6 @@ public enum MemberRoleStatus {
     PENDING_MEMBER,         // 승인 대기 중인 회원
     UNKNOWN_MEMBER,         // 탈퇴한 회원
     WITHDRAWN_MEMBER,       // 탈퇴요청한 출판사직원, 1인회원
+    PUBLISHER_MEMBER,       // 출판사직원
     ADMIN                   // 관리자
 }
