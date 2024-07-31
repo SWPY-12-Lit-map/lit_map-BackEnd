@@ -46,19 +46,19 @@ public class MemberController {
         return new ResponseEntity<>(res, HttpStatus.CREATED);
     }
 
-    @PostMapping("/{memberId}/approve")
-    @Operation(summary = "회원 승인", description = "관리자가 회원 가입을 승인합니다.")
-    public ResponseEntity<SuccessResponse<Member>> approveMember(@PathVariable Long memberId) {
-        Member approvedMember = memberPublisherService.approveMember(memberId);
-
-        SuccessResponse<Member> res = SuccessResponse.<Member>builder()
-                .result(approvedMember)
-                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
-                .resultMsg("회원 가입이 승인되었습니다.")
-                .build();
-
-        return new ResponseEntity<>(res, HttpStatus.OK);
-    }
+//    @PostMapping("/{memberId}/approve")
+//    @Operation(summary = "회원 승인", description = "관리자가 회원 가입을 승인합니다.")
+//    public ResponseEntity<SuccessResponse<Member>> approveMember(@PathVariable Long memberId) {
+//        Member approvedMember = memberPublisherService.approveMember(memberId);
+//
+//        SuccessResponse<Member> res = SuccessResponse.<Member>builder()
+//                .result(approvedMember)
+//                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
+//                .resultMsg("회원 가입이 승인되었습니다.")
+//                .build();
+//
+//        return new ResponseEntity<>(res, HttpStatus.OK);
+//    }
 
     @GetMapping("/check-email")
     public ResponseEntity<?> checkEmail(@RequestParam String litmapEmail) {
@@ -125,6 +125,20 @@ public class MemberController {
 //            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 //        }
 //    }
+
+    @PostMapping("/verify-password")
+    @Operation(summary = "비밀번호 확인", description = "마이페이지 접근 전에 비밀번호를 확인합니다.")
+    public ResponseEntity<SuccessResponse<Boolean>> verifyPassword(@RequestBody LoginDto loginDto) {
+        boolean isVerified = memberPublisherService.verifyPassword(loginDto.getLitmapEmail(), loginDto.getPassword());
+
+        SuccessResponse<Boolean> res = SuccessResponse.<Boolean>builder()
+                .result(isVerified)
+                .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
+                .resultMsg(isVerified ? "비밀번호 확인 성공" : "비밀번호 확인 실패")
+                .build();
+
+        return new ResponseEntity<>(res, isVerified ? HttpStatus.OK : HttpStatus.UNAUTHORIZED);
+    }
 
     @GetMapping("/mypage")
     @Operation(summary = "1인작가 마이페이지 조회", description = "현재 로그인된 1인작가의 마이페이지를 조회합니다.")

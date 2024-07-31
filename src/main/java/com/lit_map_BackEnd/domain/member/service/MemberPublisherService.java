@@ -31,6 +31,8 @@ public interface MemberPublisherService {
 
     Publisher fetchPublisherFromApi(Long publisherNumber); // 공공 API로 출판사 정보 가져오기 + 사업자확인도 필요
 
+    boolean verifyPassword(String litmapEmail, String password);
+
     String findMemberEmail(String workEmail, String name); // 1인작가 이메일 찾기
     String findPublisherEmail(Long publisherNumber, String publisherName, String name); // 출판사 이메일 찾기
 

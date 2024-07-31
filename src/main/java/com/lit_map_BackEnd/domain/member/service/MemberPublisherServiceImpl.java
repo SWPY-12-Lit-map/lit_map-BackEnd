@@ -316,6 +316,17 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
     }// 공공 API를 통해 출판사 정보 가져오기 메서드 -> 있지만 아직 사용안함
 
     @Override
+    public boolean verifyPassword(String litmapEmail, String password) {
+        Optional<Member> memberOptional = memberRepository.findByLitmapEmail(litmapEmail);
+        if (memberOptional.isPresent()) {
+            Member member = memberOptional.get();
+            return passwordEncoder.matches(password, member.getPassword());
+        } else {
+            throw new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND);
+        }
+    }
+
+    @Override
     public String findMemberEmail(String workEmail, String name) {
         Optional<Member> memberOptional = memberRepository.findByWorkEmail(workEmail);
         if (memberOptional.isPresent()) {
@@ -410,6 +421,9 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         if (memberUpdateDto.getUrlLink() != null) {
             member.setUrlLink(memberUpdateDto.getUrlLink());
         }
+
+        // MemberRoleStatus 유지
+        member.setMemberRoleStatus(member.getMemberRoleStatus());
     } // 1인작가 정보 업데이트
 
     private void updatePublisherFields(Publisher publisher, PublisherUpdateDto publisherUpdateDto) {
