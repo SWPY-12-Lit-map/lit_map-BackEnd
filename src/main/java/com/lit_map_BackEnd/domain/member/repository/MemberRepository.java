@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -17,6 +16,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByLitmapEmail(String litmapEmail); // 릿맵 이메일로 회원 조회
     Optional<Member> findByWorkEmail(String workEmail); // 업무용 이메일로 회원 조회
     Optional<Member> findByNickname(String nickname); // 닉네임으로 회원 조회
+    Optional<Member> findByName(String name);
 
     boolean existsByLitmapEmail(String litmapEmail); // 릿맵 이메일 존재 여부 확인
 
