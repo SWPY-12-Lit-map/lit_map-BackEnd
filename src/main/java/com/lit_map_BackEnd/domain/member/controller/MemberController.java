@@ -224,17 +224,17 @@ public class MemberController {
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
-    @PostMapping("/{memberId}/approve-withdrawal")
-    @Operation(summary = "작가,직원 탈퇴 승인", description = "작가,직원 탈퇴 승인")
-    public ResponseEntity<SuccessResponse<String>> approveMemberWithdrawal(@PathVariable Long memberId) {
-        adminMemberService.approveWithdrawal(memberId);
-        SuccessResponse<String> res = SuccessResponse.<String>builder()
-                .result("회원 탈퇴가 승인되었습니다.")
-                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
-                .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
-                .build();
-        return new ResponseEntity<>(res, HttpStatus.OK);
-    }
+//    @PostMapping("/{memberId}/approve-withdrawal")
+//    @Operation(summary = "작가,직원 탈퇴 승인", description = "작가,직원 탈퇴 승인")
+//    public ResponseEntity<SuccessResponse<String>> approveMemberWithdrawal(@PathVariable Long memberId) {
+//        adminMemberService.approveWithdrawal(memberId);
+//        SuccessResponse<String> res = SuccessResponse.<String>builder()
+//                .result("회원 탈퇴가 승인되었습니다.")
+//                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
+//                .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
+//                .build();
+//        return new ResponseEntity<>(res, HttpStatus.OK);
+//    }
 
     @GetMapping("/logout")
     @Operation(summary = "로그아웃", description = "사용자를 로그아웃하고 세션을 무효화합니다.")

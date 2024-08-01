@@ -10,4 +10,5 @@ public interface AdminMemberService {
     List<Member> getMembersByStatus(MemberRoleStatus status); // 특정 상태의 회원들을 조회하는 메소드
     void approveWithdrawal(Long memberId); // 회원 탈퇴 승인
     Member approveMember(Long memberId);
+    void forceWithdrawMember(Long memberId); // 회원 강제 탈퇴
 }

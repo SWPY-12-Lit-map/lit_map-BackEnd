@@ -45,4 +45,28 @@ public class AdminMemberController {
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
+    @PutMapping("/approve/{memberId}")
+    @PreAuthorize("hasRole('ADMIN')") // ADMIN 권한을 가진 사용자만 접근 가능
+    public ResponseEntity<SuccessResponse<Member>> approveMember(@PathVariable Long memberId) {
+        Member approvedMember = adminMember.approveMember(memberId); // 회원 승인 처리
+        SuccessResponse<Member> res = SuccessResponse.<Member>builder()
+                .result(approvedMember) // 승인된 회원 정보
+                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
+                .resultMsg("회원 승인 완료")
+                .build();
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+    @PutMapping("/force-withdraw/{memberId}")
+    @PreAuthorize("hasRole('ADMIN')") // ADMIN 권한을 가진 사용자만 접근 가능
+    public ResponseEntity<SuccessResponse<Void>> forceWithdrawMember(@PathVariable Long memberId) {
+        adminMember.forceWithdrawMember(memberId); // 회원 강제 탈퇴 처리
+        SuccessResponse<Void> res = SuccessResponse.<Void>builder()
+                .result(null)
+                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
+                .resultMsg("회원 강제 탈퇴 완료")
+                .build();
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
 }
