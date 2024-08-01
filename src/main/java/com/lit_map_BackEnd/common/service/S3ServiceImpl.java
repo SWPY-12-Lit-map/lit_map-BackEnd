@@ -82,7 +82,7 @@ public class S3ServiceImpl implements S3Service {
         if (member.getMemberRoleStatus() == MemberRoleStatus.ADMIN) {
             ListObjectsV2Request req = new ListObjectsV2Request()
                     .withBucketName(bucket)
-                    .withPrefix("empty");
+                    .withPrefix("banner");
 
             ListObjectsV2Result listObjectsV2Result = amazonS3.listObjectsV2(req);
             List<S3ObjectSummary> objectSummaries = listObjectsV2Result.getObjectSummaries();
