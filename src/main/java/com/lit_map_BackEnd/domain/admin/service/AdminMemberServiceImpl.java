@@ -39,9 +39,9 @@ public class AdminMemberServiceImpl implements AdminMemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
-        if (!adminAuthService.isAdmin()) {
-            throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
-        }
+//        if (!adminAuthService.isAdmin()) {
+//            throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
+//        } // 관리자권한
         member.setMemberRoleStatus(MemberRoleStatus.UNKNOWN_MEMBER);
         memberRepository.save(member);
 
@@ -53,9 +53,9 @@ public class AdminMemberServiceImpl implements AdminMemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
-        if (!adminAuthService.isAdmin()) {
-            throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
-        }
+//        if (!adminAuthService.isAdmin()) {
+//            throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
+//        } // 관리자 권한
 
         member.setMemberRoleStatus(MemberRoleStatus.ACTIVE_MEMBER);
         memberRepository.save(member);
@@ -77,9 +77,9 @@ public class AdminMemberServiceImpl implements AdminMemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
-        if (!adminAuthService.isAdmin()) {
-            throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
-        }
+//        if (!adminAuthService.isAdmin()) {
+//            throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
+//        } // 관리자 권한
 
         member.setMemberRoleStatus(MemberRoleStatus.UNKNOWN_MEMBER);
         memberRepository.save(member);

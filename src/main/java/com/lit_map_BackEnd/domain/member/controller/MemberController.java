@@ -174,7 +174,7 @@ public class MemberController {
         Member profile = SessionUtil.getLoggedInUser(request);
 
         System.out.println(profile.getLitmapEmail());
-        if (profile != null && profile.getMemberRoleStatus() == MemberRoleStatus.ACTIVE_MEMBER) {
+        if (profile != null) {
             // 최신 정보를 가져와 세션을 업데이트합니다.
             Member updatedProfile = memberPublisherService.findByLitmapEmail(profile.getLitmapEmail());
             SessionUtil.setLoggedInUser(request, updatedProfile);
@@ -184,9 +184,14 @@ public class MemberController {
                     .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
                     .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
                     .build();
-            return new ResponseEntity<>(res, HttpStatus.OK);
+
+            if (updatedProfile.getMemberRoleStatus() == MemberRoleStatus.ACTIVE_MEMBER) {
+                return new ResponseEntity<>(res, HttpStatus.OK);
+            } else {
+                throw new BusinessExceptionHandler(ErrorCode.PENDING_USER);
+            }
         } else {
-            throw new BusinessExceptionHandler(ErrorCode.PENDING_USER);
+            throw new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND);
         }
     }
 

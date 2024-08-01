@@ -127,16 +127,7 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
     @Override
     public boolean checkWorkEmailExists(String workEmail) {
         return memberRepository.findByWorkEmail(workEmail).isPresent();
-    }
-/*
-    @Override
-    @Transactional
-    public Publisher savePublisher(PublisherDto publisherDto) {
-//        if (publisherRepository.findByPublisherNumber(publisherDto.getPublisherNumber()).isPresent()) {
-//            throw new BusinessExceptionHandler(ErrorCode.DUPLICATE_PUBLISHER);
-//        }
     } // 회원가입시 사용하는 이메일 중복 여부 확인 메서드
-*/
 
     // PublisherDto를 Publisher 엔티티로 변환하는 메서드
     private Publisher convertToPublisher(PublisherDto publisherDto) {
@@ -173,6 +164,7 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         Publisher publisher = convertToPublisher(publisherDto); // PublisherDto를 Publisher 엔티티로 변환
         Member member = convertToMember(publisherDto, publisher); // PublisherDto와 변환된 Publisher 엔티티를 사용하여 Member 엔티티를 생성
 
+        member.setMemberRoleStatus(MemberRoleStatus.PUBLISHER_MEMBER); // 출판사 직원 상태로 설정
         publisher.getMemberList().add(member); // publisher의 memberList에 생성된 member 추가
 
         Publisher savedPublisher = publisherRepository.save(publisher); // Publisher 엔티티를 데이터베이스에 저장
@@ -192,15 +184,24 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         return convertToPublisherDto(savedPublisher); // 저장된 Publisher 엔티티를 PublisherDto로 변환하여 반환
     } // 출판사 회원가입
 
+    private PublisherDto convertToPublisherDto(Publisher publisher) {
+        // 필요한 필드를 PublisherDto로 변환
+        return PublisherDto.builder()
+                .publisherNumber(publisher.getPublisherNumber())
+                .publisherName(publisher.getPublisherName())
+                .publisherAddress(publisher.getPublisherAddress())
+                .publisherPhoneNumber(publisher.getPublisherPhoneNumber())
+                .publisherCeo(publisher.getPublisherCeo())
+                .litmapEmail(publisher.getMemberList().get(0).getLitmapEmail())
+                .name(publisher.getMemberList().get(0).getName())
+                .password(publisher.getMemberList().get(0).getPassword())
+                .nickname(publisher.getMemberList().get(0).getNickname())
+                .myMessage(publisher.getMemberList().get(0).getMyMessage())
+                .userImage(publisher.getMemberList().get(0).getUserImage())
+                .memberRoleStatus(publisher.getMemberList().get(0).getMemberRoleStatus()) // 추가: 회원 상태 반환
+                .build();
+    } // Publisher 엔티티를 PublisherDto로 변환하는 메서드
 
-    /*
-        private void loginAfterRegistration(String email, String password) {
-            CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(email);
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, password, userDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(auth);
-            session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
-        }
-    */
     @Override
     public Member findByLitmapEmail(String litmapEmail) {
         return memberRepository.findByLitmapEmail(litmapEmail)
@@ -451,20 +452,4 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         }
     } // 출판사 정보 업데이트
 
-    private PublisherDto convertToPublisherDto(Publisher publisher) {
-        // 필요한 필드를 PublisherDto로 변환
-        return PublisherDto.builder()
-                .publisherNumber(publisher.getPublisherNumber())
-                .publisherName(publisher.getPublisherName())
-                .publisherAddress(publisher.getPublisherAddress())
-                .publisherPhoneNumber(publisher.getPublisherPhoneNumber())
-                .publisherCeo(publisher.getPublisherCeo())
-                .litmapEmail(publisher.getMemberList().get(0).getLitmapEmail())
-                .name(publisher.getMemberList().get(0).getName())
-                .password(publisher.getMemberList().get(0).getPassword())
-                .nickname(publisher.getMemberList().get(0).getNickname())
-                .myMessage(publisher.getMemberList().get(0).getMyMessage())
-                .userImage(publisher.getMemberList().get(0).getUserImage())
-                .build();
-    } // Publisher 엔티티를 PublisherDto로 변환하는 메서드
 }
