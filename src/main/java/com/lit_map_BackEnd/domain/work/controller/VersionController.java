@@ -52,20 +52,6 @@ public class VersionController {
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
-    @PutMapping("/confirm/{versionId}")
-    @Operation(summary = "관리자 작품 승인", description = "관리자 작품 승인 완료")
-    public ResponseEntity<SuccessResponse> confirmVersion(
-            @PathVariable(name = "versionId") Long versionId) {
-        versionService.approveMail(versionId);
-        //에러메시지 수정필요
-        SuccessResponse res = SuccessResponse.builder()
-                .result("승인 성공")
-                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
-                .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
-                .build();
-
-        return new ResponseEntity<>(res, HttpStatus.OK);
-    }
 
 
     //버전 삭제 사유  //@RequestParam String email

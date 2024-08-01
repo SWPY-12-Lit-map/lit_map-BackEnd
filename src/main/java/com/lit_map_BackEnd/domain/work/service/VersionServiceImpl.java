@@ -2,6 +2,7 @@ package com.lit_map_BackEnd.domain.work.service;
 
 import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
 import com.lit_map_BackEnd.common.exception.code.ErrorCode;
+import com.lit_map_BackEnd.domain.admin.service.AdminAuthService;
 import com.lit_map_BackEnd.domain.character.dto.CastResponseDto;
 import com.lit_map_BackEnd.domain.character.entity.Cast;
 import com.lit_map_BackEnd.domain.character.entity.RollBackCast;
@@ -9,9 +10,6 @@ import com.lit_map_BackEnd.domain.character.repository.CastRepository;
 import com.lit_map_BackEnd.domain.character.service.CastService;
 import com.lit_map_BackEnd.domain.mail.dto.MailWorkDto;
 import com.lit_map_BackEnd.domain.mail.service.MailService;
-import com.lit_map_BackEnd.domain.member.service.AdminService;
-import com.lit_map_BackEnd.domain.member.service.AdminServiceImpl;
-import com.lit_map_BackEnd.domain.member.service.CustomUserDetailsService;
 import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
 import com.lit_map_BackEnd.domain.work.dto.VersionResponseDto;
 import com.lit_map_BackEnd.domain.work.entity.*;
@@ -43,7 +41,7 @@ public class VersionServiceImpl implements VersionService{
 
     private final MemberRepository memberRepository;
     private final MailService mailService;
-    private final AdminService adminService;
+    private final AdminAuthService adminAuthService;
 
 
     // 기존의 버전 정보 업데이트하기
@@ -196,7 +194,7 @@ public class VersionServiceImpl implements VersionService{
 
     public void approveMail(Long versionId) {
 
-        if (!adminService.isAdmin()) {
+        if (!adminAuthService.isAdmin()) {
             throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
         }
             Version version = versionRepository.findById(versionId)
@@ -218,7 +216,7 @@ public class VersionServiceImpl implements VersionService{
     }
 
     public void declineMail(Long versionId, String reason) {
-        if (!adminService.isAdmin()) {
+        if (!adminAuthService.isAdmin()) {
             throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
         }
             Version version = versionRepository.findById(versionId)

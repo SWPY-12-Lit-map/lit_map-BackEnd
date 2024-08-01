@@ -17,9 +17,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByLitmapEmail(String litmapEmail); // 릿맵 이메일로 회원 조회
     Optional<Member> findByWorkEmail(String workEmail); // 업무용 이메일로 회원 조회
     Optional<Member> findByNickname(String nickname); // 닉네임으로 회원 조회
-    Optional<Member> findByLitmapEmail(String litmapEmail);
-    Optional<Member> findByWorkEmail(String workEmail);
-    Optional<Member> findByNickname(String nickname);
     Optional<Member> findByName(String name);
 
     boolean existsByLitmapEmail(String litmapEmail); // 릿맵 이메일 존재 여부 확인
@@ -27,7 +24,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Modifying // 찾아서 수정하기
     @Query("UPDATE Member m SET m.password = :password WHERE m.id = :id")
     void updatePassword(@Param("id") Long id, @Param("password") String password);
-
 
 
 }
