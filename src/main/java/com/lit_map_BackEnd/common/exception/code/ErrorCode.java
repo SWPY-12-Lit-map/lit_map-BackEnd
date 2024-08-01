@@ -16,6 +16,7 @@ public enum ErrorCode {
     DUPLICATE_WORK_NAME(500, "중복된 작품 이름이 있습니다"),
     DUPLICATE_CAST_NAME(500, "중복된 캐릭터가 존재합니다"),
     WORK_NOT_FOUND(500, "해당 작품은 존재하지 않습니다"),
+    IMAGE_NOT_FOUND(500, "해당 사진은 존재하지 않습니다"),
     VERSION_NOT_FOUND(500, "해당 버전은 존재하지 않습니다"),
     CATEGORY_NOT_FOUND(500, "해당 카테고리는 존재하지 않습니다"),
     GENRE_NOT_FOUND(500, "해당 장르는 존재하지 않습니다"),

@@ -1,22 +1,23 @@
 package com.lit_map_BackEnd.common.service;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.*;
 import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
 import com.lit_map_BackEnd.common.exception.code.ErrorCode;
+import com.lit_map_BackEnd.domain.member.entity.Member;
+import com.lit_map_BackEnd.domain.member.entity.MemberRoleStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import com.lit_map_BackEnd.common.service.S3Service;
 
 import java.io.*;
 import java.net.URI;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -61,16 +62,37 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
-    public void deleteImage(String name) {
-        // URI가 전체로 들어오기 때문에 뒤에 path 부분만 남겨서 확인을 해야한다.
-        String path = URI.create(name).getPath();
-        String key = path.substring(path.indexOf("/") + 1);
+    public void deleteImage(Member member, String name) {
+        if (member.getMemberRoleStatus() == MemberRoleStatus.ADMIN) {
+            // URI가 전체로 들어오기 때문에 뒤에 path 부분만 남겨서 확인을 해야한다.
+            String path = URI.create(name).getPath();
+            String key = path.substring(path.indexOf("/") + 1);
 
-        boolean isExist = amazonS3.doesObjectExist(bucket, key);
-        if (isExist) {
-            String decodedFileName = URLDecoder.decode(key, StandardCharsets.UTF_8);
-            amazonS3.deleteObject(bucket, decodedFileName);
-        }
+            boolean isExist = amazonS3.doesObjectExist(bucket, key);
+            if (isExist) {
+                String decodedFileName = URLDecoder.decode(key, StandardCharsets.UTF_8);
+                amazonS3.deleteObject(bucket, decodedFileName);
+            } else throw new BusinessExceptionHandler(ErrorCode.IMAGE_NOT_FOUND);
+        } else throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
+    }
+
+    @Override
+    public List<String> getBannerImages(Member member) {
+        List<String> list = new ArrayList<>();
+        if (member.getMemberRoleStatus() == MemberRoleStatus.ADMIN) {
+            ListObjectsV2Request req = new ListObjectsV2Request()
+                    .withBucketName(bucket)
+                    .withPrefix("empty");
+
+            ListObjectsV2Result listObjectsV2Result = amazonS3.listObjectsV2(req);
+            List<S3ObjectSummary> objectSummaries = listObjectsV2Result.getObjectSummaries();
+
+            for (S3ObjectSummary objectSummary : objectSummaries) {
+                String s = cfName + "/" + objectSummary.getKey();
+                list.add(s);
+            }
+            return list;
+        } else throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
     }
 
     private File convert(MultipartFile file) throws IOException {
