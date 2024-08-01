@@ -145,6 +145,7 @@ public class MemberController {
     public ResponseEntity<SuccessResponse<Object>> getMemberMyPage(HttpServletRequest request) {
         Member profile = SessionUtil.getLoggedInUser(request);
 
+        System.out.println(profile.getLitmapEmail());
         if (profile != null && profile.getMemberRoleStatus() == MemberRoleStatus.ACTIVE_MEMBER) {
             // 최신 정보를 가져와 세션을 업데이트합니다.
             Member updatedProfile = memberPublisherService.findByLitmapEmail(profile.getLitmapEmail());
