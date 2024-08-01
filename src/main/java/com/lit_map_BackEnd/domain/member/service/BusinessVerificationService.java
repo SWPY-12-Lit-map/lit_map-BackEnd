@@ -1,20 +1,16 @@
 package com.lit_map_BackEnd.domain.member.service;
 
 import com.lit_map_BackEnd.domain.member.dto.BusinessVerificationRequest.BusinessVerificationRequestWrapper;
-import com.lit_map_BackEnd.domain.member.dto.BusinessVerificationResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.http.*;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLDecoder;
 import java.util.Collections;
-
-import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
@@ -25,7 +21,7 @@ public class BusinessVerificationService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public BusinessVerificationResponse verifyBusiness(BusinessVerificationRequestWrapper request) throws URISyntaxException {
+    public ResponseEntity<String> verifyBusiness(BusinessVerificationRequestWrapper request) throws URISyntaxException {
 
         URI url = new URI(verificationApiUrl);
 
@@ -39,25 +35,21 @@ public class BusinessVerificationService {
         HttpEntity<BusinessVerificationRequestWrapper> entity = new HttpEntity<>(request, headers);
 
         try {
-            ResponseEntity<BusinessVerificationResponse> response = restTemplate.exchange(
+            ResponseEntity<String> response = restTemplate.exchange(
                     url,
                     HttpMethod.POST,
                     entity,
-                    BusinessVerificationResponse.class
+                    String.class
             );
-            return response.getBody();
+            log.info("Response Status: {}", response.getStatusCode()); // 응답 상태 코드 로그
+            log.info("Response Body: {}", response.getBody()); // 응답 바디 로그
+            return response;
         } catch (HttpClientErrorException e) {
             log.error("HTTP error: {}", e.getStatusCode(), e);
-            BusinessVerificationResponse errorResponse = new BusinessVerificationResponse();
-            errorResponse.setStatus(e.getStatusCode().toString());
-            errorResponse.setMessage(e.getResponseBodyAsString());
-            return errorResponse;
+            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
         } catch (Exception e) {
             log.error("Unexpected error: ", e);
-            BusinessVerificationResponse errorResponse = new BusinessVerificationResponse();
-            errorResponse.setStatus("500");
-            errorResponse.setMessage("An unexpected error occurred");
-            return errorResponse;
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
         }
     }
 }
