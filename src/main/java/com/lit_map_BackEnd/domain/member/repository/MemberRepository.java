@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -23,5 +24,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Modifying // 찾아서 수정하기
     @Query("UPDATE Member m SET m.password = :password WHERE m.id = :id")
     void updatePassword(@Param("id") Long id, @Param("password") String password);
+
 
 }

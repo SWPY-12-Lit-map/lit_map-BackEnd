@@ -32,8 +32,10 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // CSRF 보호를 비활성화
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        //.antMatchers("/admin/**").hasRole("ADMIN") // 관리자 권한 설정
-                        .anyRequest().permitAll() // 모든 요청을 허용
+                         .requestMatchers("/admin/**").hasRole("ADMIN")
+//                        .anyRequest().authenticated()
+
+                          .anyRequest().permitAll() // 모든 요청을 허용
                 )
                 .sessionManagement(sessionManagement -> sessionManagement
                         .maximumSessions(1) // 동시 세션 수 제한
@@ -53,6 +55,8 @@ public class SecurityConfig {
 
         return http.build();
     }
+
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

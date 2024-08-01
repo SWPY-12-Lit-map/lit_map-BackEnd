@@ -14,6 +14,7 @@ import com.lit_map_BackEnd.domain.genre.service.GenreService;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.entity.MemberRoleStatus;
 import com.lit_map_BackEnd.domain.member.repository.MemberRepository;
+import com.lit_map_BackEnd.domain.relation.service.RelationService;
 import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
 import com.lit_map_BackEnd.domain.work.dto.VersionResponseDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkRequestDto;
@@ -50,7 +51,7 @@ public class WorkServiceImpl implements WorkService{
     private final CastService castService;
     private final VersionService versionService;
     private final MemberRepository memberRepository;
-
+    private final RelationService relationService;
 
     @Autowired
     private final YoutubeService youtubeService;
@@ -286,6 +287,9 @@ public class WorkServiceImpl implements WorkService{
         // 이는 초기 로딩 속도와 네트워크 효율성을 고려하여 제작
         VersionResponseDto version = versionService.findVersionByWorkAndNumber(work.getId(), versionNum);
 
+        //연관 작품 가져오기
+      //  List<Work> recommendedWorks = relationService.recommendRelatedWorks(work);
+
         // Youtube 정보 조회
 //        String workTitle = work.getTitle(); // 작품의 제목 가져오기
 //        List<Youtube> youtubeInfo = null;
@@ -309,6 +313,7 @@ public class WorkServiceImpl implements WorkService{
 //                youtubeList.add(youtube);
 //            }
 //        }
+
 
         return WorkResponseDto.builder()
                 .workId(work.getId())

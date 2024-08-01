@@ -5,6 +5,8 @@ import com.lit_map_BackEnd.common.exception.code.ErrorCode;
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
 import com.lit_map_BackEnd.common.util.SessionUtil;
+import com.lit_map_BackEnd.domain.admin.service.AdminAuthService;
+import com.lit_map_BackEnd.domain.admin.service.AdminMemberService;
 import com.lit_map_BackEnd.domain.member.dto.*;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.entity.MemberRoleStatus;
@@ -33,6 +35,7 @@ public class MemberController {
     private final MemberPublisherService memberPublisherService;
     private final MemberService memberService;
     private final SessionUtil sessionUtil;
+    private final AdminMemberService adminMemberService;
 
     @PostMapping("/register")
     @Operation(summary = "회원가입", description = "새로운 회원을 등록합니다.")
@@ -224,7 +227,7 @@ public class MemberController {
     @PostMapping("/{memberId}/approve-withdrawal")
     @Operation(summary = "작가,직원 탈퇴 승인", description = "작가,직원 탈퇴 승인")
     public ResponseEntity<SuccessResponse<String>> approveMemberWithdrawal(@PathVariable Long memberId) {
-        memberService.approveWithdrawal(memberId);
+        adminMemberService.approveWithdrawal(memberId);
         SuccessResponse<String> res = SuccessResponse.<String>builder()
                 .result("회원 탈퇴가 승인되었습니다.")
                 .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())

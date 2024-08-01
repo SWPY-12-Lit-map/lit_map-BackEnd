@@ -27,6 +27,8 @@ public class Member {
     @Column(nullable = false, unique = true)
     private String litmapEmail;
 
+    public String getLitmapEmail() { return litmapEmail; }
+
     @Column(nullable = true, unique = true)
     private String workEmail; // 업무용 이메일, 1인작가 아이디 찾기
 
