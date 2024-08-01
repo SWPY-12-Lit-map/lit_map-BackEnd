@@ -123,6 +123,10 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
 
     public boolean checkLitmapEmailExists(String litmapEmail) {
         return memberRepository.findByLitmapEmail(litmapEmail).isPresent();
+    } // 회원가입시 사용하는 이메일 중복 여부 확인 메서드
+    @Override
+    public boolean checkWorkEmailExists(String workEmail) {
+        return memberRepository.findByWorkEmail(workEmail).isPresent();
     }
 /*
     @Override
@@ -247,10 +251,10 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         }
     }
 
-    @Override
-    public PublisherDto loginPublisher(String litmapEmail, String password) {
-        return null;
-    }
+//    @Override
+//    public PublisherDto loginPublisher(String litmapEmail, String password) {
+//        return null;
+//    }
 
     @Override
     public void logout() {
@@ -321,15 +325,19 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
     }// 공공 API를 통해 출판사 정보 가져오기 메서드 -> 있지만 아직 사용안함
 
     @Override
-    public boolean verifyPassword(String litmapEmail, String password) {
+    public Member verifyPassword(String litmapEmail, String password) {
         Optional<Member> memberOptional = memberRepository.findByLitmapEmail(litmapEmail);
         if (memberOptional.isPresent()) {
             Member member = memberOptional.get();
-            return passwordEncoder.matches(password, member.getPassword());
+            if (passwordEncoder.matches(password, member.getPassword())) {
+                return member;
+            } else {
+                throw new BusinessExceptionHandler(ErrorCode.PASSWORDS_DO_NOT_MATCH);
+            }
         } else {
             throw new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND);
         }
-    }
+    } // 마이페이지 진입시 비밀번호 입력
 
     @Override
     public String findMemberEmail(String workEmail, String name) {
