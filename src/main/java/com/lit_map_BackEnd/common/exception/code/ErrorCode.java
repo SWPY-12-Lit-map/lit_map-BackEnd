@@ -35,6 +35,8 @@ public enum ErrorCode {
     INVALID_PASSWORD_FORMAT(500,"비밀번호 형식이 올바르지 않습니다."),
     PROHIBITED_NICKNAME(500,"허용되지 않는 닉네임입니다."),
     INVALID_USER_INFO(500,"사용자 정보가 일치하지 않습니다."),
+    PENDING_USER(500,"승인 대기 중인 회원입니다"),
+    WITHDRAWN_USER(500,"탈퇴한 회원입니다"),
     DUPLICATE_PUBLISHER(400, "이미 존재하는 출판사입니다."),
     PUBLISHER_NOT_FOUND(404,"출판사를 찾을 수 없습니다."),
     EMAIL_SEND_FAILED(500,"이메일로 임시비밀번호 발송에 실패했습니다."),  // 수정된 부분

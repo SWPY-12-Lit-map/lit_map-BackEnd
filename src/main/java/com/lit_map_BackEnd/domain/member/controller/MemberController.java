@@ -1,5 +1,6 @@
 package com.lit_map_BackEnd.domain.member.controller;
 
+import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
 import com.lit_map_BackEnd.common.exception.code.ErrorCode;
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
@@ -78,6 +79,9 @@ public class MemberController {
         try {
             // 회원 로그인 처리
             Member loggedMember = memberPublisherService.login(loginDto.getLitmapEmail(), loginDto.getPassword());
+            if (loggedMember.getMemberRoleStatus() == MemberRoleStatus.WITHDRAWN_MEMBER) {
+                throw new BusinessExceptionHandler(ErrorCode.WITHDRAWN_USER);
+            }
 
             // 세션 쿠키 설정
             SessionUtil.createSessionCookie(request.getSession(false), response);
@@ -158,7 +162,7 @@ public class MemberController {
                     .build();
             return new ResponseEntity<>(res, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            throw new BusinessExceptionHandler(ErrorCode.PENDING_USER);
         }
     }
 
