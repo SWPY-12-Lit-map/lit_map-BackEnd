@@ -83,9 +83,9 @@ public class BoardServiceImpl implements BoardService{
 
     @Override
     @Transactional(readOnly = true)
-    public MyWorkListResponseDto getMyWorkList() {
+    public MyWorkListResponseDto getMyWorkList(Long memberId) {
         // 멤버 아이디 가져오고 그걸로 멤버 찾아서 null 확인
-        Member member = memberRepository.findById(1L)
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
         // 각 멤버의 작품을 가져와서 map에 미리 저장
@@ -277,10 +277,10 @@ public class BoardServiceImpl implements BoardService{
     }
 
     @Override
-    public Map<String, Long> getWorksCount() {
+    public Map<String, Long> getWorksCount(Long memberId) {
         Map<String, Long> map = new HashMap<>();
 
-        Member member = memberRepository.findById(1L)
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
         // 각 멤버의 작품을 검색하고 각 작품의 버전을 검색해서 complete와 나머지를 따로 검색
