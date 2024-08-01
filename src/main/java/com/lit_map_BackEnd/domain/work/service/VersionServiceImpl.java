@@ -25,7 +25,6 @@ import com.lit_map_BackEnd.domain.member.repository.MemberRepository;
 import com.lit_map_BackEnd.domain.work.entity.Confirm;
 import com.lit_map_BackEnd.domain.work.entity.Version;
 import com.lit_map_BackEnd.domain.work.entity.Work;
-import org.springframework.security.core.Authentication;
 
 
 import java.util.*;

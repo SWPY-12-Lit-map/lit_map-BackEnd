@@ -1,14 +1,11 @@
 package com.lit_map_BackEnd.domain.work.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.lit_map_BackEnd.domain.mail.dto.MailWorkDto;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
 import com.lit_map_BackEnd.domain.work.dto.VersionResponseDto;
 import com.lit_map_BackEnd.domain.work.entity.Version;
 import com.lit_map_BackEnd.domain.work.entity.Work;
-import com.lit_map_BackEnd.domain.work.entity.Confirm;
-import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import java.util.Map;
