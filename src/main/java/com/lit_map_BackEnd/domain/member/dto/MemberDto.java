@@ -8,6 +8,7 @@ import lombok.*;
 @Data
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class MemberDto {
 
     @NotBlank(message = "litmap 이메일을 입력해주세요.")

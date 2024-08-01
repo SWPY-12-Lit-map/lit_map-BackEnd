@@ -1,9 +1,9 @@
 name: deploy To Ec2
 
 on:
-  pull_request:
+  push:
     branches:
-      - main
+      - feat-36
 
 jobs :
   deploy:
@@ -39,7 +39,7 @@ jobs :
           source: project.jar
           target: /home/ubuntu/litmap-server/tobe
 
-      - name: SSH로 EC2 접속
+      - name: SSH로 EC2 접속하기
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}

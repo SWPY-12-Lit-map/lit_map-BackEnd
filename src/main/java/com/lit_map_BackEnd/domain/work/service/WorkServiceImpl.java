@@ -276,28 +276,28 @@ public class WorkServiceImpl implements WorkService{
       //  List<Work> recommendedWorks = relationService.recommendRelatedWorks(work);
 
         // Youtube 정보 조회
-        String workTitle = work.getTitle(); // 작품의 제목 가져오기
-        List<Youtube> youtubeInfo = null;
-
-        try {
-            youtubeInfo = youtubeService.getYoutubeInfo(workTitle);
-        } catch (Exception e) {
-            throw new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND);
-        }
-        List<Youtube> youtubeList = new ArrayList<>();
-
-        if (youtubeInfo != null) {
-            for (Youtube info : youtubeInfo) {
-                Youtube youtube = new Youtube(
-                        info.getTitle(),
-                        info.getVideoUrl(),
-                        info.getThumbnailUrl(),
-                        info.getViewCount(),
-                        info.getUploadDate()
-                );
-                youtubeList.add(youtube);
-            }
-        }
+//        String workTitle = work.getTitle(); // 작품의 제목 가져오기
+//        List<Youtube> youtubeInfo = null;
+//
+//        try {
+//            youtubeInfo = youtubeService.getYoutubeInfo(workTitle);
+//        } catch (Exception e) {
+//            throw new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND);
+//        }
+//        List<Youtube> youtubeList = new ArrayList<>();
+//
+//        if (youtubeInfo != null) {
+//            for (Youtube info : youtubeInfo) {
+//                Youtube youtube = new Youtube(
+//                        info.getTitle(),
+//                        info.getVideoUrl(),
+//                        info.getThumbnailUrl(),
+//                        info.getViewCount(),
+//                        info.getUploadDate()
+//                );
+//                youtubeList.add(youtube);
+//            }
+//        }
 
 
         return WorkResponseDto.builder()
@@ -311,7 +311,7 @@ public class WorkServiceImpl implements WorkService{
                 .title(work.getTitle())
                 .contents(work.getContent())
                 .versions(version)
-                .youtubes(youtubeList)
+                //.youtubes(youtubeList)
                 .build();
     }
 }

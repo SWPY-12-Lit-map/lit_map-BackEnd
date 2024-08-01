@@ -2,12 +2,17 @@ package com.lit_map_BackEnd.domain.member.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class PublisherDto {
 
     @NotNull(message = "사업자 번호를 입력해주세요.")
@@ -46,4 +51,5 @@ public class PublisherDto {
 
     private String userImage;
 
+    private List<MemberDto> memberList;
 }
