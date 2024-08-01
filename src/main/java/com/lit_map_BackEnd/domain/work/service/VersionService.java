@@ -25,8 +25,7 @@ public interface VersionService {
     List<VersionListDto> versionList(Work work);
 
     void rollBackDataSave(Long memberId, Long workId, Double versionNum);
-    void confirmVersion(Long versionId, Authentication authentication);
-    void rollBackDataSave(Long workId, Double versionNum);
+   //    void rollBackDataSave(Long workId, Double versionNum);
 
 
     MailWorkDto sendMailWithTemplate(Long versionId, String subject, String content);
