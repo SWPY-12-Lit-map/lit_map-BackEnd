@@ -13,7 +13,7 @@ public interface MemberPublisherService {
     Member saveMember(MemberDto memberDto); // 작가 회원가입
 
     boolean checkLitmapEmailExists(String litmapEmail);     // 이메일 중복 여부 확인 메서드
-    boolean checkWorkEmailExists(String workEmail);
+    //boolean checkWorkEmailExists(String workEmail);
     PublisherDto savePublisher(PublisherDto publisherDto); // 출판사 회원가입
 
 
@@ -24,7 +24,7 @@ public interface MemberPublisherService {
 
     @Transactional
     Member login(String litmapEmail, String password); // 로그인
-    //PublisherDto loginPublisher(String litmapEmail, String password); // 출판사 직원 로그인
+    PublisherDto loginPublisher(String litmapEmail, String password); // 출판사 직원 로그인
 
     void logout(); // 로그아웃
 
