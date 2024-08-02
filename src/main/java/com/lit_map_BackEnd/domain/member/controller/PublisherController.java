@@ -3,10 +3,7 @@ package com.lit_map_BackEnd.domain.member.controller;
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
 import com.lit_map_BackEnd.common.util.SessionUtil;
-import com.lit_map_BackEnd.domain.member.dto.FindPublisherEmailDto;
-import com.lit_map_BackEnd.domain.member.dto.ProfileUpdateDto;
-import com.lit_map_BackEnd.domain.member.dto.PublisherDto;
-import com.lit_map_BackEnd.domain.member.dto.PublisherUpdateDto;
+import com.lit_map_BackEnd.domain.member.dto.*;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.entity.MemberRoleStatus;
 import com.lit_map_BackEnd.domain.member.service.MemberPublisherService;
@@ -17,8 +14,6 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,19 +45,7 @@ public class PublisherController {
         } else {
             return ResponseEntity.ok("사용 가능한 이메일입니다.");
         }
-    } // 회원가입시 유효성 체크
-
-//    @GetMapping("/fetch")
-//    @Operation(summary = "공공API를 사용하여 출판사 정보 가져오기", description = "공공API를 사용하여 출판사 정보를 가져옵니다.")
-//    public ResponseEntity<SuccessResponse<Publisher>> fetchPublisherFromApi(@RequestBody Long publisherNumber) {
-//        Publisher fetchedPublisher = memberPublisherService.fetchPublisherFromApi(publisherNumber);
-//        SuccessResponse<Publisher> res = SuccessResponse.<Publisher>builder()
-//                .result(fetchedPublisher)
-//                .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
-//                .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
-//                .build();
-//        return new ResponseEntity<>(res, HttpStatus.OK);
-//    }
+    }
 
     @PostMapping("/find-email")
     @Operation(summary = "이메일 찾기", description = "사업자 번호, 출판사명, 회원이름을 사용하여 이메일을 찾습니다.")
@@ -83,16 +66,18 @@ public class PublisherController {
 
     @GetMapping("/mypage")
     @Operation(summary = "출판사 직원 마이페이지 조회", description = "현재 로그인된 출판사 직원의 마이페이지를 조회합니다.")
-    public ResponseEntity<SuccessResponse<Object>> getPublisherMyPage(HttpServletRequest request) {
+    public ResponseEntity<SuccessResponse<PublisherDto>> getPublisherMyPage(HttpServletRequest request) {
         Member profile = SessionUtil.getLoggedInUser(request);
 
         if (profile != null && profile.getMemberRoleStatus() == MemberRoleStatus.PUBLISHER_MEMBER) {
-            // 최신 정보를 가져와 세션을 업데이트합니다.
+            // 최신 정보를 DB에서 가져와 세션을 업데이트합니다.
             Member updatedProfile = memberPublisherService.findByLitmapEmail(profile.getLitmapEmail());
             SessionUtil.setLoggedInUser(request, updatedProfile);
 
-            PublisherDto publisherDto = (PublisherDto) request.getSession(false).getAttribute("publisherDto");
-            SuccessResponse<Object> res = SuccessResponse.builder()
+            PublisherDto publisherDto = memberPublisherService.getProfile(request);
+            SessionUtil.setLoggedInUser(request, updatedProfile); // 최신 정보 세션에 저장
+
+            SuccessResponse<PublisherDto> res = SuccessResponse.<PublisherDto>builder()
                     .result(publisherDto)
                     .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
                     .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
@@ -130,12 +115,11 @@ public class PublisherController {
     public ResponseEntity<SuccessResponse<PublisherDto>> updatePublisher(@RequestBody @Validated PublisherUpdateDto publisherUpdateDto, HttpServletRequest request) {
         Member loggedMember = SessionUtil.getLoggedInUser(request);
         if (loggedMember == null || loggedMember.getPublisher() == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); // 인증되지 않은 경우 401 응답
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
         PublisherDto updatedPublisher = memberPublisherService.updatePublisherMember(loggedMember.getLitmapEmail(), publisherUpdateDto);
 
-        // 세션 정보 업데이트
         Member updatedProfile = memberPublisherService.findByLitmapEmail(loggedMember.getLitmapEmail());
         SessionUtil.setLoggedInUser(request, updatedProfile);
 
