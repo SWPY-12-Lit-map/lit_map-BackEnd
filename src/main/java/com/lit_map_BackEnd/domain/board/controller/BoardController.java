@@ -144,4 +144,18 @@ public class BoardController {
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
+    @GetMapping("/banner")
+    @Operation(summary = "배너 가져오기", description = "관리자가 지정해놓은 배너 사진 가져오기")
+    public ResponseEntity<SuccessResponse> getBannerImage() {
+        List<String> bannerImages = boardService.getBannerImages();
+
+        SuccessResponse res = SuccessResponse.builder()
+                .result(bannerImages)
+                .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
+                .build();
+
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
 }
