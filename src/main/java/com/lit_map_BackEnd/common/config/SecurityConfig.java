@@ -40,10 +40,10 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // CSRF 보호를 비활성화
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        //.requestMatchers("/admin/**").hasRole("ADMIN") // /admin/** 경로는 ADMIN 권한만 접근 가능
-                        .anyRequest().permitAll()
-                            .requestMatchers("/admin/**").hasRole("ADMIN")
-                            .requestMatchers("/api/members/login").permitAll() // 로그인 페이지 접근 허용
+
+                        .requestMatchers("/api/members/login").permitAll() // 로그인 페이지 접근 허용
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+
                             .anyRequest().permitAll() // 모든 요청을 허용
 
                 )
@@ -71,8 +71,6 @@ public class SecurityConfig {
                         .invalidateHttpSession(true) // 로그아웃 시 세션 무효화
                         .deleteCookies("JSESSIONID")
                 )
-      //          .cors(cors -> cors.configurationSource(corsConfigurationSource())); // CORS 설정
-        //.userDetailsService(customUserDetailsService);
 
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정
                 .userDetailsService(customUserDetailsService);

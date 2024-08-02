@@ -5,9 +5,11 @@ import com.lit_map_BackEnd.common.exception.code.ErrorCode;
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
 import com.lit_map_BackEnd.common.util.SessionUtil;
+import com.lit_map_BackEnd.domain.admin.service.AdminAuthService;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.entity.MemberRoleStatus;
 import com.lit_map_BackEnd.domain.admin.service.AdminMemberService;
+import com.lit_map_BackEnd.domain.member.repository.MemberRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,35 +26,38 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
-public class AdminMemberController {
+public class AdminMemberController { //관리자권한 방법이 다름
 
     private final AdminMemberService adminMember;
     private final AdminMemberService adminMemberService;
-
-    private void checkAdminRole(HttpServletRequest request) {
-        Member currentUser = SessionUtil.getLoggedInUser(request);
-        if (currentUser == null || currentUser.getMemberRoleStatus() != MemberRoleStatus.ADMIN) {
-            throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
-        }
-    }
+    private final AdminAuthService adminAuthService;
+    private final MemberRepository memberRepository;
 
     @GetMapping("/mypage")
     @Operation(summary = "관리자 마이페이지", description = "관리자의 마이페이지를 조회합니다.")
     public ResponseEntity<SuccessResponse<Member>> getAdminMyPage(HttpServletRequest request) {
         try {
-            checkAdminRole(request); // ADMIN 권한 확인
-            Member profile = SessionUtil.getLoggedInUser(request);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
+            }
 
-            if (profile != null) {
+            String email = authentication.getName();
+            Member member = memberRepository.findByLitmapEmail(email)
+                    .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR));
+
+            if (member.getMemberRoleStatus() != MemberRoleStatus.ADMIN) {
+                throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
+            }
+
+
                 SuccessResponse<Member> res = SuccessResponse.<Member>builder()
-                        .result(profile)
+                        .result(member)
                         .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
                         .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
                         .build();
                 return new ResponseEntity<>(res, HttpStatus.OK);
-            } else {
-                throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
-            }
+
         } catch (BusinessExceptionHandler e) {
             return new ResponseEntity<>(new SuccessResponse<>(
                     null,
@@ -63,7 +70,9 @@ public class AdminMemberController {
     @GetMapping("/all")
     @Operation(summary = "회원조회", description = "전체회원조회")
     public ResponseEntity<SuccessResponse<List<Member>>> getAllMembers(HttpServletRequest request) {
-        checkAdminRole(request); // ADMIN 권한 확인
+        if (!adminAuthService.isAdmin()) {
+            throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
+        }
         List<Member> members = adminMember.getAllMembers(); // 모든 회원 정보 조회
 
         // 관리자 회원을 제외한 나머지 회원 상태만 필터링
@@ -87,7 +96,9 @@ public class AdminMemberController {
     @GetMapping("/pending")
     @Operation(summary = "승인대기회원조회", description = "승인대기중인 회원조회")
     public ResponseEntity<SuccessResponse<List<Member>>> getPendingMembers(HttpServletRequest request) {
-        checkAdminRole(request); // ADMIN 권한 확인
+        if (!adminAuthService.isAdmin()) {
+            throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
+        }
         List<Member> pendingMembers = adminMember.getMembersByStatus(MemberRoleStatus.PENDING_MEMBER); // 승인 대기 중인 회원 조회
         SuccessResponse<List<Member>> res = SuccessResponse.<List<Member>>builder()
                 .result(pendingMembers) // 조회된 승인 대기 회원 리스트
@@ -100,7 +111,9 @@ public class AdminMemberController {
     @PutMapping("/approve/{memberId}")
     @Operation(summary = "회원승인", description = "회원승인")
     public ResponseEntity<SuccessResponse<Member>> approveMember(@PathVariable Long memberId, HttpServletRequest request) {
-        checkAdminRole(request); // ADMIN 권한 확인
+        if (!adminAuthService.isAdmin()) {
+            throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
+        }
         Member approvedMember = adminMember.approveMember(memberId); // 회원 승인 처리
         SuccessResponse<Member> res = SuccessResponse.<Member>builder()
                 .result(approvedMember) // 승인된 회원 정보
@@ -113,7 +126,9 @@ public class AdminMemberController {
     @PutMapping("/approve-withdrawal/{memberId}")
     @Operation(summary = "회원탈퇴승인", description = "회원탈퇴승인")
     public ResponseEntity<SuccessResponse<Void>> approveWithdrawal(@PathVariable Long memberId, HttpServletRequest request) {
-        checkAdminRole(request); // ADMIN 권한 확인
+        if (!adminAuthService.isAdmin()) {
+            throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
+        }
         adminMemberService.approveWithdrawal(memberId); // 회원 탈퇴 승인 처리
         SuccessResponse<Void> res = SuccessResponse.<Void>builder()
                 .result(null)
@@ -126,7 +141,9 @@ public class AdminMemberController {
     @PutMapping("/force-withdraw/{memberId}")
     @Operation(summary = "회원강제탈퇴", description = "회원강제탈퇴")
     public ResponseEntity<SuccessResponse<Void>> forceWithdrawMember(@PathVariable Long memberId, HttpServletRequest request) {
-        checkAdminRole(request); // ADMIN 권한 확인
+        if (!adminAuthService.isAdmin()) {
+            throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
+        }
         adminMember.forceWithdrawMember(memberId); // 회원 강제 탈퇴 처리
         SuccessResponse<Void> res = SuccessResponse.<Void>builder()
                 .result(null)
