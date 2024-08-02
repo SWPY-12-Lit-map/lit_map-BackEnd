@@ -22,6 +22,8 @@ public interface MemberPublisherService {
 
     PublisherDto getPublisherProfile(Long publisherId); // 출판사 프로필 조회
 
+    Member updateProfile(String litmapEmail, ProfileUpdateDto profileUpdateDto);// 프로필사진, 닉네임, 메세지 수정
+
     @Transactional
     Member login(String litmapEmail, String password); // 로그인
     PublisherDto loginPublisher(String litmapEmail, String password); // 출판사 직원 로그인

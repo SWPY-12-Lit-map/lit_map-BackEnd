@@ -395,6 +395,30 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         return updatedPublisherDto;
     } // 출판사 직원 마이페이지 (회원정보) 수정
 
+    @Override
+    @Transactional
+    public Member updateProfile(String litmapEmail, ProfileUpdateDto profileUpdateDto) {
+        Member member = memberRepository.findByLitmapEmail(litmapEmail)
+                .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
+
+        if (profileUpdateDto.getNickname() != null) {
+            member.setNickname(profileUpdateDto.getNickname());
+        } // 닉네임
+        if (profileUpdateDto.getUserImage() != null) {
+            member.setUserImage(profileUpdateDto.getUserImage());
+        } // 프로필 이미지
+        if (profileUpdateDto.getMyMessage() != null) {
+            member.setMyMessage(profileUpdateDto.getMyMessage());
+        } // 메세지
+
+        Member updatedMember = memberRepository.save(member);
+
+        // 세션 정보 업데이트
+        SessionUtil.setLoggedInUser(request, updatedMember);
+
+        return updatedMember;
+    } // 1인작가, 출판사직원 프로필정보 수정
+
     private void updateMemberFields(Member member, MemberUpdateDto memberUpdateDto) {
         if (memberUpdateDto.getWorkEmail() != null) {
             member.setWorkEmail(memberUpdateDto.getWorkEmail());
@@ -402,17 +426,8 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         if (memberUpdateDto.getName() != null) {
             member.setName(memberUpdateDto.getName());
         }
-        if (memberUpdateDto.getPassword() != null && memberUpdateDto.getConfirmPassword() != null && memberUpdateDto.getPassword().equals(memberUpdateDto.getConfirmPassword())) {
+        if (memberUpdateDto.getPassword() != null) {
             member.setPassword(passwordEncoder.encode(memberUpdateDto.getPassword()));
-        }
-        if (memberUpdateDto.getNickname() != null) {
-            member.setNickname(memberUpdateDto.getNickname());
-        }
-        if (memberUpdateDto.getUserImage() != null) {
-            member.setUserImage(memberUpdateDto.getUserImage());
-        }
-        if (memberUpdateDto.getMyMessage() != null) {
-            member.setMyMessage(memberUpdateDto.getMyMessage());
         }
         if (memberUpdateDto.getUrlLink() != null) {
             member.setUrlLink(memberUpdateDto.getUrlLink());

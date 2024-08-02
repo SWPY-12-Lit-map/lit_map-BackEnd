@@ -189,6 +189,28 @@ public class MemberController {
         }
     }
 
+    @PutMapping("/profile/update")
+    @Operation(summary = "프로필 정보 수정", description = "메세지, 닉네임, 프로필이미지")
+    public ResponseEntity<SuccessResponse<Member>> updateProfile(@RequestBody @Validated ProfileUpdateDto profileUpdateDto, HttpServletRequest request) {
+        Member loggedMember = SessionUtil.getLoggedInUser(request);
+        if (loggedMember == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); // 인증되지 않은 경우 401 응답
+        }
+
+        Member updatedMember = memberPublisherService.updateProfile(loggedMember.getLitmapEmail(), profileUpdateDto);
+
+        // 세션 정보 업데이트
+        SessionUtil.setLoggedInUser(request, updatedMember);
+
+        SuccessResponse<Member> res = SuccessResponse.<Member>builder()
+                .result(updatedMember)
+                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
+                .resultMsg("Profile update successful")
+                .build();
+
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
     @PutMapping("/update")
     @Operation(summary = "1인작가 정보 수정", description = "1인작가의 마이페이지 정보를 수정")
     public ResponseEntity<SuccessResponse<Member>> updateMember(@RequestBody @Validated MemberUpdateDto memberUpdateDto, HttpServletRequest request) {
