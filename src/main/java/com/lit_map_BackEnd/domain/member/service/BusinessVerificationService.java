@@ -22,8 +22,9 @@ public class BusinessVerificationService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     public ResponseEntity<String> verifyBusiness(BusinessVerificationRequestWrapper request) throws URISyntaxException {
+        String urlWithKey = verificationApiUrl; // 이미 서비스 키가 포함된 URL
 
-        URI url = new URI(verificationApiUrl);
+        URI url = new URI(urlWithKey);
 
         log.info("Request URL: {}", url); // 로그에 URL 출력
         log.info("Request Body: {}", request); // 요청 내용 로깅
