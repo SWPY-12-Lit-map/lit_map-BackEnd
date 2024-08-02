@@ -18,6 +18,6 @@ public class PublisherUpdateDto {
     @NotBlank(message = "비밀번호가 일치하지 않습니다.")
     private String confirmPassword;
 
-    private MemberRoleStatus memberRoleStatus;
+    private MemberRoleStatus memberRoleStatus = MemberRoleStatus.PUBLISHER_MEMBER; // 기본값 설정
 
 }

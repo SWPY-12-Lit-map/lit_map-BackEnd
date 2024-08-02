@@ -54,5 +54,6 @@ public class PublisherDto {
 
     private List<MemberDto> memberList;
 
-    private MemberRoleStatus memberRoleStatus; // 추가
+    private MemberRoleStatus memberRoleStatus = MemberRoleStatus.PUBLISHER_MEMBER; // 기본값 설정
+
 }
