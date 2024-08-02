@@ -40,6 +40,7 @@ public enum ErrorCode {
     DUPLICATE_PUBLISHER(400, "이미 존재하는 출판사입니다."),
     PUBLISHER_NOT_FOUND(404,"출판사를 찾을 수 없습니다."),
     EMAIL_SEND_FAILED(500,"이메일로 임시비밀번호 발송에 실패했습니다."),  // 수정된 부분
+    MANY_BANNER(500, "3장 이상의 배너 사진이 등록되어 있습니다"),
     APPROVE_ERROR(500, "승인 실패했습니다."),
 
     // SQL 문제 발생

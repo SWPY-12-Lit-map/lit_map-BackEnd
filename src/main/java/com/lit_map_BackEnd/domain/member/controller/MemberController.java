@@ -72,7 +72,7 @@ public class MemberController {
         } else {
             return ResponseEntity.ok("사용 가능한 이메일입니다.");
         }
-    } // 회원가입시 이메일 중복 체크
+    }// 회원가입시 이메일 중복 체크
 
     @PostMapping("/login")
     @Operation(summary = "로그인", description = "회원이 로그인합니다.")
@@ -136,12 +136,27 @@ public class MemberController {
     @PostMapping("/verify-password")
     @Operation(summary = "비밀번호 확인", description = "마이페이지 접근 전에 비밀번호를 확인합니다.")
     public ResponseEntity<SuccessResponse<Boolean>> verifyPassword(@RequestBody LoginDto loginDto) {
-        boolean isVerified = memberPublisherService.verifyPassword(loginDto.getLitmapEmail(), loginDto.getPassword());
+        Member member = memberPublisherService.verifyPassword(loginDto.getLitmapEmail(), loginDto.getPassword());
+
+        boolean isVerified = member != null;
+
+        String message;
+        if (isVerified) {
+            if (member.getMemberRoleStatus() == MemberRoleStatus.ACTIVE_MEMBER) {
+                message = "비밀번호 확인 성공. 1인회원 마이페이지로 이동";
+            } else if (member.getMemberRoleStatus() == MemberRoleStatus.PUBLISHER_MEMBER) {
+                message = "비밀번호 확인 성공. 출판사 직원 마이페이지로 이동";
+            } else {
+                message = "비밀번호 확인 성공. 마이페이지로 이동";
+            }
+        } else {
+            message = "비밀번호 확인 실패";
+        }
 
         SuccessResponse<Boolean> res = SuccessResponse.<Boolean>builder()
                 .result(isVerified)
                 .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
-                .resultMsg(isVerified ? "비밀번호 확인 성공" : "비밀번호 확인 실패")
+                .resultMsg(message)
                 .build();
 
         return new ResponseEntity<>(res, isVerified ? HttpStatus.OK : HttpStatus.UNAUTHORIZED);
@@ -152,21 +167,48 @@ public class MemberController {
     public ResponseEntity<SuccessResponse<Object>> getMemberMyPage(HttpServletRequest request) {
         Member profile = SessionUtil.getLoggedInUser(request);
 
-        System.out.println(profile.getLitmapEmail());
-        if (profile != null && profile.getMemberRoleStatus() == MemberRoleStatus.ACTIVE_MEMBER) {
+        if (profile != null) {
             // 최신 정보를 가져와 세션을 업데이트합니다.
             Member updatedProfile = memberPublisherService.findByLitmapEmail(profile.getLitmapEmail());
             SessionUtil.setLoggedInUser(request, updatedProfile);
 
-            SuccessResponse<Object> res = SuccessResponse.builder()
-                    .result(updatedProfile)
-                    .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
-                    .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
-                    .build();
-            return new ResponseEntity<>(res, HttpStatus.OK);
+            if (updatedProfile.getMemberRoleStatus() == MemberRoleStatus.ACTIVE_MEMBER) {
+                SuccessResponse<Object> res = SuccessResponse.builder()
+                        .result(updatedProfile)
+                        .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
+                        .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
+                        .build();
+                return new ResponseEntity<>(res, HttpStatus.OK);
+            } else if (updatedProfile.getMemberRoleStatus() == MemberRoleStatus.PENDING_MEMBER) {
+                throw new BusinessExceptionHandler(ErrorCode.PENDING_USER);
+            } else {
+                throw new BusinessExceptionHandler(ErrorCode.INVALID_USER_INFO);
+            }
         } else {
-            throw new BusinessExceptionHandler(ErrorCode.PENDING_USER);
+            throw new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND);
         }
+    }
+
+    @PutMapping("/profile/update")
+    @Operation(summary = "프로필 정보 수정", description = "메세지, 닉네임, 프로필이미지")
+    public ResponseEntity<SuccessResponse<Member>> updateProfile(@RequestBody @Validated ProfileUpdateDto profileUpdateDto, HttpServletRequest request) {
+        Member loggedMember = SessionUtil.getLoggedInUser(request);
+        if (loggedMember == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); // 인증되지 않은 경우 401 응답
+        }
+
+        Member updatedMember = memberPublisherService.updateProfile(loggedMember.getLitmapEmail(), profileUpdateDto);
+
+        // 세션 정보 업데이트
+        SessionUtil.setLoggedInUser(request, updatedMember);
+
+        SuccessResponse<Member> res = SuccessResponse.<Member>builder()
+                .result(updatedMember)
+                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
+                .resultMsg("Profile update successful")
+                .build();
+
+        return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
     @PutMapping("/update")
@@ -203,17 +245,17 @@ public class MemberController {
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
-    @PostMapping("/{memberId}/approve-withdrawal")
-    @Operation(summary = "작가,직원 탈퇴 승인", description = "작가,직원 탈퇴 승인")
-    public ResponseEntity<SuccessResponse<String>> approveMemberWithdrawal(@PathVariable Long memberId) {
-        adminMemberService.approveWithdrawal(memberId);
-        SuccessResponse<String> res = SuccessResponse.<String>builder()
-                .result("회원 탈퇴가 승인되었습니다.")
-                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
-                .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
-                .build();
-        return new ResponseEntity<>(res, HttpStatus.OK);
-    }
+//    @PostMapping("/{memberId}/approve-withdrawal")
+//    @Operation(summary = "작가,직원 탈퇴 승인", description = "작가,직원 탈퇴 승인")
+//    public ResponseEntity<SuccessResponse<String>> approveMemberWithdrawal(@PathVariable Long memberId) {
+//        adminMemberService.approveWithdrawal(memberId);
+//        SuccessResponse<String> res = SuccessResponse.<String>builder()
+//                .result("회원 탈퇴가 승인되었습니다.")
+//                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
+//                .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
+//                .build();
+//        return new ResponseEntity<>(res, HttpStatus.OK);
+//    }
 
     @GetMapping("/logout")
     @Operation(summary = "로그아웃", description = "사용자를 로그아웃하고 세션을 무효화합니다.")

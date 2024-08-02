@@ -3,13 +3,14 @@ package com.lit_map_BackEnd.domain.board.service;
 import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
 import com.lit_map_BackEnd.common.exception.code.ErrorCode;
 import com.lit_map_BackEnd.domain.board.dto.*;
+import com.lit_map_BackEnd.domain.board.entity.MainBanner;
+import com.lit_map_BackEnd.domain.board.repository.BannerRepository;
 import com.lit_map_BackEnd.domain.category.entity.Category;
 import com.lit_map_BackEnd.domain.category.repository.CategoryRepository;
 import com.lit_map_BackEnd.domain.category.service.CategoryService;
 import com.lit_map_BackEnd.domain.genre.entity.Genre;
 import com.lit_map_BackEnd.domain.genre.repository.GenreRepository;
 import com.lit_map_BackEnd.domain.member.entity.Member;
-import com.lit_map_BackEnd.domain.member.entity.Publisher;
 import com.lit_map_BackEnd.domain.member.repository.MemberRepository;
 import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
@@ -30,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 
-
 @Service
 @RequiredArgsConstructor
 public class BoardServiceImpl implements BoardService{
@@ -43,6 +43,7 @@ public class BoardServiceImpl implements BoardService{
     private final MemberRepository memberRepository;
     private final CategoryService categoryService;
     private final WorkAuthorRepository workAuthorRepository;
+    private final BannerRepository bannerRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -307,6 +308,12 @@ public class BoardServiceImpl implements BoardService{
         map.put("작성중인 글", fullCount - completeCount);
 
         return map;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> getBannerImages() {
+        return bannerRepository.findAll().stream().map(MainBanner::getImageUrl).toList();
     }
 
     private Map<String, CategoryResultDto> processWorks(List<Work> worksByQuestion, Map<String, CategoryResultDto> map) {
