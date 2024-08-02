@@ -1,5 +1,7 @@
 package com.lit_map_BackEnd.domain.admin.controller;
 
+import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
+import com.lit_map_BackEnd.common.exception.code.ErrorCode;
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
 import com.lit_map_BackEnd.domain.member.entity.Member;
@@ -46,6 +48,20 @@ public class AdminMemberController {
                 .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
                 .build();
         return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+    @PutMapping("/approve/{memberId}")
+    @PreAuthorize("hasRole('ADMIN')") // ADMIN 권한을 가진 사용자만 접근 가능
+    @Operation(summary = "회원 승인", description = "회원 가입을 승인합니다.")
+    public ResponseEntity<SuccessResponse<Member>> approveMember(@PathVariable("memberId") Long memberId) {
+
+            Member member = adminMemberService.approveMember(memberId);
+            SuccessResponse<Member> response = SuccessResponse.<Member>builder()
+                    .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
+                    .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
+                    .result(member)
+                    .build();
+            return new ResponseEntity<>(response, HttpStatus.OK);
+
     }
 
 }

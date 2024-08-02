@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -24,40 +25,24 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     private MemberRepository memberRepository;
 
+
     private CustomUserDetails customUserDetails;
+    @Autowired
+    public CustomUserDetailsService(MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
+    }
 
     @Override
-    public UserDetails loadUserByUsername(String litmapEmail) throws UsernameNotFoundException {
-        // Optional<Member> 타입으로 조회
-        System.out.println("username (litmapEmail): " + litmapEmail);
-        Member member = memberRepository.findByLitmapEmail(litmapEmail)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + litmapEmail));
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Member member = memberRepository.findByLitmapEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        // Convert MemberRoleStatus to GrantedAuthority
-        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + member.getMemberRoleStatus().name()));
-
-        // CustomUserDetails로 반환
-        return new CustomUserDetails(member);
+        String role = member.getMemberRoleStatus().name();
+        return User.builder()
+                .username(member.getLitmapEmail())
+                .password(member.getPassword()) // 저장된 해시된 비밀번호 사용
+                .roles(role)
+                .build();
     }
-    /*
-    @Override
-    public UserDetails loadUserByUsername(String litmapEmail) throws UsernameNotFoundException {
-        // Optional<Member> 타입으로 조회
-        System.out.println("username( litmapEmail ) : " + litmapEmail);
-        Optional<Member> optionalMember = memberRepository.findByLitmapEmail(litmapEmail);
-
-        // 값이 없으면 예외 발생
-        Member member = optionalMember.orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.NONE));
-
-        // Convert MemberRoleStatus to GrantedAuthority
-        List<SimpleGrantedAuthority> authorities = member.getRoleStatus() != null ?
-                List.of(new SimpleGrantedAuthority("ROLE_" + member.getRoleStatus().name())) :
-                Collections.emptyList();
-
-        return new User(
-                member.getLitmapEmail(),
-                member.getPassword(),
-                authorities
-        );*/
-    }
+       }
 

@@ -46,33 +46,4 @@ public class AdminAuthController {
         }
     }
 
-/*
-    @Autowired
-    public AdminAuthController(AdminAuthService adminAuthService) {
-        this.adminAuthService = adminAuthService;
-    }
-
-    @PostMapping("/status")
-    public String getAdminStatus() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        // 인증 정보가 없는 경우를 처리합니다.
-        if (authentication == null) {
-            System.out.println("인증정보가 없습니다. ");
-            return "No Authentication";
-        }
-
-        // 인증 정보와 권한을 출력합니다.
-        System.out.println("Authorities: " + authentication.getAuthorities());
-
-        if (adminAuthService.isAdmin()) {
-            System.out.println("관리자계정입니다 ");
-            return SuccessCode.SELECT_SUCCESS.getMessage();
-        } else {
-            System.out.println("관리자계정이 아닙니다 ");
-            return "관리자계정아님";
-        }
-    }
-
-*/
 }

@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -39,11 +40,9 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // CSRF 보호를 비활성화
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                          //  .requestMatchers("/admin/**").authenticated()
                             .requestMatchers("/admin/**").hasRole("ADMIN")
-                            //    .requestMatchers("/api/version/confirm/**").hasRole("ADMIN")
-                                .requestMatchers("/api/members/login").permitAll() // 로그인 페이지 접근 허용
-                                .anyRequest().permitAll() // 모든 요청을 허용
+                            .requestMatchers("/api/members/login").permitAll() // 로그인 페이지 접근 허용
+                            .anyRequest().permitAll() // 모든 요청을 허용
 
                 )
 
@@ -51,17 +50,15 @@ public class SecurityConfig {
                         .maximumSessions(1) // 동시 세션 수 제한
                         .maxSessionsPreventsLogin(false) // 새 로그인이 기존 세션을 무효화하지 않음
                         .sessionRegistry(sessionRegistry())
-                        //.sessionFixation().migrateSession() // 세션 고정 공격 방지
                 )
               .formLogin(formLogin -> formLogin
-                        //.loginPage("/api/members/login") // 사용자 정의 로그인 페이지 URL 설정
                         .loginProcessingUrl("/api/members/login") // 로그인 처리 경로 설정
                         .successHandler((request, response, authentication) -> response.setStatus(HttpServletResponse.SC_OK))
                         .failureHandler((request, response, exception) -> response.setStatus(HttpServletResponse.SC_UNAUTHORIZED))
-                   //     .defaultSuccessUrl("/main")
                         .permitAll() // 로그인 페이지는 모든 사용자에게 허용
                 )
-               // .formLogin(formLogin -> formLogin.disable()) // 폼 로그인 비활성화
+                .httpBasic(Customizer.withDefaults())
+                // .formLogin(formLogin -> formLogin.disable()) // 폼 로그인 비활성화
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/main")
@@ -70,8 +67,6 @@ public class SecurityConfig {
                 )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정
                 .userDetailsService(customUserDetailsService);
-               // .userDetailsService(customUserDetailsService);
-             //  .httpBasic(HttpBasicConfigurer::disable);
         return http.build();
     }
 
