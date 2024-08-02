@@ -5,7 +5,6 @@ import com.lit_map_BackEnd.common.exception.code.ErrorCode;
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
 import com.lit_map_BackEnd.common.util.SessionUtil;
-import com.lit_map_BackEnd.domain.admin.service.AdminAuthService;
 import com.lit_map_BackEnd.domain.admin.service.AdminMemberService;
 import com.lit_map_BackEnd.domain.member.dto.*;
 import com.lit_map_BackEnd.domain.member.entity.Member;
@@ -23,8 +22,6 @@ import org.springframework.http.ResponseEntity;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/members")

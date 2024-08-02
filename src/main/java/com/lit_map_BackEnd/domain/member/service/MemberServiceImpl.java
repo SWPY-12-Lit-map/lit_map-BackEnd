@@ -2,7 +2,6 @@ package com.lit_map_BackEnd.domain.member.service;
 
 import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
 import com.lit_map_BackEnd.common.exception.code.ErrorCode;
-import com.lit_map_BackEnd.domain.admin.service.AdminAuthService;
 import com.lit_map_BackEnd.domain.mail.service.MailService;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.entity.MemberRoleStatus;
@@ -17,7 +16,6 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
     private final MailService mailService;
-    private final AdminAuthService adminAuthService;
 
     @Override
     @Transactional

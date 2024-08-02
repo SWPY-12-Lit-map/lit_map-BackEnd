@@ -2,11 +2,13 @@ package com.lit_map_BackEnd.domain.admin.service;
 
 import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
 import com.lit_map_BackEnd.common.exception.code.ErrorCode;
+import com.lit_map_BackEnd.common.util.SessionUtil;
 import com.lit_map_BackEnd.domain.admin.repository.AdminMemberRepository;
 import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.member.entity.MemberRoleStatus;
 import com.lit_map_BackEnd.domain.member.repository.MemberRepository;
 import com.lit_map_BackEnd.domain.mail.service.MailService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,7 +22,6 @@ public class AdminMemberServiceImpl implements AdminMemberService {
     private final MemberRepository memberRepository;
     private final AdminMemberRepository adminMemberRepository;
     private final MailService mailService;
-    private final AdminAuthService adminAuthService;
 
 
     @Override
@@ -93,5 +94,10 @@ public class AdminMemberServiceImpl implements AdminMemberService {
 
         mailService.sendEmail(member.getLitmapEmail(), subject, content);
     }
-
+    public void checkAdminRole(HttpServletRequest request) {
+        Member currentUser = SessionUtil.getLoggedInUser(request);
+        if (currentUser == null || currentUser.getMemberRoleStatus() != MemberRoleStatus.ADMIN) {
+            throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
+        }
+    }
 }

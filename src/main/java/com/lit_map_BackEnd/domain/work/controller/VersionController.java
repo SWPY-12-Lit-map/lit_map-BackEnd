@@ -65,9 +65,11 @@ public class VersionController {
     @PreAuthorize("hasRole('ADMIN')") //추가
     @Operation(summary = "관리자 작품 승인", description = "관리자 작품 승인 완료")
     public ResponseEntity<SuccessResponse> confirmVersion(
-            @PathVariable(name = "versionId") Long versionId) {
-        versionService.approveMail(versionId);
-        //에러메시지 수정필요
+
+        @PathVariable(name = "versionId") Long versionId, HttpServletRequest request) {
+            versionService.approveMail(versionId, request);
+
+            //에러메시지 수정필요
         SuccessResponse res = SuccessResponse.builder()
                 .result("승인 성공")
                 .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
@@ -81,8 +83,8 @@ public class VersionController {
     //버전 삭제 사유  //@RequestParam String email
     @PostMapping("/confirm/decline")
     @Operation(summary = "관리자 작품 반려", description = "관리자 작품 반려 완료 및 사유")
-    public ResponseEntity<SuccessResponse> sendSummaryEmail(Long versionId, @RequestParam String summary) {
-        versionService.declineMail(versionId, summary); //service 지정후 impl 수정
+    public ResponseEntity<SuccessResponse> sendSummaryEmail(Long versionId, @RequestParam String summary,  HttpServletRequest request) {
+        versionService.declineMail(versionId, summary, request); //service 지정후 impl 수정
         SuccessResponse res = SuccessResponse.builder()
                 .result("승인 성공")
                 .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())

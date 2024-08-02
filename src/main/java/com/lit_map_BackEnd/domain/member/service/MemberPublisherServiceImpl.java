@@ -3,7 +3,6 @@ package com.lit_map_BackEnd.domain.member.service;
 import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
 import com.lit_map_BackEnd.common.exception.code.ErrorCode;
 import com.lit_map_BackEnd.common.util.SessionUtil;
-import com.lit_map_BackEnd.domain.admin.service.AdminAuthService;
 import com.lit_map_BackEnd.domain.mail.dto.MailDto;
 import com.lit_map_BackEnd.domain.mail.service.MailService;
 import com.lit_map_BackEnd.domain.member.dto.*;
@@ -41,7 +40,6 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
     private final HttpServletRequest request;
     private final HttpServletResponse response;
     private final RestTemplate restTemplate = new RestTemplate();
-    private final AdminAuthService adminAuthService;
 
     @Value("${external.api.publisher.url}")
     private String publisherApiUrl;
