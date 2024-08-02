@@ -1,5 +1,6 @@
 package com.lit_map_BackEnd.domain.member.dto;
 
+import com.lit_map_BackEnd.domain.member.entity.MemberRoleStatus;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -52,4 +53,6 @@ public class PublisherDto {
     private String userImage;
 
     private List<MemberDto> memberList;
+
+    private MemberRoleStatus memberRoleStatus; // 추가
 }

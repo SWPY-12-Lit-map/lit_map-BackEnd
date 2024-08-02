@@ -1,6 +1,7 @@
 package com.lit_map_BackEnd.common.converter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Convert;
@@ -25,12 +26,13 @@ public class JsonMapConverter implements AttributeConverter<Map<String, Object>,
 
     @Override
     public Map<String, Object> convertToEntityAttribute(String dbData) {
-        if (dbData == null) {
+        if (dbData == null || dbData.isEmpty()) { // 추가  || dbData.isEmpty()
             return new HashMap<>();
         }
 
         try {
-            return objectMapper.readValue(dbData, HashMap.class);
+            //return objectMapper.readValue(dbData, HashMap.class);
+            return objectMapper.readValue(dbData, new TypeReference<Map<String, Object>>() {});
         } catch (IOException e) {
             throw new RuntimeException("Error converting JSON to map", e);
         }

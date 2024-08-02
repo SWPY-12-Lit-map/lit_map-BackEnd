@@ -1,6 +1,7 @@
 package com.lit_map_BackEnd.domain.work.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.lit_map_BackEnd.domain.work.entity.Work;
 import com.lit_map_BackEnd.domain.youtube.entity.Youtube;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,4 +30,6 @@ public class WorkResponseDto {
     private List<VersionListDto> versionList;
     private List<Youtube> youtubes;
     private String mainAuthor;
+
+
 }

@@ -1,5 +1,6 @@
 package com.lit_map_BackEnd.domain.member.dto;
 
+import com.lit_map_BackEnd.domain.member.entity.MemberRoleStatus;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -14,5 +15,7 @@ public class PublisherUpdateDto extends MemberUpdateDto{
 
     @NotBlank(message = "대표자 이름을 입력해주세요.")
     private String publisherCeo; // 대표자 이름
+
+    private MemberRoleStatus memberRoleStatus;
 
 }

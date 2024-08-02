@@ -1,5 +1,6 @@
 package com.lit_map_BackEnd.domain.member.dto;
 
+import com.lit_map_BackEnd.domain.member.entity.MemberRoleStatus;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -22,4 +23,5 @@ public class MemberUpdateDto {
     private String myMessage; // 메시지
     private String userImage; // 사용자 이미지
     private String urlLink; // 판매 링크 사이트
+    private MemberRoleStatus memberRoleStatus;
 }

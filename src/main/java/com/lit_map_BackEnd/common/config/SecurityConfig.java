@@ -32,13 +32,13 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // CSRF 보호를 비활성화
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        //.antMatchers("/admin/**").hasRole("ADMIN") // 관리자 권한 설정
-                        .anyRequest().permitAll() // 모든 요청을 허용
+                        //.requestMatchers("/admin/**").hasRole("ADMIN") // /admin/** 경로는 ADMIN 권한만 접근 가능
+                        .anyRequest().permitAll()
                 )
                 .sessionManagement(sessionManagement -> sessionManagement
-                        .maximumSessions(1) // 동시 세션 수 제한
-                        .maxSessionsPreventsLogin(false) // 새 로그인이 기존 세션을 무효화하지 않음
-                        .sessionRegistry(sessionRegistry())
+                                .maximumSessions(1) // 동시 세션 수 제한
+                                .maxSessionsPreventsLogin(false) // 새 로그인이 기존 세션을 무효화하지 않음
+                                .sessionRegistry(sessionRegistry())
                         //.sessionFixation().migrateSession() // 세션 고정 공격 방지
                 )
                 .formLogin(formLogin -> formLogin.disable()) // 폼 로그인 비활성화
@@ -49,10 +49,12 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID")
                 )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())); // CORS 설정
-                //.userDetailsService(customUserDetailsService);
+        //.userDetailsService(customUserDetailsService);
 
         return http.build();
     }
+
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
