@@ -65,16 +65,10 @@ public class MemberController {
 //    }
 
     @GetMapping("/check-email")
-    public ResponseEntity<?> checkEmail(@RequestParam String litmapEmail, @RequestParam String workEmail) {
-        boolean litmapEmailExists = memberPublisherService.checkLitmapEmailExists(litmapEmail);
-        boolean workEmailExists = memberPublisherService.checkWorkEmailExists(workEmail);
-
-        if (litmapEmailExists && workEmailExists) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("릿맵 이메일과 업무용 이메일이 이미 존재합니다.");
-        } else if (litmapEmailExists) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 존재하는 릿맵 이메일입니다.");
-        } else if (workEmailExists) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 존재하는 업무용 이메일입니다.");
+    public ResponseEntity<?> checkEmail(@RequestParam String litmapEmail) {
+        boolean exists = memberPublisherService.checkLitmapEmailExists(litmapEmail);
+        if (exists) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 존재하는 이메일입니다.");
         } else {
             return ResponseEntity.ok("사용 가능한 이메일입니다.");
         }

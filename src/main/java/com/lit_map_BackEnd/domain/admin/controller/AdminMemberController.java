@@ -33,6 +33,24 @@ public class AdminMemberController {
         }
     }
 
+    @GetMapping("/mypage")
+    @Operation(summary = "관리자 마이페이지", description = "관리자의 마이페이지를 조회합니다.")
+    public ResponseEntity<SuccessResponse<Member>> getAdminMyPage(HttpServletRequest request) {
+        checkAdminRole(request); // ADMIN 권한 확인
+        Member profile = SessionUtil.getLoggedInUser(request);
+
+        if (profile != null) {
+            SuccessResponse<Member> res = SuccessResponse.<Member>builder()
+                    .result(profile)
+                    .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
+                    .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
+                    .build();
+            return new ResponseEntity<>(res, HttpStatus.OK);
+        } else {
+            throw new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND);
+        }
+    }
+
     @GetMapping("/all")
     @Operation(summary = "회원조회", description = "전체회원조회")
     public ResponseEntity<SuccessResponse<List<Member>>> getAllMembers(HttpServletRequest request) {
@@ -59,19 +77,6 @@ public class AdminMemberController {
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
-    @PutMapping("/approve-withdrawal/{memberId}")
-    @Operation(summary = "회원탈퇴승인", description = "회원탈퇴승인")
-    public ResponseEntity<SuccessResponse<Void>> approveWithdrawal(@PathVariable Long memberId, HttpServletRequest request) {
-        checkAdminRole(request); // ADMIN 권한 확인
-        adminMemberService.approveWithdrawal(memberId); // 회원 탈퇴 승인 처리
-        SuccessResponse<Void> res = SuccessResponse.<Void>builder()
-                .result(null)
-                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
-                .resultMsg("회원 탈퇴 승인 완료")
-                .build();
-        return new ResponseEntity<>(res, HttpStatus.OK);
-    }
-
     @PutMapping("/approve/{memberId}")
     @Operation(summary = "회원승인", description = "회원승인")
     public ResponseEntity<SuccessResponse<Member>> approveMember(@PathVariable Long memberId, HttpServletRequest request) {
@@ -81,6 +86,19 @@ public class AdminMemberController {
                 .result(approvedMember) // 승인된 회원 정보
                 .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
                 .resultMsg("회원 승인 완료")
+                .build();
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+    @PutMapping("/approve-withdrawal/{memberId}")
+    @Operation(summary = "회원탈퇴승인", description = "회원탈퇴승인")
+    public ResponseEntity<SuccessResponse<Void>> approveWithdrawal(@PathVariable Long memberId, HttpServletRequest request) {
+        checkAdminRole(request); // ADMIN 권한 확인
+        adminMemberService.approveWithdrawal(memberId); // 회원 탈퇴 승인 처리
+        SuccessResponse<Void> res = SuccessResponse.<Void>builder()
+                .result(null)
+                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
+                .resultMsg("회원 탈퇴 승인 완료")
                 .build();
         return new ResponseEntity<>(res, HttpStatus.OK);
     }

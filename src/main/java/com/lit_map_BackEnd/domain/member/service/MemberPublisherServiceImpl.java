@@ -124,10 +124,10 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
     public boolean checkLitmapEmailExists(String litmapEmail) {
         return memberRepository.findByLitmapEmail(litmapEmail).isPresent();
     } // 회원가입시 사용하는 이메일 중복 여부 확인 메서드
-    @Override
-    public boolean checkWorkEmailExists(String workEmail) {
-        return memberRepository.findByWorkEmail(workEmail).isPresent();
-    } // 회원가입시 사용하는 이메일 중복 여부 확인 메서드
+//    @Override
+//    public boolean checkWorkEmailExists(String workEmail) {
+//        return memberRepository.findByWorkEmail(workEmail).isPresent();
+//    } // 회원가입시 사용하는 이메일 중복 여부 확인 메서드
 
     // PublisherDto를 Publisher 엔티티로 변환하는 메서드
     private Publisher convertToPublisher(PublisherDto publisherDto) {
@@ -184,24 +184,6 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         return convertToPublisherDto(savedPublisher); // 저장된 Publisher 엔티티를 PublisherDto로 변환하여 반환
     } // 출판사 회원가입
 
-    private PublisherDto convertToPublisherDto(Publisher publisher) {
-        // 필요한 필드를 PublisherDto로 변환
-        return PublisherDto.builder()
-                .publisherNumber(publisher.getPublisherNumber())
-                .publisherName(publisher.getPublisherName())
-                .publisherAddress(publisher.getPublisherAddress())
-                .publisherPhoneNumber(publisher.getPublisherPhoneNumber())
-                .publisherCeo(publisher.getPublisherCeo())
-                .litmapEmail(publisher.getMemberList().get(0).getLitmapEmail())
-                .name(publisher.getMemberList().get(0).getName())
-                .password(publisher.getMemberList().get(0).getPassword())
-                .nickname(publisher.getMemberList().get(0).getNickname())
-                .myMessage(publisher.getMemberList().get(0).getMyMessage())
-                .userImage(publisher.getMemberList().get(0).getUserImage())
-                .memberRoleStatus(publisher.getMemberList().get(0).getMemberRoleStatus()) // 추가: 회원 상태 반환
-                .build();
-    } // Publisher 엔티티를 PublisherDto로 변환하는 메서드
-
     @Override
     public Member findByLitmapEmail(String litmapEmail) {
         return memberRepository.findByLitmapEmail(litmapEmail)
@@ -252,10 +234,10 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         }
     }
 
-//    @Override
-//    public PublisherDto loginPublisher(String litmapEmail, String password) {
-//        return null;
-//    }
+    @Override
+    public PublisherDto loginPublisher(String litmapEmail, String password) {
+        return null;
+    }
 
     @Override
     public void logout() {
@@ -452,4 +434,22 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         }
     } // 출판사 정보 업데이트
 
+
+    private PublisherDto convertToPublisherDto(Publisher publisher) {
+        // 필요한 필드를 PublisherDto로 변환
+        return PublisherDto.builder()
+                .publisherNumber(publisher.getPublisherNumber())
+                .publisherName(publisher.getPublisherName())
+                .publisherAddress(publisher.getPublisherAddress())
+                .publisherPhoneNumber(publisher.getPublisherPhoneNumber())
+                .publisherCeo(publisher.getPublisherCeo())
+                .litmapEmail(publisher.getMemberList().get(0).getLitmapEmail())
+                .name(publisher.getMemberList().get(0).getName())
+                .password(publisher.getMemberList().get(0).getPassword())
+                .nickname(publisher.getMemberList().get(0).getNickname())
+                .myMessage(publisher.getMemberList().get(0).getMyMessage())
+                .userImage(publisher.getMemberList().get(0).getUserImage())
+                .memberRoleStatus(publisher.getMemberList().get(0).getMemberRoleStatus()) // 추가: 회원 상태 반환
+                .build();
+    } // Publisher 엔티티를 PublisherDto로 변환하는 메서드
 }
