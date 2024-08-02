@@ -14,7 +14,9 @@ import java.util.Optional;
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
-    Optional<Member> findByLitmapEmail(String litmapEmail); // 릿맵 이메일로 회원 조회
+//    Optional<Member> findByLitmapEmail(String litmapEmail); // 릿맵 이메일로 회원 조회
+    @Query("SELECT m FROM Member m WHERE m.litmapEmail = :litmapEmail")
+    Optional<Member> findByLitmapEmail(@Param("litmapEmail") String litmapEmail);
     Optional<Member> findByWorkEmail(String workEmail); // 업무용 이메일로 회원 조회
     Optional<Member> findByNickname(String nickname); // 닉네임으로 회원 조회
     Optional<Member> findByName(String name);

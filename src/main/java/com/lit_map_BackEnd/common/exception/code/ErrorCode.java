@@ -48,6 +48,9 @@ public enum ErrorCode {
     // 권한 문제
     FORBIDDEN_ERROR(500, "관리자 권한이 아닙니다."),
 
+
+    NONE(500, "TEST"),
+
     ;
 
     private final int status;

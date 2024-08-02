@@ -24,7 +24,7 @@ public class Member {
     @Column(name = "member_id")
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "litmap_email", nullable = false, unique = true)
     private String litmapEmail;
 
     public String getLitmapEmail() { return litmapEmail; }
