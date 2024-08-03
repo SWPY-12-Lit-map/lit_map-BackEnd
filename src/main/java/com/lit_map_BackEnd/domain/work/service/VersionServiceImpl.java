@@ -2,7 +2,7 @@ package com.lit_map_BackEnd.domain.work.service;
 
 import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
 import com.lit_map_BackEnd.common.exception.code.ErrorCode;
-import com.lit_map_BackEnd.domain.admin.service.AdminAuthService;
+import com.lit_map_BackEnd.domain.admin.service.AdminMemberService;
 import com.lit_map_BackEnd.domain.character.dto.CastResponseDto;
 import com.lit_map_BackEnd.domain.character.entity.Cast;
 import com.lit_map_BackEnd.domain.character.entity.RollBackCast;
@@ -17,6 +17,7 @@ import com.lit_map_BackEnd.domain.work.entity.*;
 import com.lit_map_BackEnd.domain.work.repository.RollBackVersionRepository;
 import com.lit_map_BackEnd.domain.work.repository.VersionRepository;
 import com.lit_map_BackEnd.domain.work.repository.WorkRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +43,8 @@ public class VersionServiceImpl implements VersionService{
 
     private final MemberRepository memberRepository;
     private final MailService mailService;
-    private final AdminAuthService adminAuthService;
+    private final AdminMemberService adminMember;
+    private final AdminMemberService adminMemberService;
 
 
     // 기존의 버전 정보 업데이트하기
@@ -204,11 +206,9 @@ public class VersionServiceImpl implements VersionService{
         return new MailWorkDto(litmapEmail, work);
     }
 
-    public void approveMail(Long versionId) {
+    public void approveMail(Long versionId, HttpServletRequest request) {
+        adminMemberService.checkAdminRole(request);
 
-        if (!adminAuthService.isAdmin()) {
-            throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
-        }
         Version version = versionRepository.findById(versionId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.VERSION_NOT_FOUND));
 
@@ -228,10 +228,8 @@ public class VersionServiceImpl implements VersionService{
     }
 
 
-    public void declineMail(Long versionId, String reason) {
-        if (!adminAuthService.isAdmin()) {
-            throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
-        }
+    public void declineMail(Long versionId, String reason, HttpServletRequest request   ) {
+            adminMemberService.checkAdminRole(request);
             Version version = versionRepository.findById(versionId)
                     .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.VERSION_NOT_FOUND));
 

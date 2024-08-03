@@ -37,6 +37,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	implementation 'org.springframework.security:spring-security-web' // 추가된 의존성
 	implementation 'org.springframework.security:spring-security-core' // 추가된 의존성
+	implementation 'javax.servlet:javax.servlet-api:4.0.1'
 
 	runtimeOnly 'com.mysql:mysql-connector-j'
 

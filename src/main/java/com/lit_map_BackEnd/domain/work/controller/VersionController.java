@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -60,12 +61,30 @@ public class VersionController {
     }
 
 
+    @PutMapping("/confirm/{versionId}")  //작품승인
+    @PreAuthorize("hasRole('ADMIN')") //추가
+    @Operation(summary = "관리자 작품 승인", description = "관리자 작품 승인 완료")
+    public ResponseEntity<SuccessResponse> confirmVersion(
+
+        @PathVariable(name = "versionId") Long versionId, HttpServletRequest request) {
+            versionService.approveMail(versionId, request);
+
+            //에러메시지 수정필요
+        SuccessResponse res = SuccessResponse.builder()
+                .result("승인 성공")
+                .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage())
+                .build();
+
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
 
     //버전 삭제 사유  //@RequestParam String email
     @PostMapping("/confirm/decline")
     @Operation(summary = "관리자 작품 반려", description = "관리자 작품 반려 완료 및 사유")
-    public ResponseEntity<SuccessResponse> sendSummaryEmail(Long versionId, @RequestParam String summary) {
-        versionService.declineMail(versionId, summary); //service 지정후 impl 수정
+    public ResponseEntity<SuccessResponse> sendSummaryEmail(Long versionId, @RequestParam String summary,  HttpServletRequest request) {
+        versionService.declineMail(versionId, summary, request); //service 지정후 impl 수정
         SuccessResponse res = SuccessResponse.builder()
                 .result("승인 성공")
                 .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
@@ -73,14 +92,7 @@ public class VersionController {
                 .build();
 
         return ResponseEntity.ok(res);
-//        return new ResponseEntity<>(res, HttpStatus.OK);
 
-        /*
-        try {
-            versionService.sendDeclineMail(versionId, summary); //service 지정후 impl 수정
-            return ResponseEntity.ok("Email sent successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send email");
-        }*/
+
     }
 }

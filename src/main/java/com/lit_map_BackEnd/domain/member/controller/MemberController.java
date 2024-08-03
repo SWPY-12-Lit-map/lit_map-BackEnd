@@ -92,16 +92,19 @@ public class MemberController {
 
     @PostMapping("/verify-password")
     @Operation(summary = "비밀번호 확인", description = "마이페이지 접근 전에 비밀번호를 확인합니다.")
-    public ResponseEntity<SuccessResponse<Boolean>> verifyPassword(@RequestBody LoginDto loginDto) {
-        Member member = memberPublisherService.verifyPassword(loginDto.getLitmapEmail(), loginDto.getPassword());
-
-        boolean isVerified = member != null;
+    public ResponseEntity<SuccessResponse<Boolean>> verifyPassword(HttpServletRequest request,
+                                                                   @RequestBody CheckPassword password) {
+        Member loggedInUser = SessionUtil.getLoggedInUser(request);
+        if (loggedInUser == null) {
+            throw new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND);
+        }
+        boolean isVerified = memberPublisherService.verifyPassword(loggedInUser.getPassword(), password.getPassword());
 
         String message;
         if (isVerified) {
-            if (member.getMemberRoleStatus() == MemberRoleStatus.ACTIVE_MEMBER) {
+            if (loggedInUser.getMemberRoleStatus() == MemberRoleStatus.ACTIVE_MEMBER) {
                 message = "비밀번호 확인 성공. 1인회원 마이페이지로 이동";
-            } else if (member.getMemberRoleStatus() == MemberRoleStatus.PUBLISHER_MEMBER) {
+            } else if (loggedInUser.getMemberRoleStatus() == MemberRoleStatus.PUBLISHER_MEMBER) {
                 message = "비밀번호 확인 성공. 출판사 직원 마이페이지로 이동";
             } else {
                 message = "비밀번호 확인 성공. 마이페이지로 이동";

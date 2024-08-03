@@ -14,23 +14,31 @@ public interface RelationRepository extends JpaRepository<Work,Long> {
 
     //같은 카테고리, 같은 장르 조회 후 같은 작가에서 다른작가로 정렬
     @Query("SELECT w FROM Work w " +
-            "WHERE w.id <> :workId " +  // Exclude the same work
-            "AND w.category.id = (SELECT wcg.category.id FROM WorkCategoryGenre wcg WHERE wcg.work.id = :workId) " +
-            "AND w.mainAuthor = (SELECT wa.author.name FROM WorkAuthor wa WHERE wa.work.id = :workId) " +
-            "AND EXISTS (SELECT wg FROM WorkGenre wg WHERE wg.work.id = :workId AND wg.genre.id = w.id) " +
+            "WHERE w.id <> :workId " +
+            "AND w.category.id IN (SELECT wcg.category.id FROM WorkCategoryGenre wcg WHERE wcg.work.id = :workId) " +
+            "AND EXISTS (SELECT wa FROM WorkAuthor wa WHERE wa.work.id = :workId AND wa.author.name = w.mainAuthor) " +
+            "AND EXISTS (SELECT wg1 FROM WorkGenre wg1 WHERE wg1.work.id = :workId AND EXISTS " +
+            "(SELECT wg2 FROM WorkGenre wg2 WHERE wg2.work.id = w.id AND wg2.genre.id = wg1.genre.id)) " +
             "ORDER BY " +
-            "CASE WHEN w.mainAuthor = (SELECT wa2.author.name FROM WorkAuthor wa2 WHERE wa2.work.id = :workId) THEN 0 ELSE 1 END, " +  // Sort by matching author_id first
+            "CASE WHEN w.mainAuthor in (SELECT wa2.author.name FROM WorkAuthor wa2 WHERE wa2.work.id = :workId) THEN 0 ELSE 1 END, " +
             "w.title ASC")
     List<Work> findOtherWorksWithSameCategoryGenreSortedByAuthor(
             @Param("workId") Long workId
     );
 
+
     //같은 카테고리, 같은 작가 일때 다른 장르 조회
     @Query("SELECT w FROM Work w " +
             "WHERE w.id <> :workId " +
-            "AND w.category.id = (SELECT wcg.category.id FROM WorkCategoryGenre wcg WHERE wcg.work.id = :workId) " +
-            "AND w.mainAuthor = (SELECT wa.author.name FROM WorkAuthor wa WHERE wa.work.id = :workId) " +
-            "AND NOT EXISTS (SELECT wg FROM WorkGenre wg WHERE wg.work.id = :workId AND wg.genre.id = w.id)")
+            "AND w.category.id IN (SELECT wcg.category.id FROM WorkCategoryGenre wcg WHERE wcg.work.id = :workId) " +
+            "AND w.mainAuthor IN (SELECT wa.author.name FROM WorkAuthor wa WHERE wa.work.id = :workId) " +
+            "AND NOT EXISTS (" +
+            "    SELECT 1 FROM WorkGenre wg " +
+            "    WHERE wg.work.id = :workId " +
+            "    AND wg.genre.id IN (" +
+            "        SELECT wg2.genre.id FROM WorkGenre wg2 WHERE wg2.work.id = w.id" +
+            "    )" +
+            ")")
     List<Work> findWorksWithSameCategoryAndAuthorButDifferentGenre(@Param("workId") Long workId);
 
 

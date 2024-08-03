@@ -6,6 +6,7 @@ import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
 import com.lit_map_BackEnd.domain.work.dto.VersionResponseDto;
 import com.lit_map_BackEnd.domain.work.entity.Version;
 import com.lit_map_BackEnd.domain.work.entity.Work;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -27,9 +28,9 @@ public interface VersionService {
 
     MailWorkDto sendMailWithTemplate(Long versionId, String subject, String content);
 
-    void approveMail(Long versionId);
+    void approveMail(Long versionId, HttpServletRequest request);
 
-    void declineMail(Long versionId, String reason);
+    void declineMail(Long versionId, String reason, HttpServletRequest request);
 
 
 }

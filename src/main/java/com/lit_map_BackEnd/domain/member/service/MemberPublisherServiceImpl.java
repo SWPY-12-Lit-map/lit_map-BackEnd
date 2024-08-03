@@ -3,7 +3,6 @@ package com.lit_map_BackEnd.domain.member.service;
 import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
 import com.lit_map_BackEnd.common.exception.code.ErrorCode;
 import com.lit_map_BackEnd.common.util.SessionUtil;
-import com.lit_map_BackEnd.domain.admin.service.AdminAuthService;
 import com.lit_map_BackEnd.domain.mail.dto.MailDto;
 import com.lit_map_BackEnd.domain.mail.service.MailService;
 import com.lit_map_BackEnd.domain.member.dto.*;
@@ -41,7 +40,6 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
     private final HttpServletRequest request;
     private final HttpServletResponse response;
     private final RestTemplate restTemplate = new RestTemplate();
-    private final AdminAuthService adminAuthService;
 
     @Value("${external.api.publisher.url}")
     private String publisherApiUrl;
@@ -276,18 +274,10 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
     }
 
     @Override
-    public Member verifyPassword(String litmapEmail, String password) {
-        Optional<Member> memberOptional = memberRepository.findByLitmapEmail(litmapEmail);
-        if (memberOptional.isPresent()) {
-            Member member = memberOptional.get();
-            if (passwordEncoder.matches(password, member.getPassword())) {
-                return member;
-            } else {
-                throw new BusinessExceptionHandler(ErrorCode.PASSWORDS_DO_NOT_MATCH);
-            }
-        } else {
-            throw new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND);
-        }
+    public boolean verifyPassword(String sessionPassword, String password) {
+        if (passwordEncoder.matches(password, sessionPassword)) {
+            return true;
+        } else throw new BusinessExceptionHandler(ErrorCode.PASSWORDS_DO_NOT_MATCH);
     }
 
     @Override
