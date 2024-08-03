@@ -274,18 +274,10 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
     }
 
     @Override
-    public Member verifyPassword(String litmapEmail, String password) {
-        Optional<Member> memberOptional = memberRepository.findByLitmapEmail(litmapEmail);
-        if (memberOptional.isPresent()) {
-            Member member = memberOptional.get();
-            if (passwordEncoder.matches(password, member.getPassword())) {
-                return member;
-            } else {
-                throw new BusinessExceptionHandler(ErrorCode.PASSWORDS_DO_NOT_MATCH);
-            }
-        } else {
-            throw new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND);
-        }
+    public boolean verifyPassword(String sessionPassword, String password) {
+        if (passwordEncoder.matches(password, sessionPassword)) {
+            return true;
+        } else throw new BusinessExceptionHandler(ErrorCode.PASSWORDS_DO_NOT_MATCH);
     }
 
     @Override
