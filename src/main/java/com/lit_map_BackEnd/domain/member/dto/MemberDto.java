@@ -38,6 +38,6 @@ public class MemberDto {
     @NotBlank(message = "판매사이트를 입력해주세요.")
     private String urlLink;
 
-    private MemberRoleStatus memberRoleStatus;
+    private MemberRoleStatus memberRoleStatus = MemberRoleStatus.PENDING_MEMBER; // 기본값 설정
 
 }

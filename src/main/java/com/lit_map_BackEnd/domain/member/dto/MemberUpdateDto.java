@@ -18,5 +18,5 @@ public class MemberUpdateDto {
     @NotBlank(message = "비밀번호가 일치하지 않습니다.")
     private String confirmPassword;
     private String urlLink; // 판매 링크 사이트
-    private MemberRoleStatus memberRoleStatus;
+    private MemberRoleStatus memberRoleStatus = MemberRoleStatus.ACTIVE_MEMBER; // 기본값 설정
 }

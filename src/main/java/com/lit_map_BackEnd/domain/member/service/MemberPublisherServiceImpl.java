@@ -355,7 +355,10 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         if (publisherUpdateDto.getName() != null) {
             member.setName(publisherUpdateDto.getName());
         }
-        if (publisherUpdateDto.getPassword() != null && publisherUpdateDto.getConfirmPassword() != null && publisherUpdateDto.getPassword().equals(publisherUpdateDto.getConfirmPassword())) {
+        if (publisherUpdateDto.getPassword() != null && !publisherUpdateDto.getPassword().isEmpty()) {
+            if (!publisherUpdateDto.getPassword().equals(publisherUpdateDto.getConfirmPassword())) {
+                throw new BusinessExceptionHandler(ErrorCode.PASSWORDS_DO_NOT_MATCH);
+            }
             member.setPassword(passwordEncoder.encode(publisherUpdateDto.getPassword()));
         }
         if (publisherUpdateDto.getMemberRoleStatus() != null) {
@@ -393,7 +396,10 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         if (memberUpdateDto.getName() != null) {
             member.setName(memberUpdateDto.getName());
         }
-        if (memberUpdateDto.getPassword() != null) {
+        if (memberUpdateDto.getPassword() != null && !memberUpdateDto.getPassword().isEmpty()) {
+            if (!memberUpdateDto.getPassword().equals(memberUpdateDto.getConfirmPassword())) {
+                throw new BusinessExceptionHandler(ErrorCode.PASSWORDS_DO_NOT_MATCH);
+            }
             member.setPassword(passwordEncoder.encode(memberUpdateDto.getPassword()));
         }
         if (memberUpdateDto.getUrlLink() != null) {
