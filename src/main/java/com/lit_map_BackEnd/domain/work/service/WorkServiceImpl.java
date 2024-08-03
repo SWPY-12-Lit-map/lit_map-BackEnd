@@ -216,7 +216,7 @@ public class WorkServiceImpl implements WorkService{
         Work work = workRepository.findById(workId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
 
-        WorkResponseDto workData = getWorkData(workId, 0.1);
+        WorkResponseDto workData = getWorkData(workId, 1.0);
 
         List<VersionListDto> maps = versionService.versionList(work);
 
@@ -286,6 +286,7 @@ public class WorkServiceImpl implements WorkService{
 
         // 이는 초기 로딩 속도와 네트워크 효율성을 고려하여 제작
         VersionResponseDto version = versionService.findVersionByWorkAndNumber(work.getId(), versionNum);
+        List<VersionListDto> versionList = versionService.versionList(work);
 
         //연관 작품 가져오기
       //  List<Work> recommendedWorks = relationService.recommendRelatedWorks(work);
@@ -326,6 +327,7 @@ public class WorkServiceImpl implements WorkService{
                 .title(work.getTitle())
                 .contents(work.getContent())
                 .versions(version)
+                .versionList(versionList)
                 //.youtubes(youtubeList)
                 .build();
     }
