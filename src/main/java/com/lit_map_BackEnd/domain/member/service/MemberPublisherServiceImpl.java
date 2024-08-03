@@ -161,7 +161,6 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Member findByLitmapEmail(String litmapEmail) {
         return memberRepository.findByLitmapEmail(litmapEmail)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));

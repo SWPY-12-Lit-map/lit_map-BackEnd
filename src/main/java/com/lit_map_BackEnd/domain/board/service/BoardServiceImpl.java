@@ -52,7 +52,7 @@ public class BoardServiceImpl implements BoardService{
         QVersion version = QVersion.version;
 
         List<Tuple> results = jpaQueryFactory
-                .select(work.id, work.title,
+                .select(work.id, work.title, version.id,
                         version.versionName, version.updatedDate)
                 .from(work)
                 .join(version).on(version.work.eq(work))
@@ -62,6 +62,7 @@ public class BoardServiceImpl implements BoardService{
         Map<Long, WorkResponseDto> workToVersionsMap = new HashMap<>();
         for (Tuple tuple : results) {
             Long workId = tuple.get(work.id);
+            Long versionId = tuple.get(version.id);
             String workTitle = tuple.get(work.title);
             String versionName = tuple.get(version.versionName);
             LocalDateTime updatedDate = tuple.get(version.updatedDate);
@@ -73,6 +74,7 @@ public class BoardServiceImpl implements BoardService{
                     .build());
 
             VersionListDto build = VersionListDto.builder()
+                    .versionId(versionId)
                     .versionName(versionName)
                     .lastUpdateDate(updatedDate)
                     .build();
