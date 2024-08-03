@@ -20,7 +20,7 @@ public interface RelationRepository extends JpaRepository<Work,Long> {
             "AND EXISTS (SELECT wg1 FROM WorkGenre wg1 WHERE wg1.work.id = :workId AND EXISTS " +
             "(SELECT wg2 FROM WorkGenre wg2 WHERE wg2.work.id = w.id AND wg2.genre.id = wg1.genre.id)) " +
             "ORDER BY " +
-            "CASE WHEN w.mainAuthor = (SELECT wa2.author.name FROM WorkAuthor wa2 WHERE wa2.work.id = :workId) THEN 0 ELSE 1 END, " +
+            "CASE WHEN w.mainAuthor in (SELECT wa2.author.name FROM WorkAuthor wa2 WHERE wa2.work.id = :workId) THEN 0 ELSE 1 END, " +
             "w.title ASC")
     List<Work> findOtherWorksWithSameCategoryGenreSortedByAuthor(
             @Param("workId") Long workId
