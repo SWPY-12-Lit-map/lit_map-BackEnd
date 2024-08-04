@@ -216,7 +216,7 @@ public class WorkServiceImpl implements WorkService{
         Work work = workRepository.findById(workId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.WORK_NOT_FOUND));
 
-        WorkResponseDto workData = getWorkData(workId, 0.1);
+        WorkResponseDto workData = getWorkData(workId, 1.0);
 
         List<VersionListDto> maps = versionService.versionList(work);
 
@@ -313,7 +313,6 @@ public class WorkServiceImpl implements WorkService{
 //                youtubeList.add(youtube);
 //            }
 //        }
-
 
         return WorkResponseDto.builder()
                 .workId(work.getId())
