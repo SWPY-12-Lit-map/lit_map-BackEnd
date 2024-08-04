@@ -323,8 +323,6 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         updateMemberFields(member, memberUpdateDto);
         Member updatedMember = memberRepository.save(member);
 
-        SessionUtil.setLoggedInUser(request, updatedMember);
-
         return updatedMember;
     }
 
@@ -343,12 +341,7 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
         updatePublisherMemberFields(member, publisherUpdateDto);
         memberRepository.save(member);
 
-        PublisherDto updatedPublisherDto = convertToPublisherDto(publisher);
-
-        SessionUtil.setLoggedInUser(request, member);
-        request.getSession().setAttribute("publisherDto", updatedPublisherDto);
-
-        return updatedPublisherDto;
+        return convertToPublisherDto(publisher);
     }
 
     private void updatePublisherMemberFields(Member member, PublisherUpdateDto publisherUpdateDto) {
@@ -382,9 +375,6 @@ public class MemberPublisherServiceImpl implements MemberPublisherService {
             member.setMyMessage(profileUpdateDto.getMyMessage());
         }
         Member updatedMember = memberRepository.save(member);
-
-        // 최신 정보를 세션에 업데이트
-        SessionUtil.setLoggedInUser(request, updatedMember);
 
         return updatedMember;
     }

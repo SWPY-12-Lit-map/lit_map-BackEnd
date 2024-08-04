@@ -34,7 +34,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers("/api/members/login").permitAll() // 로그인 페이지 접근 허용
                         //.requestMatchers("/admin/**").hasRole("ADMIN")
-
+                        .requestMatchers("/api/business/**").permitAll() // 인증 없이 접근할 수 있도록 설정
                             .anyRequest().permitAll() // 모든 요청을 허용
 
                 )
