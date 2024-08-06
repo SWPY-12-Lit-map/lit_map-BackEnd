@@ -62,14 +62,12 @@ public class VersionController {
 
 
     @PutMapping("/confirm/{versionId}")  //작품승인
-    @PreAuthorize("hasRole('ADMIN')") //추가
     @Operation(summary = "관리자 작품 승인", description = "관리자 작품 승인 완료")
-    public ResponseEntity<SuccessResponse> confirmVersion(
+    public ResponseEntity<SuccessResponse> confirmVersion(@PathVariable(name = "versionId") Long versionId,
+                                                          HttpServletRequest request) {
+        versionService.approveMail(versionId, request);
 
-        @PathVariable(name = "versionId") Long versionId, HttpServletRequest request) {
-            versionService.approveMail(versionId, request);
-
-            //에러메시지 수정필요
+        //에러메시지 수정필요
         SuccessResponse res = SuccessResponse.builder()
                 .result("승인 성공")
                 .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
