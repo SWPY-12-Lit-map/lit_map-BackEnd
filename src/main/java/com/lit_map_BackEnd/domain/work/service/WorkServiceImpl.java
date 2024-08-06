@@ -76,7 +76,8 @@ public class WorkServiceImpl implements WorkService{
         Set<MemberRoleStatus> invalidStatuses = Set.of(
                 MemberRoleStatus.PENDING_MEMBER,
                 MemberRoleStatus.UNKNOWN_MEMBER,
-                MemberRoleStatus.WITHDRAWN_MEMBER
+                MemberRoleStatus.WITHDRAWN_MEMBER,
+                MemberRoleStatus.ADMIN
         );
 
         if (invalidStatuses.contains(memberRoleStatus)) {
