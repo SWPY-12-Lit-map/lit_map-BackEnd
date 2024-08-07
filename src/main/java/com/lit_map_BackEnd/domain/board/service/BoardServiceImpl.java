@@ -170,6 +170,7 @@ public class BoardServiceImpl implements BoardService{
 
         return all.map(work -> WorkResponseDto.builder()
                 .workId(work.getId())
+                .category(work.getCategory().getName())
                 .imageUrl(work.getImageUrl())
                 .title(work.getTitle())
                 .build());
@@ -197,6 +198,7 @@ public class BoardServiceImpl implements BoardService{
 
                     return WorkResponseDto.builder()
                             .workId(work.getId())
+                            .category(work.getCategory().getName())
                             .imageUrl(work.getImageUrl())
                             .title(work.getTitle())
                             .memberName(name)
@@ -205,6 +207,31 @@ public class BoardServiceImpl implements BoardService{
                 }).toList();
 
         return new SliceImpl<>(workResponseDtos, pageable, latestUpdateDates.hasNext());
+    }
+
+    @Override
+    public Slice<WorkResponseDto> getWorkByCategory(int pageNum, String categoryName) {
+        Pageable pageable = PageRequest.of(pageNum, 10);
+        Slice<Work> workByCategoryId = workRepository.findWorkByCategoryId(pageable, categoryName);
+
+        List<WorkResponseDto> workResponseDtos = workByCategoryId.getContent().stream()
+                .map(work -> {
+                    String name = "";
+
+                    // 제작자를 찾고 만약 없으면 미상으로 넘기기
+                    if (work.getMember() == null) name = "미상";
+                    else name = work.getMember().getName();
+
+                    return WorkResponseDto.builder()
+                            .workId(work.getId())
+                            .imageUrl(work.getImageUrl())
+                            .title(work.getTitle())
+                            .memberName(name)
+                            .build();
+
+                }).toList();
+
+        return new SliceImpl<>(workResponseDtos, pageable, workByCategoryId.hasNext());
     }
 
 

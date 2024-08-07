@@ -14,6 +14,7 @@ public interface BoardService {
     MyWorkListResponseDto getMyWorkList(Long memberId);
     Slice<WorkResponseDto> getWorkListByView(int pageNum);
     Slice<WorkResponseDto> getWorkListByUpdateDate(int pageNum);
+    Slice<WorkResponseDto> getWorkByCategory(int pageNum, String categoryName);
     List<Map<String, Object>> getWorkByCategoryAndGenre(Long categoryId, Long genreId);
     Map<String, CategoryResultDto> findWorksBySearch(SearchDto searchDto);
     Map<String, Long> getWorksCount(Long memberId);
