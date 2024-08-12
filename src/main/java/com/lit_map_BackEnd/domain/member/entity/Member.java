@@ -1,5 +1,6 @@
 package com.lit_map_BackEnd.domain.member.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.lit_map_BackEnd.domain.work.entity.Work;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,8 +24,10 @@ public class Member {
     @Column(name = "member_id")
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "litmap_email", nullable = false, unique = true)
     private String litmapEmail;
+
+    public String getLitmapEmail() { return litmapEmail; }
 
     @Column(nullable = true, unique = true)
     private String workEmail; // 업무용 이메일, 1인작가 아이디 찾기
@@ -50,10 +53,12 @@ public class Member {
     // 회원 여러 명 : 출판사 한 개
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "publisher_id")
+    @JsonIgnore
     private Publisher publisher;
 
     // 회원 한 명 : 작품 여러 개
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     @Builder.Default
     private List<Work> works = new ArrayList<>();
 

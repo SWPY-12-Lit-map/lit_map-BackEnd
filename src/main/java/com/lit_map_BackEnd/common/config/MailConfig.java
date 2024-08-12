@@ -14,11 +14,11 @@ public class MailConfig {
     public JavaMailSender mailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 
-        mailSender.setHost("smtp.naver.com");
-        mailSender.setPort(465);
+        mailSender.setHost("smtp.gmail.com");
+        mailSender.setPort(587);
 
-        mailSender.setUsername("sooho7767@naver.com");
-        mailSender.setPassword("rhksflwk123@");
+        mailSender.setUsername("litmap12@gmail.com");
+        mailSender.setPassword("amgjqexnoejyecer");
         mailSender.setJavaMailProperties(getMailProperties());
 
         return mailSender;
@@ -30,9 +30,9 @@ public class MailConfig {
         properties.setProperty("mail.transport.protocol", "smtp");
         properties.setProperty("mail.smtp.auth", "true");
         properties.setProperty("mail.smtp.starttls.enable", "true");
-        properties.setProperty("mail.debug", "true");
-        properties.setProperty("mail.smtp.ssl.trust", "smtp.naver.com");
-        properties.setProperty("mail.smtp.ssl.enable", "true");
+       // properties.setProperty("mail.debug", "true");
+        //properties.setProperty("mail.smtp.ssl.trust", "smtp.gmail.com");
+        //properties.setProperty("mail.smtp.ssl.enable", "true");
         properties.setProperty("mail.smtp.connectiontimeout", "5000");
         properties.setProperty("mail.smtp.timeout", "5000");
         properties.setProperty("mail.smtp.writetimeout", "5000");

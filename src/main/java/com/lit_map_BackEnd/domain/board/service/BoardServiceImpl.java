@@ -3,13 +3,14 @@ package com.lit_map_BackEnd.domain.board.service;
 import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
 import com.lit_map_BackEnd.common.exception.code.ErrorCode;
 import com.lit_map_BackEnd.domain.board.dto.*;
+import com.lit_map_BackEnd.domain.board.entity.MainBanner;
+import com.lit_map_BackEnd.domain.board.repository.BannerRepository;
 import com.lit_map_BackEnd.domain.category.entity.Category;
 import com.lit_map_BackEnd.domain.category.repository.CategoryRepository;
 import com.lit_map_BackEnd.domain.category.service.CategoryService;
 import com.lit_map_BackEnd.domain.genre.entity.Genre;
 import com.lit_map_BackEnd.domain.genre.repository.GenreRepository;
 import com.lit_map_BackEnd.domain.member.entity.Member;
-import com.lit_map_BackEnd.domain.member.entity.Publisher;
 import com.lit_map_BackEnd.domain.member.repository.MemberRepository;
 import com.lit_map_BackEnd.domain.work.dto.VersionListDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
@@ -30,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 
-
 @Service
 @RequiredArgsConstructor
 public class BoardServiceImpl implements BoardService{
@@ -43,6 +43,7 @@ public class BoardServiceImpl implements BoardService{
     private final MemberRepository memberRepository;
     private final CategoryService categoryService;
     private final WorkAuthorRepository workAuthorRepository;
+    private final BannerRepository bannerRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -51,7 +52,7 @@ public class BoardServiceImpl implements BoardService{
         QVersion version = QVersion.version;
 
         List<Tuple> results = jpaQueryFactory
-                .select(work.id, work.title,
+                .select(work.id, work.title, version.id,
                         version.versionName, version.updatedDate)
                 .from(work)
                 .join(version).on(version.work.eq(work))
@@ -61,6 +62,7 @@ public class BoardServiceImpl implements BoardService{
         Map<Long, WorkResponseDto> workToVersionsMap = new HashMap<>();
         for (Tuple tuple : results) {
             Long workId = tuple.get(work.id);
+            Long versionId = tuple.get(version.id);
             String workTitle = tuple.get(work.title);
             String versionName = tuple.get(version.versionName);
             LocalDateTime updatedDate = tuple.get(version.updatedDate);
@@ -72,6 +74,7 @@ public class BoardServiceImpl implements BoardService{
                     .build());
 
             VersionListDto build = VersionListDto.builder()
+                    .versionId(versionId)
                     .versionName(versionName)
                     .lastUpdateDate(updatedDate)
                     .build();
@@ -83,9 +86,9 @@ public class BoardServiceImpl implements BoardService{
 
     @Override
     @Transactional(readOnly = true)
-    public MyWorkListResponseDto getMyWorkList() {
+    public MyWorkListResponseDto getMyWorkList(Long memberId) {
         // 멤버 아이디 가져오고 그걸로 멤버 찾아서 null 확인
-        Member member = memberRepository.findById(1L)
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
         // 각 멤버의 작품을 가져와서 map에 미리 저장
@@ -167,6 +170,7 @@ public class BoardServiceImpl implements BoardService{
 
         return all.map(work -> WorkResponseDto.builder()
                 .workId(work.getId())
+                .category(work.getCategory().getName())
                 .imageUrl(work.getImageUrl())
                 .title(work.getTitle())
                 .build());
@@ -194,6 +198,7 @@ public class BoardServiceImpl implements BoardService{
 
                     return WorkResponseDto.builder()
                             .workId(work.getId())
+                            .category(work.getCategory().getName())
                             .imageUrl(work.getImageUrl())
                             .title(work.getTitle())
                             .memberName(name)
@@ -202,6 +207,31 @@ public class BoardServiceImpl implements BoardService{
                 }).toList();
 
         return new SliceImpl<>(workResponseDtos, pageable, latestUpdateDates.hasNext());
+    }
+
+    @Override
+    public Slice<WorkResponseDto> getWorkByCategory(int pageNum, String categoryName) {
+        Pageable pageable = PageRequest.of(pageNum, 10);
+        Slice<Work> workByCategoryId = workRepository.findWorkByCategoryId(pageable, categoryName);
+
+        List<WorkResponseDto> workResponseDtos = workByCategoryId.getContent().stream()
+                .map(work -> {
+                    String name = "";
+
+                    // 제작자를 찾고 만약 없으면 미상으로 넘기기
+                    if (work.getMember() == null) name = "미상";
+                    else name = work.getMember().getName();
+
+                    return WorkResponseDto.builder()
+                            .workId(work.getId())
+                            .imageUrl(work.getImageUrl())
+                            .title(work.getTitle())
+                            .memberName(name)
+                            .build();
+
+                }).toList();
+
+        return new SliceImpl<>(workResponseDtos, pageable, workByCategoryId.hasNext());
     }
 
 
@@ -277,10 +307,10 @@ public class BoardServiceImpl implements BoardService{
     }
 
     @Override
-    public Map<String, Long> getWorksCount() {
+    public Map<String, Long> getWorksCount(Long memberId) {
         Map<String, Long> map = new HashMap<>();
 
-        Member member = memberRepository.findById(1L)
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessExceptionHandler(ErrorCode.USER_NOT_FOUND));
 
         // 각 멤버의 작품을 검색하고 각 작품의 버전을 검색해서 complete와 나머지를 따로 검색
@@ -307,6 +337,12 @@ public class BoardServiceImpl implements BoardService{
         map.put("작성중인 글", fullCount - completeCount);
 
         return map;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> getBannerImages() {
+        return bannerRepository.findAll().stream().map(MainBanner::getImageUrl).toList();
     }
 
     private Map<String, CategoryResultDto> processWorks(List<Work> worksByQuestion, Map<String, CategoryResultDto> map) {
