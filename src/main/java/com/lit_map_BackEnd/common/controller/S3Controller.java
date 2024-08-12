@@ -4,7 +4,10 @@ import com.lit_map_BackEnd.common.entity.ImageRequestDto;
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
 import com.lit_map_BackEnd.common.service.S3Service;
+import com.lit_map_BackEnd.common.util.SessionUtil;
+import com.lit_map_BackEnd.domain.member.entity.Member;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +24,11 @@ public class S3Controller {
 
     @PostMapping("")
     @Operation(summary = "이미지 파일 미리 저장", description = "이미지 파일 미리 저장하기")
-    public ResponseEntity<SuccessResponse> uploadImage(@RequestPart MultipartFile image,
+    public ResponseEntity<SuccessResponse> uploadImage(HttpServletRequest request,
+                                                       @RequestPart MultipartFile image,
                                                        @RequestPart String path) throws IOException {
-        String imageUrl = s3Service.uploadImage(image, path);
+        Member loggedInUser = SessionUtil.getLoggedInUser(request);
+        String imageUrl = s3Service.uploadImage(image, loggedInUser, path);
 
         SuccessResponse res = SuccessResponse.builder()
                 .result(imageUrl)
@@ -36,8 +41,10 @@ public class S3Controller {
 
     @DeleteMapping("")
     @Operation(summary = "저장된 이미지 삭제", description = "S3에 저장된 이미지 파일 삭제")
-    public ResponseEntity<SuccessResponse> deleteImage(@RequestBody ImageRequestDto imageRequestDto) {
-        s3Service.deleteImage(imageRequestDto.getImageUrl());
+    public ResponseEntity<SuccessResponse> deleteImage(HttpServletRequest request,
+                                                       @RequestBody ImageRequestDto imageRequestDto) {
+        Member loggedInUser = SessionUtil.getLoggedInUser(request);
+        s3Service.deleteImage(loggedInUser, imageRequestDto.getImageUrl());
 
         SuccessResponse res = SuccessResponse.builder()
                 .result("이미지가 삭제되었습니다")
@@ -47,5 +54,4 @@ public class S3Controller {
 
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
-
 }

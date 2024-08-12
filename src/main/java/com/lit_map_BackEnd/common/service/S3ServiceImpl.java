@@ -1,22 +1,26 @@
 package com.lit_map_BackEnd.common.service;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.*;
 import com.lit_map_BackEnd.common.exception.BusinessExceptionHandler;
 import com.lit_map_BackEnd.common.exception.code.ErrorCode;
+import com.lit_map_BackEnd.domain.board.entity.MainBanner;
+import com.lit_map_BackEnd.domain.board.repository.BannerRepository;
+import com.lit_map_BackEnd.domain.member.entity.Member;
+import com.lit_map_BackEnd.domain.member.entity.MemberRoleStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import com.lit_map_BackEnd.common.service.S3Service;
 
 import java.io.*;
 import java.net.URI;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -27,6 +31,7 @@ import java.util.UUID;
 public class S3ServiceImpl implements S3Service {
 
     private final AmazonS3 amazonS3;
+    private final BannerRepository bannerRepository;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -38,8 +43,49 @@ public class S3ServiceImpl implements S3Service {
     private static final List<String> ALLOWED_FILE_EXTENSIONS = List.of(".jpg", ".png", ".jpeg");
 
     @Override
-    public String uploadImage(MultipartFile multipartFile, String path) throws IOException {
-       // 해당 파일이 jpg, png, jpeg가 아니라면 예외처리
+    @Transactional
+    public String uploadImage(MultipartFile multipartFile,
+                              Member member, String path) throws IOException {
+        String img = "";
+        if (path.equals("banner")) {
+            if (member.getMemberRoleStatus() == MemberRoleStatus.ADMIN) {
+                long count = bannerRepository.count();
+                if (count >= 3) {
+                    throw new BusinessExceptionHandler(ErrorCode.MANY_BANNER);
+                }
+
+                img = uploadImg(multipartFile, path);
+                MainBanner build = MainBanner.builder()
+                        .imageUrl(img).build();
+
+                bannerRepository.save(build);
+            } else throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
+        } else img = uploadImg(multipartFile, path);
+
+        return img;
+    }
+
+    @Override
+    @Transactional
+    public void deleteImage(Member member, String name) {
+        // URI가 전체로 들어오기 때문에 뒤에 path 부분만 남겨서 확인을 해야한다.
+        String path = URI.create(name).getPath();
+        String key = path.substring(path.indexOf("/") + 1);
+        String folder = key.substring(path.indexOf("/"), path.lastIndexOf("/") - 1);
+
+        if (folder.equals("banner")) {
+            if (member.getMemberRoleStatus() == MemberRoleStatus.ADMIN) {
+                deleteImg(key);
+                bannerRepository.deleteByImageUrl(name);
+            }
+            else throw new BusinessExceptionHandler(ErrorCode.FORBIDDEN_ERROR);
+        } else {
+            deleteImg(key);
+        }
+    }
+
+    private String uploadImg(MultipartFile multipartFile, String path) throws IOException {
+        // 해당 파일이 jpg, png, jpeg가 아니라면 예외처리
         String fileExtension = extractFileExtension(multipartFile);
 
         // UUID를 새로운 이름에 추가해서 유일한 이름으로 제작
@@ -60,17 +106,12 @@ public class S3ServiceImpl implements S3Service {
         return uploadImageUrl;
     }
 
-    @Override
-    public void deleteImage(String name) {
-        // URI가 전체로 들어오기 때문에 뒤에 path 부분만 남겨서 확인을 해야한다.
-        String path = URI.create(name).getPath();
-        String key = path.substring(path.indexOf("/") + 1);
-
+    private void deleteImg(String key) {
         boolean isExist = amazonS3.doesObjectExist(bucket, key);
         if (isExist) {
             String decodedFileName = URLDecoder.decode(key, StandardCharsets.UTF_8);
             amazonS3.deleteObject(bucket, decodedFileName);
-        }
+        } else throw new BusinessExceptionHandler(ErrorCode.IMAGE_NOT_FOUND);
     }
 
     private File convert(MultipartFile file) throws IOException {

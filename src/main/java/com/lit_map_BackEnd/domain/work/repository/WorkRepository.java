@@ -28,6 +28,13 @@ public interface WorkRepository extends JpaRepository<Work, Long> {
     @Query("select w from Work w " +
             "join Version v on w.id = v.work.id " +
             "left join RollBackVersion rv on v.id = rv.originVersionId " +
+            "where w.category.name = :categoryName " +
+            "and (v.confirm = 'COMPLETE' or rv.confirm = 'COMPLETE')")
+    Slice<Work> findWorkByCategoryId(Pageable pageable, String categoryName);
+
+    @Query("select w from Work w " +
+            "join Version v on w.id = v.work.id " +
+            "left join RollBackVersion rv on v.id = rv.originVersionId " +
             "where v.confirm = 'COMPLETE' or rv.confirm = 'COMPLETE' " +
             "order by w.view desc ")
     Slice<Work> findWorks(Pageable pageable);

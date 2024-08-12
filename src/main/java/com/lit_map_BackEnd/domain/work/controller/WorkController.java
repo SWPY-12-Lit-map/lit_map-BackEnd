@@ -2,12 +2,15 @@ package com.lit_map_BackEnd.domain.work.controller;
 
 import com.lit_map_BackEnd.common.exception.code.SuccessCode;
 import com.lit_map_BackEnd.common.exception.response.SuccessResponse;
+import com.lit_map_BackEnd.common.util.SessionUtil;
+import com.lit_map_BackEnd.domain.member.entity.Member;
 import com.lit_map_BackEnd.domain.work.dto.VersionResponseDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkRequestDto;
 import com.lit_map_BackEnd.domain.work.dto.WorkResponseDto;
 import com.lit_map_BackEnd.domain.work.service.VersionService;
 import com.lit_map_BackEnd.domain.work.service.WorkService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -56,8 +59,10 @@ public class WorkController {
 
     @PostMapping("")
     @Operation(summary = "작품 등록", description = "작품의 데이터 저장")
-    public ResponseEntity<SuccessResponse> saveWork(@RequestBody @Valid WorkRequestDto workRequestDto) {
-        int result = workService.saveWork(workRequestDto);
+    public ResponseEntity<SuccessResponse> saveWork(HttpServletRequest request,
+                                                    @RequestBody @Valid WorkRequestDto workRequestDto) {
+        Member loggedInUser = SessionUtil.getLoggedInUser(request);
+        int result = workService.saveWork(loggedInUser, workRequestDto);
 
         SuccessResponse res = SuccessResponse.builder()
                 .result(result)
@@ -70,9 +75,9 @@ public class WorkController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "작품 삭제", description = "작품을 삭제하고 관련 내용도 같이 삭제")
-    public ResponseEntity<SuccessResponse> deleteWork(@PathVariable(name = "id") Long id) {
-
-        workService.deleteWork(id);
+    public ResponseEntity<SuccessResponse> deleteWork(HttpServletRequest request, @PathVariable(name = "id") Long id) {
+        Member loggedInUser = SessionUtil.getLoggedInUser(request);
+        workService.deleteWork(loggedInUser, id);
 
         SuccessResponse res = SuccessResponse.builder()
                 .result("성공")
