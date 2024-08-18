@@ -117,18 +117,13 @@ public class BoardServiceImpl implements BoardService{
         QWork work = QWork.work;
         QVersion version = QVersion.version;
         // memberId를 이용한 작성 작품 가져오기
-        JPQLQuery<Long> subQuery = JPAExpressions
-                .select(work.id)
-                .from(work)
-                .where(work.member.id.eq(member.getId()));
-
         List<Tuple> fetch = jpaQueryFactory
                 .select(work.id, version.id, version.versionName,
                         version.updatedDate, version.confirm, version.versionNum)
                 .from(work)
                 .join(version)
                 .on(version.work.id.eq(work.id))
-                .where(work.id.in(subQuery))
+                .where(work.member.id.eq(member.getId()))
                 .fetch();
 
         for (Tuple tuple : fetch) {
