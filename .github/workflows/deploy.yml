@@ -1,9 +1,9 @@
 name: deploy To Ec2
 
 on:
-  push:
+  pull_request:
     branches:
-      - feat-32
+      - main
 
 jobs :
   deploy:
